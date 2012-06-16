@@ -33,6 +33,13 @@ public class MacroParser {
       return null;
     }
 
+    /**
+     * Is this a placeholder?
+     */
+    public boolean isPlaceholder() {
+      return false;
+    }
+
   }
 
   /**
@@ -92,6 +99,11 @@ public class MacroParser {
     @Override
     public Type getPlaceholderType() {
       return type;
+    }
+
+    @Override
+    public boolean isPlaceholder() {
+      return true;
     }
 
   }
@@ -203,20 +215,23 @@ public class MacroParser {
      * the correctly parsed input.
      */
     public Ast build() {
-      List<Ast> values = new ArrayList<Ast>();
-      this.addValues(values);
-      return new MacroCall(info.onEnd, values);
+      Macro macro = info.onEnd;
+      List<Component> components = macro.getComponents();
+      List<MacroCall.Argument> args = new ArrayList<MacroCall.Argument>();
+      addArguments(args, components, components.size() - 1);
+      return new MacroCall(macro, args);
     }
 
-    /**
-     * Add this state's and its predecessors' values to the list.
-     */
-    private void addValues(List<Ast> values) {
+    private void addArguments(List<MacroCall.Argument> args,
+        List<Component> components, int index) {
       if (prev != null)
-        prev.addValues(values);
-      if (value != null)
-        values.add(value);
+        prev.addArguments(args, components, index - 1);
+      if (value != null) {
+        Component component = components.get(index);
+        args.add(new MacroCall.Argument(value, (Placeholder) component));
+      }
     }
+
 
     /**
      * Does this state allow a subexpression?

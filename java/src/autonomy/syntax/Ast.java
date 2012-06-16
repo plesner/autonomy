@@ -3,6 +3,7 @@ package autonomy.syntax;
 import java.util.List;
 
 import autonomy.syntax.MacroParser.Component;
+import autonomy.syntax.MacroParser.Placeholder;
 
 
 /**
@@ -62,10 +63,30 @@ public abstract class Ast {
    */
   public static class MacroCall extends Ast {
 
-    private final Macro macro;
-    private final List<Ast> args;
+    /**
+     * A single macro call argument.
+     */
+    public static class Argument {
 
-    public MacroCall(Macro macro, List<Ast> args) {
+      private final Ast value;
+      private final Placeholder placeholder;
+
+      public Argument(Ast value, Placeholder placeholder) {
+        this.value = value;
+        this.placeholder = placeholder;
+      }
+
+      @Override
+      public String toString() {
+        return value.toString();
+      }
+
+    }
+
+    private final Macro macro;
+    private final List<Argument> args;
+
+    public MacroCall(Macro macro, List<Argument> args) {
       this.macro = macro;
       this.args = args;
     }
