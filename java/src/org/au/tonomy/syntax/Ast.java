@@ -1,9 +1,10 @@
-package autonomy.syntax;
+package org.au.tonomy.syntax;
 
 import java.util.List;
 
-import autonomy.syntax.MacroParser.Component;
-import autonomy.syntax.MacroParser.Placeholder;
+import org.au.tonomy.syntax.MacroParser.Component;
+import org.au.tonomy.syntax.MacroParser.Placeholder;
+
 
 
 /**

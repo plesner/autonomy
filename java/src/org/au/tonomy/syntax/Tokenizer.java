@@ -1,9 +1,10 @@
-package autonomy.syntax;
+package org.au.tonomy.syntax;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import autonomy.syntax.Token.Type;
+import org.au.tonomy.syntax.Token.Type;
+
 
 
 /**

@@ -1,4 +1,4 @@
-package autonomy.syntax;
+package org.au.tonomy.syntax;
 
 /**
  * A single token within some source code.

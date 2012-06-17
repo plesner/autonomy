@@ -1,20 +1,20 @@
-package autonomy.syntax;
+package org.au.tonomy.syntax;
 
-import static autonomy.syntax.Token.number;
-import static autonomy.syntax.Token.operator;
-import static autonomy.syntax.Token.punctuation;
-import static autonomy.syntax.Token.word;
+import static org.au.tonomy.syntax.Token.number;
+import static org.au.tonomy.syntax.Token.operator;
+import static org.au.tonomy.syntax.Token.punctuation;
+import static org.au.tonomy.syntax.Token.word;
 
 import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.au.tonomy.syntax.Token;
+import org.au.tonomy.syntax.Tokenizer;
+import org.au.tonomy.syntax.Token.Type;
 import org.junit.Test;
 
-import autonomy.syntax.Token;
-import autonomy.syntax.Tokenizer;
-import autonomy.syntax.Token.Type;
 
 public class TokenizerTest extends TestCase {
 

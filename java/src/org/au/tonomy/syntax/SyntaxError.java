@@ -1,4 +1,4 @@
-package autonomy.syntax;
+package org.au.tonomy.syntax;
 /**
  * Exception that signals a syntax error.
  */

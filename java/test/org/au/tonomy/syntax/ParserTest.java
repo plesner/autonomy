@@ -1,24 +1,24 @@
-package autonomy.syntax;
+package org.au.tonomy.syntax;
 
-import static autonomy.syntax.MacroParser.Placeholder.Type.EAGER_EXPRESSION;
-import static autonomy.syntax.MacroParser.Placeholder.Type.LAZY_STATEMENT;
+import static org.au.tonomy.syntax.MacroParser.Placeholder.Type.EAGER_EXPRESSION;
+import static org.au.tonomy.syntax.MacroParser.Placeholder.Type.LAZY_STATEMENT;
 
 import java.util.Arrays;
 
 import junit.framework.TestCase;
 
+import org.au.tonomy.syntax.Ast;
+import org.au.tonomy.syntax.Macro;
+import org.au.tonomy.syntax.MacroParser;
+import org.au.tonomy.syntax.Parser;
+import org.au.tonomy.syntax.SyntaxError;
+import org.au.tonomy.syntax.Tokenizer;
+import org.au.tonomy.syntax.MacroParser.Component;
+import org.au.tonomy.syntax.MacroParser.Keyword;
+import org.au.tonomy.syntax.MacroParser.Placeholder;
+import org.au.tonomy.syntax.MacroParser.Placeholder.Type;
 import org.junit.Test;
 
-import autonomy.syntax.Ast;
-import autonomy.syntax.Macro;
-import autonomy.syntax.MacroParser;
-import autonomy.syntax.Parser;
-import autonomy.syntax.SyntaxError;
-import autonomy.syntax.Tokenizer;
-import autonomy.syntax.MacroParser.Component;
-import autonomy.syntax.MacroParser.Keyword;
-import autonomy.syntax.MacroParser.Placeholder;
-import autonomy.syntax.MacroParser.Placeholder.Type;
 
 public class ParserTest extends TestCase {
 
