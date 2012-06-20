@@ -27,6 +27,9 @@ import org.au.tonomy.shared.util.ExtraMath;
  */
 public class Hex {
 
+  /**
+   * An enum identifying the sides of a hex.
+   */
   public enum Side {
 
     EAST(1, 0),
@@ -54,6 +57,9 @@ public class Hex {
 
   }
 
+  /**
+   * Enum identifying the corners of a hex.
+   */
   public enum Corner {
 
     NORTH_EAST(30),
@@ -83,6 +89,12 @@ public class Hex {
 
   }
 
+  private static final double SHORT = Math.cos(ExtraMath.TAU / 6);
+  private static final double LONG = Math.sin(ExtraMath.TAU / 6);
+  private static final double SIDE = 2 * SHORT;
+  private static final double WIDTH = 2 * LONG;
+  private static final double HEIGHT = SIDE + SHORT;
+
   private final int g;
   private final int h;
   private final double centerX;
@@ -91,8 +103,8 @@ public class Hex {
   public Hex(int g, int h) {
     this.g = g;
     this.h = h;
-    this.centerX = g + 0.5;
-    this.centerY = h;
+    this.centerX = LONG + (WIDTH * g) + (LONG * h);
+    this.centerY = LONG + HEIGHT * h;
   }
 
   /**
@@ -109,14 +121,20 @@ public class Hex {
     return h;
   }
 
-  /*
+  /**
+   * Returns the x-coordinate of the center of this hex in the normalized
+   * coordinate system.
+   */
   public double getCenterX() {
-
+    return this.centerX;
   }
 
+  /**
+   * Returns the y-coordinate of the center of this hex in the normalized
+   * coordinate system.
+   */
   public double getCenterY() {
-
+    return this.centerY;
   }
-  */
 
 }

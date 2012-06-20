@@ -18,7 +18,9 @@ import org.au.tonomy.client.webgl.RenderingContext;
 import org.au.tonomy.client.webgl.Shader;
 import org.au.tonomy.client.webgl.UniformLocation;
 import org.au.tonomy.client.world.shader.ShaderBundle;
+import org.au.tonomy.shared.world.Hex;
 import org.au.tonomy.shared.world.Hex.Corner;
+import org.au.tonomy.shared.world.HexGrid;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
@@ -32,6 +34,8 @@ public class WorldRenderer {
   private static final ShaderBundle SHADER_BUNDLE = GWT.create(ShaderBundle.class);
 
   private final Canvas canvas;
+  private final HexGrid grid;
+  private final WorldView view = new WorldView();
 
   private final Buffer hexVertices;
   private final int vertexAttribLocation;
@@ -40,8 +44,9 @@ public class WorldRenderer {
   private final Mat4 perspective = Mat4.create();
   private final Mat4 position = Mat4.create();
 
-  public WorldRenderer(Canvas canvas) {
+  public WorldRenderer(Canvas canvas, HexGrid grid) {
     this.canvas = canvas;
+    this.grid = grid;
     RenderingContext context = RenderingContext.forCanvas(canvas);
     Program shaderProgram = linkShaders(context);
     this.vertexAttribLocation = context.getAttribLocation(shaderProgram, "vertex");
@@ -102,6 +107,10 @@ public class WorldRenderer {
     context.drawArrays(LINE_LOOP, 0, 6);
   }
 
+  public WorldView getView() {
+    return this.view;
+  }
+
   public void paint() {
     RenderingContext gl = RenderingContext.forCanvas(canvas);
 
@@ -111,15 +120,18 @@ public class WorldRenderer {
     // Clear the whole canvas and reset the perspective.
     gl.viewport(0, 0, viewportWidth, viewportHeight);
     gl.clear(COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT);
-    perspective.resetPerspective(45, viewportWidth / viewportHeight, 0.1, 100.0);
+    perspective
+        .resetPerspective(100, viewportWidth / viewportHeight, 0.1, 100.0)
+        .translate(view.getCenterX(), view.getCenterY(), view.getZoom());
     gl.uniformMatrix4fv(perspectiveLocation, false, perspective);
 
     // Bind the hex vertices.
     gl.bindBuffer(ARRAY_BUFFER, hexVertices);
     gl.vertexAttribPointer(vertexAttribLocation, 3, FLOAT, false, 0, 0);
 
-    drawArrayBuffer(gl, -1.5, 0);
-    drawArrayBuffer(gl, 1.5, 0);
+    for (Hex hex : grid) {
+      drawArrayBuffer(gl, hex.getCenterX(), hex.getCenterY());
+    }
   }
 
 }
