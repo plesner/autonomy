@@ -1,22 +1,22 @@
 package org.au.tonomy.syntax;
 
-import static org.au.tonomy.syntax.MacroParser.Placeholder.Type.EAGER_EXPRESSION;
-import static org.au.tonomy.syntax.MacroParser.Placeholder.Type.LAZY_STATEMENT;
+import static org.au.tonomy.shared.syntax.MacroParser.Placeholder.Type.EAGER_EXPRESSION;
+import static org.au.tonomy.shared.syntax.MacroParser.Placeholder.Type.LAZY_STATEMENT;
 
 import java.util.Arrays;
 
 import junit.framework.TestCase;
 
-import org.au.tonomy.syntax.Ast;
-import org.au.tonomy.syntax.Macro;
-import org.au.tonomy.syntax.MacroParser;
-import org.au.tonomy.syntax.Parser;
-import org.au.tonomy.syntax.SyntaxError;
-import org.au.tonomy.syntax.Tokenizer;
-import org.au.tonomy.syntax.MacroParser.Component;
-import org.au.tonomy.syntax.MacroParser.Keyword;
-import org.au.tonomy.syntax.MacroParser.Placeholder;
-import org.au.tonomy.syntax.MacroParser.Placeholder.Type;
+import org.au.tonomy.shared.syntax.Ast;
+import org.au.tonomy.shared.syntax.Macro;
+import org.au.tonomy.shared.syntax.MacroParser;
+import org.au.tonomy.shared.syntax.Parser;
+import org.au.tonomy.shared.syntax.SyntaxError;
+import org.au.tonomy.shared.syntax.Tokenizer;
+import org.au.tonomy.shared.syntax.MacroParser.Component;
+import org.au.tonomy.shared.syntax.MacroParser.Keyword;
+import org.au.tonomy.shared.syntax.MacroParser.Placeholder;
+import org.au.tonomy.shared.syntax.MacroParser.Placeholder.Type;
 import org.junit.Test;
 
 

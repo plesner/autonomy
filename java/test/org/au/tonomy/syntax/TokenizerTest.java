@@ -1,18 +1,18 @@
 package org.au.tonomy.syntax;
 
-import static org.au.tonomy.syntax.Token.number;
-import static org.au.tonomy.syntax.Token.operator;
-import static org.au.tonomy.syntax.Token.punctuation;
-import static org.au.tonomy.syntax.Token.word;
+import static org.au.tonomy.shared.syntax.Token.number;
+import static org.au.tonomy.shared.syntax.Token.operator;
+import static org.au.tonomy.shared.syntax.Token.punctuation;
+import static org.au.tonomy.shared.syntax.Token.word;
 
 import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.au.tonomy.syntax.Token;
-import org.au.tonomy.syntax.Tokenizer;
-import org.au.tonomy.syntax.Token.Type;
+import org.au.tonomy.shared.syntax.Token;
+import org.au.tonomy.shared.syntax.Tokenizer;
+import org.au.tonomy.shared.syntax.Token.Type;
 import org.junit.Test;
 
 

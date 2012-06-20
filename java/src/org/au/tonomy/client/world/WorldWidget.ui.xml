@@ -6,9 +6,6 @@
   	canvas {
       border: 1px dashed red;
   	}
-  	.dragging {
-      border: 1px dashed green;
-    }
   </ui:style>
-  <c:Canvas width="300" height="200" ui:field="canvas"></c:Canvas>
+  <c:Canvas coordinateSpaceWidth="500" coordinateSpaceHeight="500" ui:field="canvas"></c:Canvas>
 </ui:UiBinder>

@@ -1,11 +1,11 @@
-package org.au.tonomy.syntax;
+package org.au.tonomy.shared.syntax;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.au.tonomy.syntax.Ast.MacroCall;
+import org.au.tonomy.shared.syntax.Ast.MacroCall;
 
 
 

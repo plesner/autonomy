@@ -1,20 +1,9 @@
-package org.au.tonomy.gwt.client.canvas;
+package org.au.tonomy.client.world;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 
 /**
- * The geography of a hexagon:
- *
- *        N
- *       / \
- *  NW /     \ NE <- north shoulder
- *    |       |
- *    E       W
- *    |       |
- *  SW \     / SE <- south shoulder
- *       \ /
- *        S
  */
 public class WorldRenderer {
 
@@ -26,6 +15,7 @@ public class WorldRenderer {
   private final Canvas canvas;
   private int offsetX = 0;
   private int offsetY = 0;
+  private double edge = 20;
 
   public WorldRenderer(Canvas canvas) {
     this.canvas = canvas;
@@ -36,13 +26,16 @@ public class WorldRenderer {
     offsetY += dy;
   }
 
+  public void zoom(double factor) {
+    edge += factor;
+  }
+
   public void repaint() {
     Context2d context = canvas.getContext2d();
     context.setFillStyle("red");
     context.clearRect(0, 0, canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
     context.beginPath();
     context.setStrokeStyle("grey");
-    double edge = 20;
     for (int x = 0; x < 9; x++) {
       for (int y = 0; y < 4; y++) {
         // Move to the north western corner.

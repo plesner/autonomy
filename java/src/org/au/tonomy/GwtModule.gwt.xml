@@ -3,5 +3,7 @@
 <module>
   <inherits name="com.google.gwt.user.User" />
   <source path="client" />
-  <entry-point class="org.au.tonomy.gwt.client.GwtEntryPoint" />
+  <source path="shared" />
+  <public path="client/public" />
+  <entry-point class="org.au.tonomy.client.GwtEntryPoint" />
 </module>

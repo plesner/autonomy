@@ -1,9 +1,9 @@
-package org.au.tonomy.syntax;
+package org.au.tonomy.shared.syntax;
 
 import java.util.List;
 
-import org.au.tonomy.syntax.MacroParser.Component;
-import org.au.tonomy.syntax.MacroParser.Placeholder;
+import org.au.tonomy.shared.syntax.MacroParser.Component;
+import org.au.tonomy.shared.syntax.MacroParser.Placeholder;
 
 
 

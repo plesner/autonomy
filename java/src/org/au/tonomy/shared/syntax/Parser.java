@@ -1,12 +1,10 @@
-package org.au.tonomy.syntax;
+package org.au.tonomy.shared.syntax;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.au.tonomy.syntax.MacroParser.State;
-import org.au.tonomy.syntax.Token.Type;
-
-
+import org.au.tonomy.shared.syntax.MacroParser.State;
+import org.au.tonomy.shared.syntax.Token.Type;
 
 /**
  * Parses a sequence of tokens into a syntax tree.

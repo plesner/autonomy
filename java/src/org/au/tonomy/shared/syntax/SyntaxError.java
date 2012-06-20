@@ -1,4 +1,4 @@
-package org.au.tonomy.syntax;
+package org.au.tonomy.shared.syntax;
 /**
  * Exception that signals a syntax error.
  */

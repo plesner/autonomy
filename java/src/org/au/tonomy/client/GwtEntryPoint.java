@@ -1,6 +1,6 @@
-package org.au.tonomy.gwt.client;
+package org.au.tonomy.client;
 
-import org.au.tonomy.gwt.client.canvas.WorldWidget;
+import org.au.tonomy.client.world.WorldWidget;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.ui.RootPanel;
