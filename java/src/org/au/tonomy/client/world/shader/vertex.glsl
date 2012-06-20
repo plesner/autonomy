@@ -1,7 +1,7 @@
-attribute vec3 aVertexPosition;
-uniform mat4 uMVMatrix;
-uniform mat4 uPMatrix;
+attribute vec3 vertex;
+uniform mat4 perspective;
+uniform mat4 position;
 
 void main(void) {
-  gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+  gl_Position = perspective * position * vec4(vertex, 1.0);
 }

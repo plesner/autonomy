@@ -73,6 +73,14 @@ public class Hex {
       this.y = Math.sin(radians);
     }
 
+    public double getX() {
+      return this.x;
+    }
+
+    public double getY() {
+      return this.y;
+    }
+
   }
 
   private final int g;

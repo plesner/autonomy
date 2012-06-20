@@ -69,11 +69,11 @@ public class ExtraMath {
   /**
    * Generates a perspective projection matrix with the given bounds
    */
-  public static void resetMat4Perspective(MatrixArray mat, double fovy, double aspect,
-      double near, double far) {
-    double top = near * Math.tan(fovy * DEGREES_TO_RADIANS / 2);
-    double right = top * aspect;
-    resetMat4Frustum(mat, -right, right, -top, top, near, far);
+  public static void resetMat4Perspective(MatrixArray mat, double fieldOfView,
+      double aspectRatio, double nearBoundary, double farBoundary) {
+    double top = nearBoundary * Math.tan(fieldOfView * DEGREES_TO_RADIANS / 2);
+    double right = top * aspectRatio;
+    resetMat4Frustum(mat, -right, right, -top, top, nearBoundary, farBoundary);
   };
 
 }

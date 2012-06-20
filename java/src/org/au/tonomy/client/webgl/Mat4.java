@@ -43,11 +43,12 @@ public class Mat4 extends Float32Array implements MatrixArray {
   };
 
   /**
-   * Generates a perspective projection matrix with the given bounds
+   * Generates a perspective projection matrix with the given bounds.
    */
-  public final Mat4 resetPerspective(double fovy, double aspect, double near,
-      double far) {
-    ExtraMath.resetMat4Perspective(this, fovy, aspect, near, far);
+  public final Mat4 resetPerspective(double fieldOfView, double aspectRatio,
+      double nearBoundary, double farBoundary) {
+    ExtraMath.resetMat4Perspective(this, fieldOfView, aspectRatio, nearBoundary,
+        farBoundary);
     return this;
   };
 
