@@ -101,7 +101,7 @@ public class WorldRenderer {
     // Move the position matrix to the desired position.
     position
         .resetToIdentity()
-        .translate(x, y, -7.0);
+        .translate(x, y, 0);
     context.uniformMatrix4fv(positionLocation, false, position);
     // Draw the array buffer.
     context.drawArrays(LINE_LOOP, 0, 6);
@@ -121,8 +121,8 @@ public class WorldRenderer {
     gl.viewport(0, 0, viewportWidth, viewportHeight);
     gl.clear(COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT);
     perspective
-        .resetPerspective(100, viewportWidth / viewportHeight, 0.1, 100.0)
-        .translate(view.getCenterX(), view.getCenterY(), view.getZoom());
+        .resetPerspective(45, viewportWidth / viewportHeight, 0.1, 100.0)
+        .translate(view.getCenterX(), view.getCenterY(), -16 * view.getZoom());
     gl.uniformMatrix4fv(perspectiveLocation, false, perspective);
 
     // Bind the hex vertices.

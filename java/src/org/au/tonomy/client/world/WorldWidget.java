@@ -27,7 +27,7 @@ public class WorldWidget extends Composite {
 
   @UiField Canvas canvas;
   private final WorldRenderer renderer;
-  private final HexGrid grid = new HexGrid(32, 32);
+  private final HexGrid grid = new HexGrid(4, 4);
   private final NavigationHelper navigation;
 
   public WorldWidget() {
