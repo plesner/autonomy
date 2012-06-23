@@ -11,6 +11,7 @@ public class GwtEntryPoint implements EntryPoint {
   public void onModuleLoad() {
     WorldWidget widget = new WorldWidget();
     RootPanel.get().add(widget);
+    widget.start();
   }
 
 }

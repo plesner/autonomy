@@ -7,12 +7,20 @@ import com.google.gwt.core.client.JavaScriptObject;
  */
 public class Console {
 
+  /**
+   * Logs this object to the console.
+   */
   public static native void log(Object obj) /*-{
-    console.log(obj);
+    if ($wnd.console && $wnd.console.log)
+      $wnd.console.log(obj);
   }-*/;
 
+  /**
+   * Logs this JS object to the console.
+   */
   public static native void log(JavaScriptObject obj) /*-{
-    console.log(obj);
+    if ($wnd.console && $wnd.console.log)
+      $wnd.console.log(obj);
   }-*/;
 
 }

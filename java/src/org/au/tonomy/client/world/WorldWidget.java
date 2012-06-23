@@ -1,12 +1,12 @@
 package org.au.tonomy.client.world;
 
-import org.au.tonomy.shared.world.Hex.Side;
+import org.au.tonomy.client.Console;
+import org.au.tonomy.client.webgl.util.RenderingFunction;
+import org.au.tonomy.client.webgl.util.WebGLUtils;
 import org.au.tonomy.shared.world.World;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -33,9 +33,10 @@ public class WorldWidget extends Composite {
   @UiField Label label;
 
   private final WorldRenderer renderer;
-  private final World world = new World(4, 4);
+  private final World world = new World(8, 8);
   private final NavigationHelper navigation;
-  private boolean isRunning = false;
+  private boolean keepRunning = false;
+  private int tickCount = 0;
 
   public WorldWidget() {
     initWidget(BINDER.createAndBindUi(this));
@@ -46,25 +47,26 @@ public class WorldWidget extends Composite {
   }
 
   public void start() {
-    if (isRunning)
+    if (keepRunning)
       return;
-    isRunning = true;
-    Scheduler.get().scheduleFixedPeriod(new RepeatingCommand() {
+    keepRunning = true;
+    WebGLUtils.requestAnimFrame(canvas, new RenderingFunction() {
       @Override
-      public boolean execute() {
+      public void tick() {
         refresh();
-        return isRunning;
       }
-    }, 100);
-  }
-
-  public void stop() {
-    isRunning = false;
+      @Override
+      public boolean shouldContinue() {
+        return keepRunning;
+      }
+    });
   }
 
   private void refresh() {
+    long startMs = System.currentTimeMillis();
     renderer.paint();
-    world.getUnits().get(0).move(Side.EAST);
+    long durationMs = System.currentTimeMillis() - startMs;
+    Console.log("tick " + tickCount++ + ": " + durationMs + " ms.");
   }
 
   private void setUpDragging() {
@@ -72,7 +74,6 @@ public class WorldWidget extends Composite {
       @Override
       public void onMouseDown(MouseDownEvent event) {
         navigation.startDragging(event.getX(), event.getY());
-        start();
       }
     }, MouseDownEvent.getType());
     this.addDomHandler(new MouseMoveHandler() {

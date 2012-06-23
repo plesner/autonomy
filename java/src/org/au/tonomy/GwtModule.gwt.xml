@@ -6,4 +6,5 @@
   <source path="shared" />
   <public path="client/public" />
   <entry-point class="org.au.tonomy.client.GwtEntryPoint" />
+  <script src="webgl-utils.js"></script>
 </module>

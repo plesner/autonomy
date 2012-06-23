@@ -4,10 +4,10 @@ import org.au.tonomy.client.webgl.WebGLError.ProgramLinkError;
 import org.au.tonomy.client.webgl.WebGLError.ShaderSyntaxError;
 import org.au.tonomy.client.webgl.util.Mat4;
 import org.au.tonomy.client.webgl.util.Vec4;
+import org.au.tonomy.client.webgl.util.WebGLUtils;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.Element;
 /**
  * Wrapper around a GL context. Modeled on the WebGL IDL spec at
  * http://www.khronos.org/registry/webgl/specs/latest/webgl.idl.
@@ -58,16 +58,8 @@ public class RenderingContext extends JavaScriptObject {
    * Returns a context for the given canvas.
    */
   public static RenderingContext forCanvas(Canvas canvas) {
-    return forElement(canvas.getElement());
+    return WebGLUtils.create3DContext(canvas);
   }
-
-  /**
-   * Returns a context for a naked DOM element. This is just to make
-   * the type system add up.
-   */
-  private static native RenderingContext forElement(Element elm) /*-{
-    return elm.getContext("experimental-webgl", {antialias: true});
-  }-*/;
 
   /**
    * Creates a new program.
