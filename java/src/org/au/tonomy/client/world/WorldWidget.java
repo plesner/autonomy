@@ -1,9 +1,12 @@
 package org.au.tonomy.client.world;
 
-import org.au.tonomy.shared.world.HexGrid;
+import org.au.tonomy.shared.world.Hex.Side;
+import org.au.tonomy.shared.world.World;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -30,15 +33,38 @@ public class WorldWidget extends Composite {
   @UiField Label label;
 
   private final WorldRenderer renderer;
-  private final HexGrid grid = new HexGrid(4, 4);
+  private final World world = new World(4, 4);
   private final NavigationHelper navigation;
+  private boolean isRunning = false;
 
   public WorldWidget() {
     initWidget(BINDER.createAndBindUi(this));
-    this.renderer = new WorldRenderer(canvas, grid);
+    this.renderer = new WorldRenderer(canvas, world);
     this.renderer.paint();
     this.navigation = new NavigationHelper(renderer);
     setUpDragging();
+  }
+
+  public void start() {
+    if (isRunning)
+      return;
+    isRunning = true;
+    Scheduler.get().scheduleFixedPeriod(new RepeatingCommand() {
+      @Override
+      public boolean execute() {
+        refresh();
+        return isRunning;
+      }
+    }, 100);
+  }
+
+  public void stop() {
+    isRunning = false;
+  }
+
+  private void refresh() {
+    renderer.paint();
+    world.getUnits().get(0).move(Side.EAST);
   }
 
   private void setUpDragging() {
@@ -46,6 +72,7 @@ public class WorldWidget extends Composite {
       @Override
       public void onMouseDown(MouseDownEvent event) {
         navigation.startDragging(event.getX(), event.getY());
+        start();
       }
     }, MouseDownEvent.getType());
     this.addDomHandler(new MouseMoveHandler() {

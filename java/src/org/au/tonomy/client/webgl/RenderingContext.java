@@ -66,7 +66,7 @@ public class RenderingContext extends JavaScriptObject {
    * the type system add up.
    */
   private static native RenderingContext forElement(Element elm) /*-{
-    return elm.getContext("experimental-webgl");
+    return elm.getContext("experimental-webgl", {antialias: true});
   }-*/;
 
   /**

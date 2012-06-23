@@ -9,7 +9,8 @@ public class GwtEntryPoint implements EntryPoint {
 
   @Override
   public void onModuleLoad() {
-    RootPanel.get().add(new WorldWidget());
+    WorldWidget widget = new WorldWidget();
+    RootPanel.get().add(widget);
   }
 
 }

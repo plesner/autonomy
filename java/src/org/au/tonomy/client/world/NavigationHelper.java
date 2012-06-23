@@ -36,12 +36,10 @@ public class NavigationHelper {
     lastDraggedX = x;
     lastDraggedY = y;
     renderer.getView().move(dX / 5.0, dY / 5.0);
-    renderer.paint();
   }
 
   public void zoom(int dZ) {
     renderer.getView().zoom(dZ / 10.0);
-    renderer.paint();
   }
 
 }

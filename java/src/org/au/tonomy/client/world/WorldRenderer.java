@@ -19,7 +19,8 @@ import org.au.tonomy.client.webgl.util.Mat4;
 import org.au.tonomy.client.world.shader.ShaderBundle;
 import org.au.tonomy.shared.world.Hex;
 import org.au.tonomy.shared.world.Hex.Corner;
-import org.au.tonomy.shared.world.HexGrid;
+import org.au.tonomy.shared.world.Unit;
+import org.au.tonomy.shared.world.World;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
@@ -33,10 +34,11 @@ public class WorldRenderer {
   private static final ShaderBundle SHADER_BUNDLE = GWT.create(ShaderBundle.class);
 
   private final Canvas canvas;
-  private final HexGrid grid;
+  private final World world;
   private final WorldView view = new WorldView();
 
   private final Buffer hexVertices;
+  private final Buffer unitVertices;
   private final int vertexAttribLocation;
   private final UniformLocation perspectiveLocation;
   private final UniformLocation positionLocation;
@@ -44,9 +46,9 @@ public class WorldRenderer {
   private final Mat4 perspective = Mat4.create();
   private final Mat4 position = Mat4.create();
 
-  public WorldRenderer(Canvas canvas, HexGrid grid) {
+  public WorldRenderer(Canvas canvas, World world) {
     this.canvas = canvas;
-    this.grid = grid;
+    this.world = world;
     RenderingContext context = RenderingContext.forCanvas(canvas);
     Program shaderProgram = linkShaders(context);
     this.vertexAttribLocation = context.getAttribLocation(shaderProgram, "vertex");
@@ -55,6 +57,7 @@ public class WorldRenderer {
     this.positionLocation = context.getUniformLocation(shaderProgram, "position");
     this.colorLocation = context.getUniformLocation(shaderProgram, "color");
     this.hexVertices = createHexVertices(context);
+    this.unitVertices = createHexVertices(context);
     context.clearColor(.975, .975, .975, 1.0);
   }
 
@@ -137,10 +140,21 @@ public class WorldRenderer {
     gl.bindBuffer(ARRAY_BUFFER, hexVertices);
     gl.vertexAttribPointer(vertexAttribLocation, 3, FLOAT, false, 0, 0);
 
-    Color fill = Color.create(.929, .749, .525, 1.0);
-    for (Hex hex : grid) {
+    Color ground = Color.create(.929, .749, .525, 1.0);
+    for (Hex hex : world.getGrid()) {
       drawArrayBuffer(gl, hex.getCenterX(), hex.getCenterY(), 0.95,
-          fill, Color.BLACK);
+          ground, Color.BLACK);
+    }
+
+    // Bind the unit vertices.
+    gl.bindBuffer(ARRAY_BUFFER, unitVertices);
+    gl.vertexAttribPointer(vertexAttribLocation, 3, FLOAT, false, 0, 0);
+
+    Color red = Color.create(.50, .0, .0, 1.0);
+    for (Unit unit : world.getUnits()) {
+      Hex hex = unit.getLocation();
+      drawArrayBuffer(gl, hex.getCenterX(), hex.getCenterY(), 0.5,
+          red, Color.BLACK);
     }
   }
 

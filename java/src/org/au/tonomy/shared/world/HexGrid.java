@@ -175,4 +175,11 @@ public class HexGrid implements Iterable<Hex> {
     point.set(g, h);
   }
 
+  /**
+   * Returns the hex with the given coordinates.
+   */
+  public Hex getHex(int g, int h) {
+    return hexes[g][h];
+  }
+
 }
