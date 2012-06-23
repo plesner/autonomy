@@ -97,25 +97,37 @@ public class WorldRenderer {
   }
 
   /**
+   * Draws the current array buffer at the given x, y, and scale using
+   * the given stroke and fill colors and stroke ratio. The position
+   * matrix is clobbered.
+   *
+   * This is all bundled into one native function to reduce the number
+   * of gwt calls between java and javascript in hosted mode.
+   */
+  private static native void repositionAndDrawWithStroke(RenderingContext gl,
+      double x, double y, double scale, UniformLocation posLoc, Mat4 pos,
+      UniformLocation colorLoc, Color stroke, Color fill, double strokeRatio,
+      int mode, int first, int count) /*-{
+    $wnd.mat4.identity(pos);
+    $wnd.mat4.translate(pos, [x, y, 0]);
+    $wnd.mat4.scale(pos, [scale, scale, 1]);
+    gl.uniformMatrix4fv(posLoc, false, pos);
+    gl.uniform4fv(colorLoc, stroke);
+    gl.drawArrays(mode, first, count);
+    $wnd.mat4.scale(pos, [strokeRatio, strokeRatio, 1]);
+    gl.uniformMatrix4fv(posLoc, false, pos);
+    gl.uniform4fv(colorLoc, fill);
+    gl.drawArrays(mode, first, count);
+  }-*/;
+
+  /**
    * Draws the current array buffer at the specified position using
    * the given context.
    */
   private void drawArrayBuffer(RenderingContext context, double x,
       double y, double scale, Color fill, Color stroke) {
-    // Move the position matrix to the desired position and scale.
-    position
-        .resetToIdentity()
-        .translate(x, y, 0)
-        .scale(scale, scale, 1);
-    context.uniformMatrix4fv(positionLocation, false, position);
-    context.uniform4fv(colorLocation, stroke);
-    // Draw the array buffer.
-    context.drawArrays(TRIANGLE_FAN, 0, 6);
-    position.scale(0.95, 0.95, 1);
-    context.uniformMatrix4fv(positionLocation, false, position);
-    context.uniform4fv(colorLocation, fill);
-    // Draw the array buffer.
-    context.drawArrays(TRIANGLE_FAN, 0, 6);
+    repositionAndDrawWithStroke(context, x, y, scale, positionLocation,
+        position, colorLocation, stroke, fill, 0.95, TRIANGLE_FAN, 0, 6);
   }
 
   public WorldView getView() {
