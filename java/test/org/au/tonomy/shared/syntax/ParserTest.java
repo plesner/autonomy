@@ -1,4 +1,4 @@
-package org.au.tonomy.syntax;
+package org.au.tonomy.shared.syntax;
 
 import static org.au.tonomy.shared.syntax.MacroParser.Placeholder.Type.EAGER_EXPRESSION;
 import static org.au.tonomy.shared.syntax.MacroParser.Placeholder.Type.LAZY_STATEMENT;

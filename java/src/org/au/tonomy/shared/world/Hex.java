@@ -1,6 +1,7 @@
 package org.au.tonomy.shared.world;
 
-import org.au.tonomy.shared.util.ExtraMath;
+import static org.au.tonomy.shared.util.ExtraMath.DEGREES_TO_RADIANS;
+import static org.au.tonomy.shared.util.ExtraMath.TAU;
 
 /**
  * A single hex in a hex grid. The layout of a hex:
@@ -74,7 +75,7 @@ public class Hex {
     private final double y;
 
     private Corner(int degrees) {
-      this.radians = degrees * ExtraMath.DEGREES_TO_RADIANS;
+      this.radians = degrees * DEGREES_TO_RADIANS;
       this.x = Math.cos(radians);
       this.y = Math.sin(radians);
     }
@@ -89,11 +90,9 @@ public class Hex {
 
   }
 
-  private static final double SHORT = Math.cos(ExtraMath.TAU / 6);
-  private static final double LONG = Math.sin(ExtraMath.TAU / 6);
-  private static final double SIDE = 2 * SHORT;
-  private static final double WIDTH = 2 * LONG;
-  private static final double HEIGHT = SIDE + SHORT;
+  public static final double INNER_RADIUS = Math.sin(TAU / 6);
+  public static final double INNER_DIAMETER = 2 * INNER_RADIUS;
+  public static final double HEIGHT = 1.5;
 
   private final int g;
   private final int h;
@@ -103,8 +102,8 @@ public class Hex {
   public Hex(int g, int h) {
     this.g = g;
     this.h = h;
-    this.centerX = LONG + (WIDTH * g) + (LONG * h);
-    this.centerY = LONG + HEIGHT * h;
+    this.centerX = (INNER_DIAMETER * g) + (INNER_RADIUS * h);
+    this.centerY = HEIGHT * h;
   }
 
   /**

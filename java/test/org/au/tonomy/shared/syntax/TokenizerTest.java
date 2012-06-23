@@ -1,4 +1,4 @@
-package org.au.tonomy.syntax;
+package org.au.tonomy.shared.syntax;
 
 import static org.au.tonomy.shared.syntax.Token.number;
 import static org.au.tonomy.shared.syntax.Token.operator;
