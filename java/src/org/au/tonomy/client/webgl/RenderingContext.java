@@ -2,6 +2,8 @@ package org.au.tonomy.client.webgl;
 
 import org.au.tonomy.client.webgl.WebGLError.ProgramLinkError;
 import org.au.tonomy.client.webgl.WebGLError.ShaderSyntaxError;
+import org.au.tonomy.client.webgl.util.Mat4;
+import org.au.tonomy.client.webgl.util.Vec4;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -250,6 +252,13 @@ public class RenderingContext extends JavaScriptObject {
   public final native void uniformMatrix4fv(UniformLocation location, boolean transpose,
       Mat4 matrix) /*-{
     this.uniformMatrix4fv(location, transpose, matrix);
+  }-*/;
+
+  /**
+   * Sets the specified uniform or uniforms to the values provided.
+   */
+  public final native void uniform4fv(UniformLocation location, Vec4 vector) /*-{
+    this.uniform4fv(location, vector);
   }-*/;
 
   /**

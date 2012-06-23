@@ -3,12 +3,8 @@
     xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:c="urn:import:com.google.gwt.canvas.client"
     xmlns:d="urn:import:com.google.gwt.dom.client">
-  <ui:style>
-  	canvas {
-      border: 1px dashed red;
-  	}
-  </ui:style>
   <g:FlowPanel>
     <c:Canvas coordinateSpaceWidth="300" coordinateSpaceHeight="300" ui:field="canvas"></c:Canvas>
+    <g:Label ui:field="label"></g:Label>
   </g:FlowPanel>
 </ui:UiBinder>

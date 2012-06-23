@@ -16,6 +16,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 /**
  * A widget that controls the canvas where the game is rendered.
@@ -26,6 +27,8 @@ public class WorldWidget extends Composite {
   interface WorldWidgetUiBinder extends UiBinder<Widget, WorldWidget> { }
 
   @UiField Canvas canvas;
+  @UiField Label label;
+
   private final WorldRenderer renderer;
   private final HexGrid grid = new HexGrid(4, 4);
   private final NavigationHelper navigation;

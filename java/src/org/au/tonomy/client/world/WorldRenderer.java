@@ -2,21 +2,20 @@ package org.au.tonomy.client.world;
 
 import static org.au.tonomy.client.webgl.RenderingContext.ARRAY_BUFFER;
 import static org.au.tonomy.client.webgl.RenderingContext.COLOR_BUFFER_BIT;
-import static org.au.tonomy.client.webgl.RenderingContext.DEPTH_BUFFER_BIT;
-import static org.au.tonomy.client.webgl.RenderingContext.DEPTH_TEST;
 import static org.au.tonomy.client.webgl.RenderingContext.FLOAT;
 import static org.au.tonomy.client.webgl.RenderingContext.FRAGMENT_SHADER;
-import static org.au.tonomy.client.webgl.RenderingContext.LINE_LOOP;
 import static org.au.tonomy.client.webgl.RenderingContext.STATIC_DRAW;
+import static org.au.tonomy.client.webgl.RenderingContext.TRIANGLE_FAN;
 import static org.au.tonomy.client.webgl.RenderingContext.VERTEX_SHADER;
 
 import org.au.tonomy.client.webgl.Buffer;
 import org.au.tonomy.client.webgl.Float32Array;
-import org.au.tonomy.client.webgl.Mat4;
 import org.au.tonomy.client.webgl.Program;
 import org.au.tonomy.client.webgl.RenderingContext;
 import org.au.tonomy.client.webgl.Shader;
 import org.au.tonomy.client.webgl.UniformLocation;
+import org.au.tonomy.client.webgl.util.Color;
+import org.au.tonomy.client.webgl.util.Mat4;
 import org.au.tonomy.client.world.shader.ShaderBundle;
 import org.au.tonomy.shared.world.Hex;
 import org.au.tonomy.shared.world.Hex.Corner;
@@ -41,6 +40,7 @@ public class WorldRenderer {
   private final int vertexAttribLocation;
   private final UniformLocation perspectiveLocation;
   private final UniformLocation positionLocation;
+  private final UniformLocation colorLocation;
   private final Mat4 perspective = Mat4.create();
   private final Mat4 position = Mat4.create();
 
@@ -53,9 +53,9 @@ public class WorldRenderer {
     context.enableVertexAttribArray(vertexAttribLocation);
     this.perspectiveLocation = context.getUniformLocation(shaderProgram, "perspective");
     this.positionLocation = context.getUniformLocation(shaderProgram, "position");
+    this.colorLocation = context.getUniformLocation(shaderProgram, "color");
     this.hexVertices = createHexVertices(context);
-    context.clearColor(1.0, 1.0, 1.0, 1.0);
-    context.enable(DEPTH_TEST);
+    context.clearColor(.975, .975, .975, 1.0);
   }
 
   /**
@@ -97,14 +97,22 @@ public class WorldRenderer {
    * Draws the current array buffer at the specified position using
    * the given context.
    */
-  private void drawArrayBuffer(RenderingContext context, double x, double y) {
-    // Move the position matrix to the desired position.
+  private void drawArrayBuffer(RenderingContext context, double x,
+      double y, double scale, Color fill, Color stroke) {
+    // Move the position matrix to the desired position and scale.
     position
         .resetToIdentity()
-        .translate(x, y, 0);
+        .translate(x, y, 0)
+        .scale(scale, scale, 1);
     context.uniformMatrix4fv(positionLocation, false, position);
+    context.uniform4fv(colorLocation, stroke);
     // Draw the array buffer.
-    context.drawArrays(LINE_LOOP, 0, 6);
+    context.drawArrays(TRIANGLE_FAN, 0, 6);
+    position.scale(0.95, 0.95, 1);
+    context.uniformMatrix4fv(positionLocation, false, position);
+    context.uniform4fv(colorLocation, fill);
+    // Draw the array buffer.
+    context.drawArrays(TRIANGLE_FAN, 0, 6);
   }
 
   public WorldView getView() {
@@ -119,7 +127,7 @@ public class WorldRenderer {
 
     // Clear the whole canvas and reset the perspective.
     gl.viewport(0, 0, viewportWidth, viewportHeight);
-    gl.clear(COLOR_BUFFER_BIT | DEPTH_BUFFER_BIT);
+    gl.clear(COLOR_BUFFER_BIT);
     perspective
         .resetPerspective(45, viewportWidth / viewportHeight, 0.1, 100.0)
         .translate(view.getCenterX(), view.getCenterY(), -16 * view.getZoom());
@@ -129,8 +137,10 @@ public class WorldRenderer {
     gl.bindBuffer(ARRAY_BUFFER, hexVertices);
     gl.vertexAttribPointer(vertexAttribLocation, 3, FLOAT, false, 0, 0);
 
+    Color fill = Color.create(.929, .749, .525, 1.0);
     for (Hex hex : grid) {
-      drawArrayBuffer(gl, hex.getCenterX(), hex.getCenterY());
+      drawArrayBuffer(gl, hex.getCenterX(), hex.getCenterY(), 0.95,
+          fill, Color.BLACK);
     }
   }
 

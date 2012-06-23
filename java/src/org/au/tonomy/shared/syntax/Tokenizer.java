@@ -45,7 +45,7 @@ public class Tokenizer {
    * Advances over any whitespace.
    */
   private void skipSpaces() {
-    while (hasMore() && Character.isWhitespace(getCurrent()))
+    while (hasMore() && Character.isSpace(getCurrent()))
       advance();
   }
 
