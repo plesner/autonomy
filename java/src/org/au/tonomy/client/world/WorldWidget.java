@@ -1,6 +1,5 @@
 package org.au.tonomy.client.world;
 
-import org.au.tonomy.client.Console;
 import org.au.tonomy.client.webgl.util.RenderingFunction;
 import org.au.tonomy.client.webgl.util.WebGLUtils;
 import org.au.tonomy.shared.world.World;
@@ -30,13 +29,14 @@ public class WorldWidget extends Composite {
   interface WorldWidgetUiBinder extends UiBinder<Widget, WorldWidget> { }
 
   @UiField Canvas canvas;
-  @UiField Label label;
+  @UiField Label fps;
+  @UiField Label load;
 
+  private final FrameRateMonitor frameRate = new FrameRateMonitor(30);
   private final WorldRenderer renderer;
   private final World world = new World(8, 8);
   private final NavigationHelper navigation;
   private boolean keepRunning = false;
-  private int tickCount = 0;
 
   public WorldWidget() {
     initWidget(BINDER.createAndBindUi(this));
@@ -62,11 +62,19 @@ public class WorldWidget extends Composite {
     });
   }
 
+  private static String toString(double value) {
+    return Double.toString(Math.floor(value * 10 + 0.5) / 10);
+  }
+
   private void refresh() {
     long startMs = System.currentTimeMillis();
     renderer.paint();
     long durationMs = System.currentTimeMillis() - startMs;
-    Console.log("tick " + tickCount++ + ": " + durationMs + " ms.");
+    frameRate.record(startMs, durationMs);
+    if (frameRate.hasData()) {
+      fps.setText(toString(frameRate.getFps()));
+      load.setText(toString(frameRate.getLoad() * 100) + "%");
+    }
   }
 
   private void setUpDragging() {

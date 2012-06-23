@@ -5,6 +5,15 @@
     xmlns:d="urn:import:com.google.gwt.dom.client">
   <g:FlowPanel>
     <c:Canvas coordinateSpaceWidth="300" coordinateSpaceHeight="300" ui:field="canvas"></c:Canvas>
-    <g:Label ui:field="label"></g:Label>
+    <g:VerticalPanel>
+      <g:HorizontalPanel>
+        <g:Label>FPS:&nbsp;</g:Label>
+        <g:Label ui:field="fps">--</g:Label>
+      </g:HorizontalPanel>
+      <g:HorizontalPanel>
+        <g:Label>Load:&nbsp;</g:Label>
+        <g:Label ui:field="load">--</g:Label>
+      </g:HorizontalPanel>
+    </g:VerticalPanel>
   </g:FlowPanel>
 </ui:UiBinder>
