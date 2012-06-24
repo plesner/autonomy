@@ -7,7 +7,7 @@ import org.junit.Test;
 
 public class HexTest extends TestCase {
 
-  private static final double EPSILON = 1e-10;
+  public static final double EPSILON = 1e-10;
 
   public static void assertClose(double expected, double found) {
     assertEquals(expected, found, EPSILON);

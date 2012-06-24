@@ -1,5 +1,7 @@
 package org.au.tonomy.shared.world;
 
+import static org.au.tonomy.shared.world.HexTest.EPSILON;
+
 import java.util.Random;
 
 import junit.framework.TestCase;
@@ -131,6 +133,55 @@ public class HexGridTest extends TestCase {
     assertClose(4, 2, getCenterUnitH(0, 2));
     assertClose(6, 3, getCenterUnitH(0, 3));
     assertClose(9, 0, getCenterUnitH(3, 3));
+  }
+
+  public void testStrips() {
+    // Lower
+    assertEquals(0, HexGrid.getLowerRectStrip(0.75));
+    assertEquals(0, HexGrid.getLowerRectStrip(1.0 - EPSILON));
+    assertEquals(1, HexGrid.getLowerRectStrip(1.0 + EPSILON));
+    assertEquals(1, HexGrid.getLowerRectStrip(1.25));
+    assertEquals(1, HexGrid.getLowerRectStrip(1.5));
+    assertEquals(1, HexGrid.getLowerRectStrip(1.75));
+    assertEquals(1, HexGrid.getLowerRectStrip(2.0));
+    assertEquals(1, HexGrid.getLowerRectStrip(2.25));
+    assertEquals(1, HexGrid.getLowerRectStrip(2.5 - EPSILON));
+    assertEquals(2, HexGrid.getLowerRectStrip(2.5 + EPSILON));
+    assertEquals(2, HexGrid.getLowerRectStrip(2.75));
+    // Upper
+    assertEquals(0, HexGrid.getUpperRectStrip(0.0));
+    assertEquals(0, HexGrid.getUpperRectStrip(0.25));
+    assertEquals(0, HexGrid.getUpperRectStrip(0.5 - EPSILON));
+    assertEquals(1, HexGrid.getUpperRectStrip(0.5 + EPSILON));
+    assertEquals(1, HexGrid.getUpperRectStrip(0.75));
+    assertEquals(1, HexGrid.getUpperRectStrip(1.0));
+    assertEquals(1, HexGrid.getUpperRectStrip(1.25));
+    assertEquals(1, HexGrid.getUpperRectStrip(1.5));
+    assertEquals(1, HexGrid.getUpperRectStrip(1.75));
+    assertEquals(1, HexGrid.getUpperRectStrip(2.0 - EPSILON));
+    assertEquals(2, HexGrid.getUpperRectStrip(2.0 + EPSILON));
+    assertEquals(2, HexGrid.getUpperRectStrip(2.25));
+    // Leftmost
+    double h = Hex.INNER_RADIUS / 2;
+    assertEquals(0, HexGrid.getLeftmostRectStrip(0.0));
+    assertEquals(0, HexGrid.getLeftmostRectStrip(h));
+    assertEquals(0, HexGrid.getLeftmostRectStrip(2 * h - EPSILON));
+    assertEquals(1, HexGrid.getLeftmostRectStrip(2 * h + EPSILON));
+    assertEquals(1, HexGrid.getLeftmostRectStrip(3 * h));
+    assertEquals(1, HexGrid.getLeftmostRectStrip(4 * h));
+    assertEquals(1, HexGrid.getLeftmostRectStrip(5 * h));
+    assertEquals(1, HexGrid.getLeftmostRectStrip(6 * h - EPSILON));
+    assertEquals(2, HexGrid.getLeftmostRectStrip(6 * h + EPSILON));
+    // Rightmost
+    assertEquals(1, HexGrid.getRightmostRectStrip(EPSILON));
+    assertEquals(1, HexGrid.getRightmostRectStrip(h));
+    assertEquals(1, HexGrid.getRightmostRectStrip(2 * h - EPSILON));
+    assertEquals(2, HexGrid.getRightmostRectStrip(2 * h + EPSILON));
+    assertEquals(2, HexGrid.getRightmostRectStrip(3 * h));
+    assertEquals(2, HexGrid.getRightmostRectStrip(4 * h));
+    assertEquals(2, HexGrid.getRightmostRectStrip(5 * h));
+    assertEquals(2, HexGrid.getRightmostRectStrip(6 * h - EPSILON));
+    assertEquals(3, HexGrid.getRightmostRectStrip(6 * h + EPSILON));
   }
 
 }

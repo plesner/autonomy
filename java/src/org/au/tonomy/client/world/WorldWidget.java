@@ -2,6 +2,7 @@ package org.au.tonomy.client.world;
 
 import org.au.tonomy.client.webgl.util.RenderingFunction;
 import org.au.tonomy.client.webgl.util.WebGLUtils;
+import org.au.tonomy.shared.world.Viewport;
 import org.au.tonomy.shared.world.World;
 
 import com.google.gwt.canvas.client.Canvas;
@@ -32,15 +33,17 @@ public class WorldWidget extends Composite {
   @UiField Label fps;
   @UiField Label load;
 
+  private final Viewport viewport = new Viewport(-.25, -.25, 5.5, 5.25);
   private final FrameRateMonitor frameRate = new FrameRateMonitor(30);
   private final WorldRenderer renderer;
-  private final World world = new World(8, 8);
+  private final World world;
   private final NavigationHelper navigation;
   private boolean keepRunning = false;
 
-  public WorldWidget() {
+  public WorldWidget(World world) {
     initWidget(BINDER.createAndBindUi(this));
-    this.renderer = new WorldRenderer(canvas, world);
+    this.world = world;
+    this.renderer = new WorldRenderer(canvas, world, viewport);
     this.renderer.paint();
     this.navigation = new NavigationHelper(renderer);
     setUpDragging();

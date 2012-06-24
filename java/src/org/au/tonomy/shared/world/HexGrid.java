@@ -33,6 +33,27 @@ import java.util.Iterator;
  *   \ / \ / \ /
  * </pre>
  *
+ * Under this rectangular view an alternative assignment of rectangular
+ * hex coordinates can be used:
+ *
+ * <pre>
+ *   / \ / \ / \
+ *  |0,2|2,2|4,2|
+ *   \ / \ / \ / \
+ *    |1,1|3,1|2,1|
+ *   / \ / \ / \ /
+ *  |0,0|2,0|4,0|
+ *   \ / \ / \ /
+ * </pre>
+ *
+ * Each fixed rectangular g or h define a strip of hexes that run in
+ * a straight vertical or horizontal line. This view is used when
+ * drawing the hexes that lie under a particular rectangular viewport.
+ * Any horizontal or vertical line intersects one or two strips. When
+ * there are two strips they are known as the upper/lower strip and
+ * the leftmost/rightmost strip when there is only one the two types
+ * of strips are still well-defined, they're just equal.
+ *
  * Most of the tricks used here are described in
  * http://playtechs.blogspot.com.au/2007/04/hex-grids.html
  */
@@ -180,6 +201,38 @@ public class HexGrid implements Iterable<Hex> {
    */
   public Hex getHex(int g, int h) {
     return hexes[g][h];
+  }
+
+  /**
+   * Returns the lower strip in the rectangular view of the hexes. Only
+   * valid for positive inputs.
+   */
+  public static int getLowerRectStrip(double y) {
+    return ((int) Math.floor((y + .5) / .5)) / 3;
+  }
+
+  /**
+   * Returns the upper strip in the rectangular view of the hexes. Only
+   * valid for positive inputs.
+   */
+  public static int getUpperRectStrip(double y) {
+    return ((int) Math.floor((y + 1.0) / .5)) / 3;
+  }
+
+  /**
+   * Returns the leftmost strip in the rectangular view of the hexes.
+   * Only valid for positive inputs.
+   */
+  public static int getLeftmostRectStrip(double x) {
+    return ((int) Math.floor((x + Hex.INNER_RADIUS) / Hex.INNER_RADIUS)) / 2;
+  }
+
+  /**
+   * Returns the right strip in the rectangular view of the hexes.
+   * Only valid for positive inputs.
+   */
+  public static int getRightmostRectStrip(double x) {
+    return getLeftmostRectStrip(x) + 1;
   }
 
 }
