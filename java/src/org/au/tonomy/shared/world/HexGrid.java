@@ -1,6 +1,10 @@
 package org.au.tonomy.shared.world;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+
+import org.au.tonomy.shared.world.Hex.Side;
 
 
 /**
@@ -37,9 +41,9 @@ import java.util.Iterator;
  * hex coordinates can be used:
  *
  * <pre>
- *   / \ / \ / \
- *  |0,2|2,2|4,2|
- *   \ / \ / \ / \
+ *       / \ / \ / \
+ *      |2,2|4,2|0,2|
+ *     / \ / \ / \ /
  *    |1,1|3,1|2,1|
  *   / \ / \ / \ /
  *  |0,0|2,0|4,0|
@@ -62,6 +66,7 @@ public class HexGrid implements Iterable<Hex> {
   private final int width;
   private final int height;
   private final Hex[][] hexes;
+  private final Hex[][] rectHexes;
 
   public HexGrid(int width, int height) {
     this.width = width;
@@ -72,6 +77,47 @@ public class HexGrid implements Iterable<Hex> {
         hexes[g][h] = new Hex(g, h);
       }
     }
+    int rectWidth = 2 * width;
+    int minusOne = rectWidth - 1;
+    this.rectHexes = new Hex[rectWidth][height];
+    for (int g = 0; g < width; g++) {
+      for (int h = 0; h < height; h++) {
+        int rectG = getRectG(g, h);
+        rectHexes[rectG][h] = hexes[g][h];
+        rectHexes[(rectG + minusOne) % rectWidth][h] = hexes[g][h];
+      }
+    }
+  }
+
+  /**
+   * Returns the width of a bounding rectangule containing this whole
+   * grid.
+   */
+  public double getBoundingWidth() {
+    return (Hex.INNER_DIAMETER * width) + (Hex.INNER_RADIUS * height);
+  }
+
+  /**
+   * Returns the height of a bounding rectangle containing this whole
+   * grid.
+   * @return
+   */
+  public double getBoundingHeight() {
+    return (height * 1.5) + 1.5;
+  }
+
+  /**
+   * Returns the rectangular hex g coordinate for the hex in this grid
+   * at the given hex coordinates.
+   */
+  public int getRectG(int g, int h) {
+    return (2 * g + h) % (2 * width);
+  }
+
+  public Hex getNeighbour(Hex hex, Hex.Side direction) {
+    int newG = (hex.getG() + width + direction.getDeltaG()) % width;
+    int newH = (hex.getH() + width + direction.getDeltaH()) % width;
+    return hexes[newG][newH];
   }
 
   /**
@@ -112,6 +158,26 @@ public class HexGrid implements Iterable<Hex> {
         throw new UnsupportedOperationException();
       }
     };
+  }
+
+  public Iterable<Hex> getHexes(Viewport viewport) {
+    int rectWidth = 2 * width;
+    List<Hex> result = new ArrayList<Hex>();
+    int rgStart = getLeftmostRectStrip(viewport.getLeft());
+    int rgLimit = (getRightmostRectStrip(viewport.getRight()) + 1) % rectWidth;
+    int hStart = getLowerRectStrip(viewport.getBottom());
+    int hLimit = (getUpperRectStrip(viewport.getTop()) + 1) % height;
+    for (int h = hStart, i = 0; (i == 0) || (h != hLimit); h = (h + 1) % rectWidth, i++) {
+      Hex boundary = rectHexes[rgLimit][h];
+      Hex current = rectHexes[rgStart][h];
+      int j = 0;
+      while (j == 0 || current != boundary) {
+        result.add(current);
+        current = getNeighbour(current, Side.EAST);
+        j++;
+      }
+    }
+    return result;
   }
 
   /**
@@ -224,7 +290,7 @@ public class HexGrid implements Iterable<Hex> {
    * Only valid for positive inputs.
    */
   public static int getLeftmostRectStrip(double x) {
-    return ((int) Math.floor((x + Hex.INNER_RADIUS) / Hex.INNER_RADIUS)) / 2;
+    return (int) Math.floor(x / Hex.INNER_RADIUS);
   }
 
   /**

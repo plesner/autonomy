@@ -33,7 +33,7 @@ public class WorldWidget extends Composite {
   @UiField Label fps;
   @UiField Label load;
 
-  private final Viewport viewport = new Viewport(-.25, -.25, 5.5, 5.25);
+  private final Viewport viewport = new Viewport(1.5, 0.25, 5.25, 4.0);
   private final FrameRateMonitor frameRate = new FrameRateMonitor(30);
   private final WorldRenderer renderer;
   private final World world;
@@ -45,7 +45,7 @@ public class WorldWidget extends Composite {
     this.world = world;
     this.renderer = new WorldRenderer(canvas, world, viewport);
     this.renderer.paint();
-    this.navigation = new NavigationHelper(renderer);
+    this.navigation = new NavigationHelper(viewport);
     setUpDragging();
   }
 

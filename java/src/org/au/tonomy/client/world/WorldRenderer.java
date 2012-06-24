@@ -180,19 +180,22 @@ public class WorldRenderer {
     double viewportWidth = canvas.getCoordinateSpaceWidth();
     double viewportHeight = canvas.getCoordinateSpaceWidth();
 
+    double centerX = world.getGrid().getBoundingWidth() / 2;
+    double centerY = world.getGrid().getBoundingHeight() / 2;
+
     // Clear the whole canvas and reset the perspective.
     gl.viewport(0, 0, viewportWidth, viewportHeight);
     gl.clear(COLOR_BUFFER_BIT);
     perspective
         .resetPerspective(45, viewportWidth / viewportHeight, 0.1, 100.0)
-        .translate(view.getCenterX(), view.getCenterY(), -16 * view.getZoom());
+        .translate(-centerX, -centerY, -30 * view.getZoom());
     gl.uniformMatrix4fv(perspectiveLocation, false, perspective);
 
     // Draw the hexes.
     gl.bindBuffer(ARRAY_BUFFER, hexVertices);
     gl.vertexAttribPointer(vertexAttribLocation, 3, FLOAT, false, 0, 0);
 
-    for (Hex hex : world.getGrid()) {
+    for (Hex hex : world.getGrid().getHexes(viewport)) {
       double gRatio = 1 - ((double) hex.getG()) / (world.getWidth() - 1);
       double hRatio = 1 - ((double) hex.getH()) / (world.getHeight() - 1);
       double gAdjustment = 0.75 + (gRatio * 0.25);

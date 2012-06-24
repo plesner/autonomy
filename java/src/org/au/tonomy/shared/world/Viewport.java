@@ -41,4 +41,16 @@ public class Viewport {
     return top - bottom;
   }
 
+  public void move(double x, double y) {
+    this.left += x;
+    this.right += x;
+    this.bottom += y;
+    this.top += y;
+  }
+
+  @Override
+  public String toString() {
+    return "(" + left + ", " + bottom + ")->(" + right + ", " + top + ")";
+  }
+
 }

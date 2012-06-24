@@ -136,4 +136,9 @@ public class Hex {
     return this.centerY;
   }
 
+  @Override
+  public String toString() {
+    return "<" + g + ", " + h + ">";
+  }
+
 }

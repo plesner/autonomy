@@ -1,19 +1,21 @@
 package org.au.tonomy.client.world;
 
+import org.au.tonomy.shared.world.Viewport;
+
 /**
  * Helper that keeps track of the state associated with dragging the
  * world view.
  */
 public class NavigationHelper {
 
-  private final WorldRenderer renderer;
+  private final Viewport viewport;
 
   private int lastDraggedX;
   private int lastDraggedY;
   private boolean isDragging = false;
 
-  public NavigationHelper(WorldRenderer renderer) {
-    this.renderer = renderer;
+  public NavigationHelper(Viewport viewport) {
+    this.viewport = viewport;
   }
 
   public void startDragging(int x, int y) {
@@ -35,11 +37,11 @@ public class NavigationHelper {
     int dY = lastDraggedY - y;
     lastDraggedX = x;
     lastDraggedY = y;
-    renderer.getView().move(dX / 5.0, dY / 5.0);
+    viewport.move(dX / 8.0, dY / 8.0);
   }
 
   public void zoom(int dZ) {
-    renderer.getView().zoom(dZ / 10.0);
+    // renderer.getView().zoom(dZ / 10.0);
   }
 
 }

@@ -2,6 +2,8 @@ package org.au.tonomy.shared.world;
 
 import static org.au.tonomy.shared.world.HexTest.EPSILON;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import junit.framework.TestCase;
@@ -101,11 +103,19 @@ public class HexGridTest extends TestCase {
     return new double[] { x, y };
   }
 
+  private static double[] pair(double a, double b) {
+    return new double[] {a, b};
+  }
+
+  private static int[] pair(int a, int b) {
+    return new int[] {a, b};
+  }
+
   private static double[] getCenterUnitG(int g, int h) {
     Hex hex = new Hex(g, h);
     double x = HexGrid.getUnitGX(hex.getCenterX(), hex.getCenterY());
     double y = HexGrid.getUnitGY(hex.getCenterX(), hex.getCenterY());
-    return new double[] { x, y };
+    return pair(x, y);
   }
 
   private static void assertClose(double x, double y, double[] found) {
@@ -135,6 +145,7 @@ public class HexGridTest extends TestCase {
     assertClose(9, 0, getCenterUnitH(3, 3));
   }
 
+  @Test
   public void testStrips() {
     // Lower
     assertEquals(0, HexGrid.getLowerRectStrip(0.75));
@@ -168,20 +179,65 @@ public class HexGridTest extends TestCase {
     assertEquals(0, HexGrid.getLeftmostRectStrip(2 * h - EPSILON));
     assertEquals(1, HexGrid.getLeftmostRectStrip(2 * h + EPSILON));
     assertEquals(1, HexGrid.getLeftmostRectStrip(3 * h));
-    assertEquals(1, HexGrid.getLeftmostRectStrip(4 * h));
-    assertEquals(1, HexGrid.getLeftmostRectStrip(5 * h));
-    assertEquals(1, HexGrid.getLeftmostRectStrip(6 * h - EPSILON));
-    assertEquals(2, HexGrid.getLeftmostRectStrip(6 * h + EPSILON));
+    assertEquals(1, HexGrid.getLeftmostRectStrip(4 * h - EPSILON));
+    assertEquals(2, HexGrid.getLeftmostRectStrip(4 * h + EPSILON));
+    assertEquals(2, HexGrid.getLeftmostRectStrip(5 * h));
+    assertEquals(2, HexGrid.getLeftmostRectStrip(6 * h - EPSILON));
+    assertEquals(3, HexGrid.getLeftmostRectStrip(6 * h + EPSILON));
     // Rightmost
     assertEquals(1, HexGrid.getRightmostRectStrip(EPSILON));
     assertEquals(1, HexGrid.getRightmostRectStrip(h));
     assertEquals(1, HexGrid.getRightmostRectStrip(2 * h - EPSILON));
     assertEquals(2, HexGrid.getRightmostRectStrip(2 * h + EPSILON));
     assertEquals(2, HexGrid.getRightmostRectStrip(3 * h));
-    assertEquals(2, HexGrid.getRightmostRectStrip(4 * h));
-    assertEquals(2, HexGrid.getRightmostRectStrip(5 * h));
-    assertEquals(2, HexGrid.getRightmostRectStrip(6 * h - EPSILON));
-    assertEquals(3, HexGrid.getRightmostRectStrip(6 * h + EPSILON));
+    assertEquals(2, HexGrid.getRightmostRectStrip(4 * h - EPSILON));
+    assertEquals(3, HexGrid.getRightmostRectStrip(4 * h + EPSILON));
+    assertEquals(3, HexGrid.getRightmostRectStrip(5 * h));
+    assertEquals(3, HexGrid.getRightmostRectStrip(6 * h - EPSILON));
+    assertEquals(4, HexGrid.getRightmostRectStrip(6 * h + EPSILON));
+  }
+
+  @Test
+  public void testRectG() {
+    HexGrid grid = new HexGrid(10, 10);
+    assertEquals(0, grid.getRectG(0, 0));
+    assertEquals(1, grid.getRectG(0, 1));
+    assertEquals(2, grid.getRectG(1, 0));
+    assertEquals(2, grid.getRectG(0, 2));
+    assertEquals(3, grid.getRectG(0, 3));
+    assertEquals(3, grid.getRectG(1, 1));
+    assertEquals(18, grid.getRectG(9, 0));
+    assertEquals(19, grid.getRectG(9, 1));
+    assertEquals(0, grid.getRectG(9, 2));
+    assertEquals(1, grid.getRectG(9, 3));
+    assertEquals(2, grid.getRectG(9, 4));
+    assertEquals(0, grid.getRectG(8, 4));
+  }
+
+  private static void checkHexPositions(Iterable<Hex> hexIter, int[]... pairs) {
+    List<Hex> hexes = new ArrayList<Hex>();
+    for (Hex hex : hexIter)
+      hexes.add(hex);
+    assertEquals(pairs.length, hexes.size());
+    int index = 0;
+    for (Hex hex : hexes) {
+      assertEquals(hex.getG(), pairs[index][0]);
+      assertEquals(hex.getH(), pairs[index][1]);
+      index++;
+    }
+  }
+
+  @Test
+  public void testWithinViewport() {
+    HexGrid grid = new HexGrid(10, 10);
+    double a = Hex.INNER_RADIUS;
+    // Get the hexes all the way around hex (1, 1).
+    Iterable<Hex> one = grid.getHexes(new Viewport(2 * a - EPSILON,
+        0, 4 * a + EPSILON, 3));
+    checkHexPositions(one, pair(1, 0), pair(2, 0), pair(0, 1),
+        pair(1, 1), pair(2, 1), pair(0, 2), pair(1, 2));
+
+    Iterable<Hex> two = grid.getHexes(new Viewport(1.5, 0.25, 5.25, 4.0));
   }
 
 }
