@@ -118,7 +118,7 @@ public abstract class Ast {
    * Converts a list of objects to a string. Before each element is
    * put a single whitespace.
    */
-  private static String toString(List<?> objs) {
+  static String toString(List<?> objs) {
     StringBuilder result = new StringBuilder();
     for (Object obj : objs) {
       result.append(" ").append(obj);
