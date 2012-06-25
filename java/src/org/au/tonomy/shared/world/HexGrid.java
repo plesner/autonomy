@@ -163,11 +163,11 @@ public class HexGrid implements Iterable<Hex> {
   public Iterable<Hex> getHexes(Viewport viewport) {
     int rectWidth = 2 * width;
     List<Hex> result = new ArrayList<Hex>();
-    int rgStart = getLeftmostRectStrip(viewport.getLeft());
-    int rgLimit = (getRightmostRectStrip(viewport.getRight()) + 1) % rectWidth;
-    int hStart = getLowerRectStrip(viewport.getBottom());
-    int hLimit = (getUpperRectStrip(viewport.getTop()) + 1) % height;
-    for (int h = hStart, i = 0; (i == 0) || (h != hLimit); h = (h + 1) % rectWidth, i++) {
+    int rgStart = clip(getLeftmostRectStrip(viewport.getLeft()), rectWidth);
+    int rgLimit = clip(getRightmostRectStrip(viewport.getRight()) + 1, rectWidth);
+    int hStart = clip(getLowerRectStrip(viewport.getBottom()), height);
+    int hLimit = clip(getUpperRectStrip(viewport.getTop()) + 1, height);
+    for (int h = hStart, i = 0; (i == 0) || (h != hLimit); h = clip(h + 1, height), i++) {
       Hex boundary = rectHexes[rgLimit][h];
       Hex current = rectHexes[rgStart][h];
       int j = 0;

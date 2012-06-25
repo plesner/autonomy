@@ -4,9 +4,7 @@ import static org.au.tonomy.client.webgl.RenderingContext.ARRAY_BUFFER;
 import static org.au.tonomy.client.webgl.RenderingContext.COLOR_BUFFER_BIT;
 import static org.au.tonomy.client.webgl.RenderingContext.FLOAT;
 import static org.au.tonomy.client.webgl.RenderingContext.FRAGMENT_SHADER;
-import static org.au.tonomy.client.webgl.RenderingContext.LINE_LOOP;
 import static org.au.tonomy.client.webgl.RenderingContext.STATIC_DRAW;
-import static org.au.tonomy.client.webgl.RenderingContext.TRIANGLE_FAN;
 import static org.au.tonomy.client.webgl.RenderingContext.VERTEX_SHADER;
 
 import org.au.tonomy.client.webgl.Buffer;
@@ -124,30 +122,27 @@ public class WorldRenderer {
    */
   private static native void fillAndStrokeArrayBuffer(RenderingContext gl,
       double x, double y, double scale, UniformLocation posLoc, Mat4 pos,
-      UniformLocation colorLoc, Color stroke, Color fill, double strokeRatio,
-      int mode, int first, int count) /*-{
+      UniformLocation colorLoc, Color stroke, Color fill, int count) /*-{
     $wnd.mat4.identity(pos);
     $wnd.mat4.translate(pos, [x, y, 0]);
     $wnd.mat4.scale(pos, [scale, scale, 1]);
     gl.uniformMatrix4fv(posLoc, false, pos);
-    gl.uniform4fv(colorLoc, stroke);
-    gl.drawArrays(mode, first, count);
-    $wnd.mat4.scale(pos, [strokeRatio, strokeRatio, 1]);
-    gl.uniformMatrix4fv(posLoc, false, pos);
     gl.uniform4fv(colorLoc, fill);
-    gl.drawArrays(mode, first, count);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, count);
+    gl.uniformMatrix4fv(posLoc, false, pos);
+    gl.uniform4fv(colorLoc, stroke);
+    gl.drawArrays(gl.LINE_LOOP, 0, count);
   }-*/;
 
   private static native void strokeArrayBuffer(RenderingContext gl,
       double x, double y, double scaleX, double scaleY, UniformLocation posLoc,
-      Mat4 pos, UniformLocation colorLoc, Color stroke, int mode, int first,
-      int count) /*-{
+      Mat4 pos, UniformLocation colorLoc, Color stroke, int count) /*-{
     $wnd.mat4.identity(pos);
     $wnd.mat4.translate(pos, [x, y, 0]);
     $wnd.mat4.scale(pos, [scaleX, scaleY, 1]);
     gl.uniformMatrix4fv(posLoc, false, pos);
     gl.uniform4fv(colorLoc, stroke);
-    gl.drawArrays(mode, first, count);
+    gl.drawArrays(gl.LINE_LOOP, 0, count);
   }-*/;
 
   /**
@@ -157,7 +152,7 @@ public class WorldRenderer {
   private void fillAndStrokeArrayBuffer(RenderingContext context, double x,
       double y, double scale, Color fill, Color stroke, int vertices) {
     fillAndStrokeArrayBuffer(context, x, y, scale, positionLocation,
-        position, colorLocation, stroke, fill, 0.95, TRIANGLE_FAN, 0, vertices);
+        position, colorLocation, stroke, fill, vertices);
   }
 
   /**
@@ -167,7 +162,7 @@ public class WorldRenderer {
   private void strokeArrayBuffer(RenderingContext context, double x,
       double y, double scaleX, double scaleY, Color stroke, int vertices) {
     strokeArrayBuffer(context, x, y, scaleX, scaleY, positionLocation,
-        position, colorLocation, stroke, LINE_LOOP, 0, vertices);
+        position, colorLocation, stroke, vertices);
   }
 
   public WorldView getView() {
@@ -188,7 +183,7 @@ public class WorldRenderer {
     gl.clear(COLOR_BUFFER_BIT);
     perspective
         .resetPerspective(45, viewportWidth / viewportHeight, 0.1, 100.0)
-        .translate(-centerX, -centerY, -30 * view.getZoom());
+        .translate(-centerX, -centerY, -16 * view.getZoom());
     gl.uniformMatrix4fv(perspectiveLocation, false, perspective);
 
     // Draw the hexes.
@@ -202,7 +197,7 @@ public class WorldRenderer {
       double hAdjustment = 0.75 + (hRatio * 0.25);
       Color ground = Color.create(.929, .749 * gAdjustment, .525 * hAdjustment, 1.0);
       fillAndStrokeArrayBuffer(gl, hex.getCenterX(), hex.getCenterY(),
-          0.95, ground, Color.BLACK, 6);
+          0.90, ground, Color.GRAY, 6);
     }
 
     // Draw the units.

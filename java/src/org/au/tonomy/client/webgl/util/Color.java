@@ -12,5 +12,6 @@ public class Color extends Vec4 {
   }-*/;
 
   public static final Color BLACK = Color.create(0.0, 0.0, 0.0, 1.0);
+  public static final Color GRAY = Color.create(0.5, 0.5, 0.5, 1.0);
 
 }
