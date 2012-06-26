@@ -1,7 +1,9 @@
 package org.au.tonomy.client.world;
 
 import org.au.tonomy.client.webgl.util.RenderingFunction;
+import org.au.tonomy.client.webgl.util.Vec4;
 import org.au.tonomy.client.webgl.util.WebGLUtils;
+import org.au.tonomy.shared.world.HexPoint;
 import org.au.tonomy.shared.world.Viewport;
 import org.au.tonomy.shared.world.World;
 
@@ -32,8 +34,9 @@ public class WorldWidget extends Composite {
   @UiField Canvas canvas;
   @UiField Label fps;
   @UiField Label load;
+  @UiField Label log;
 
-  private final Viewport viewport = new Viewport(1.5, 0.25, 5.25, 4.0);
+  private final Viewport viewport = new Viewport(1.5, 0.25, 10.25, 8.0);
   private final FrameRateMonitor frameRate = new FrameRateMonitor(30);
   private final WorldRenderer renderer;
   private final World world;
@@ -43,7 +46,7 @@ public class WorldWidget extends Composite {
   public WorldWidget(World world) {
     initWidget(BINDER.createAndBindUi(this));
     this.world = world;
-    this.renderer = new WorldRenderer(canvas, world, viewport);
+    this.renderer = new WorldRenderer(canvas, world, viewport, log);
     this.renderer.paint();
     this.navigation = new NavigationHelper(viewport);
     setUpDragging();
@@ -91,6 +94,7 @@ public class WorldWidget extends Composite {
       @Override
       public void onMouseMove(MouseMoveEvent event) {
         navigation.drag(event.getX(), event.getY());
+        updateViewport(event.getX(), event.getY());
       }
     }, MouseMoveEvent.getType());
     this.addDomHandler(new MouseUpHandler() {
@@ -105,6 +109,22 @@ public class WorldWidget extends Composite {
         navigation.zoom(event.getDeltaY());
       }
     }, MouseWheelEvent.getType());
+  }
+
+  private void updateViewport(double canvasX, double canvasY) {
+    double viewportWidth = canvas.getCoordinateSpaceWidth();
+    double viewportHeight = canvas.getCoordinateSpaceHeight();
+
+    double normalX = (2 * canvasX - viewportWidth) / viewportWidth;
+    double normalY = (-2 * canvasY + viewportHeight) / viewportHeight;
+
+    Vec4 canvasPos = renderer.getPerspective().inverse().multiply(
+        Vec4.create(normalX, normalY, 0, 1));
+    double sceneX = canvasPos.get(0);
+    double sceneY = canvasPos.get(1);
+
+    HexPoint hexPoint = new HexPoint();
+    world.getGrid().locate(sceneX, sceneY, hexPoint);
   }
 
   @UiFactory

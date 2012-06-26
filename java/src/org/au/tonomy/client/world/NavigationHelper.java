@@ -33,8 +33,8 @@ public class NavigationHelper {
   public void drag(int x, int y) {
     if (!isDragging)
       return;
-    int dX = x - lastDraggedX;
-    int dY = lastDraggedY - y;
+    int dX = lastDraggedX - x;
+    int dY = y - lastDraggedY;
     lastDraggedX = x;
     lastDraggedY = y;
     viewport.move(dX / 8.0, dY / 8.0);

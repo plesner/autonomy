@@ -14,7 +14,9 @@ import org.au.tonomy.client.webgl.RenderingContext;
 import org.au.tonomy.client.webgl.Shader;
 import org.au.tonomy.client.webgl.UniformLocation;
 import org.au.tonomy.client.webgl.util.Color;
+import org.au.tonomy.client.webgl.util.Color.Adjustment;
 import org.au.tonomy.client.webgl.util.Mat4;
+import org.au.tonomy.client.webgl.util.VecColor;
 import org.au.tonomy.client.world.shader.ShaderBundle;
 import org.au.tonomy.shared.world.Hex;
 import org.au.tonomy.shared.world.Hex.Corner;
@@ -24,6 +26,7 @@ import org.au.tonomy.shared.world.World;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.ui.Label;
 
 /**
  * The object responsible for rendering the state of the world onto
@@ -37,6 +40,8 @@ public class WorldRenderer {
   private final Canvas canvas;
   private final World world;
   private final WorldView view = new WorldView();
+  private final Label log;
+  private int selectedG = -1, selectedH = -1;
 
   private final Buffer hexVertices;
   private final Buffer unitVertices;
@@ -48,10 +53,17 @@ public class WorldRenderer {
   private final Mat4 perspective = Mat4.create();
   private final Mat4 position = Mat4.create();
 
-  public WorldRenderer(Canvas canvas, World world, Viewport viewport) {
+  public void setSelected(int g, int h) {
+    this.selectedG = g;
+    this.selectedH = h;
+  }
+
+  public WorldRenderer(Canvas canvas, World world, Viewport viewport,
+      Label log) {
     this.viewport = viewport;
     this.canvas = canvas;
     this.world = world;
+    this.log = log;
     RenderingContext context = RenderingContext.forCanvas(canvas);
     Program shaderProgram = linkShaders(context);
     this.vertexAttribLocation = context.getAttribLocation(shaderProgram, "vertex");
@@ -122,7 +134,7 @@ public class WorldRenderer {
    */
   private static native void fillAndStrokeArrayBuffer(RenderingContext gl,
       double x, double y, double scale, UniformLocation posLoc, Mat4 pos,
-      UniformLocation colorLoc, Color stroke, Color fill, int count) /*-{
+      UniformLocation colorLoc, VecColor stroke, VecColor fill, int count) /*-{
     $wnd.mat4.identity(pos);
     $wnd.mat4.translate(pos, [x, y, 0]);
     $wnd.mat4.scale(pos, [scale, scale, 1]);
@@ -136,7 +148,7 @@ public class WorldRenderer {
 
   private static native void strokeArrayBuffer(RenderingContext gl,
       double x, double y, double scaleX, double scaleY, UniformLocation posLoc,
-      Mat4 pos, UniformLocation colorLoc, Color stroke, int count) /*-{
+      Mat4 pos, UniformLocation colorLoc, VecColor stroke, int count) /*-{
     $wnd.mat4.identity(pos);
     $wnd.mat4.translate(pos, [x, y, 0]);
     $wnd.mat4.scale(pos, [scaleX, scaleY, 1]);
@@ -152,7 +164,7 @@ public class WorldRenderer {
   private void fillAndStrokeArrayBuffer(RenderingContext context, double x,
       double y, double scale, Color fill, Color stroke, int vertices) {
     fillAndStrokeArrayBuffer(context, x, y, scale, positionLocation,
-        position, colorLocation, stroke, fill, vertices);
+        position, colorLocation, stroke.getVector(), fill.getVector(), vertices);
   }
 
   /**
@@ -162,11 +174,15 @@ public class WorldRenderer {
   private void strokeArrayBuffer(RenderingContext context, double x,
       double y, double scaleX, double scaleY, Color stroke, int vertices) {
     strokeArrayBuffer(context, x, y, scaleX, scaleY, positionLocation,
-        position, colorLocation, stroke, vertices);
+        position, colorLocation, stroke.getVector(), vertices);
   }
 
   public WorldView getView() {
     return this.view;
+  }
+
+  public Mat4 getPerspective() {
+    return perspective;
   }
 
   public void paint() {
@@ -175,15 +191,12 @@ public class WorldRenderer {
     double viewportWidth = canvas.getCoordinateSpaceWidth();
     double viewportHeight = canvas.getCoordinateSpaceWidth();
 
-    double centerX = world.getGrid().getBoundingWidth() / 2;
-    double centerY = world.getGrid().getBoundingHeight() / 2;
-
     // Clear the whole canvas and reset the perspective.
     gl.viewport(0, 0, viewportWidth, viewportHeight);
     gl.clear(COLOR_BUFFER_BIT);
     perspective
-        .resetPerspective(45, viewportWidth / viewportHeight, 0.1, 100.0)
-        .translate(-centerX, -centerY, -16 * view.getZoom());
+        .resetOrtho(viewport.getLeft() - 1, viewport.getRight() + 1,
+            viewport.getBottom() - 1, viewport.getTop() + 1, -1.0, 1.0);
     gl.uniformMatrix4fv(perspectiveLocation, false, perspective);
 
     // Draw the hexes.
@@ -196,8 +209,10 @@ public class WorldRenderer {
       double gAdjustment = 0.75 + (gRatio * 0.25);
       double hAdjustment = 0.75 + (hRatio * 0.25);
       Color ground = Color.create(.929, .749 * gAdjustment, .525 * hAdjustment, 1.0);
+      if (hex.getG() == selectedG && hex.getH() == selectedH)
+        ground = ground.adjust(Adjustment.LIGHTER);
       fillAndStrokeArrayBuffer(gl, hex.getCenterX(), hex.getCenterY(),
-          0.90, ground, Color.GRAY, 6);
+          0.90, ground, ground.adjust(Adjustment.DARKER), 6);
     }
 
     // Draw the units.

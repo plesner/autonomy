@@ -45,11 +45,19 @@ public class Mat4 extends Float32Array {
     return $wnd.mat4.frustum(left, right, bottom, top, near, far, this);
   }-*/;
 
-  public final native Mat4 moveAndScale2D(double x, double y, double scale) /*-{
-    $wnd.mat4.identity(this);
-    $wnd.mat4.translate(this, [x, y, 0]);
-    $wnd.mat4.scale(this, [scale, scale, 1]);
-    return this;
+  /**
+   * Returns a new matrix that is the inverse of this one.
+   */
+  public final native Mat4 inverse() /*-{
+    return $wnd.mat4.inverse(this, $wnd.mat4.create());
+  }-*/;
+
+  /**
+   * Returns a new vector that is the result of multiplying this matrix
+   * with the given vector.
+   */
+  public final native Vec4 multiply(Vec4 vec) /*-{
+    return $wnd.mat4.multiplyVec4(this, vec, $wnd.vec4.create());
   }-*/;
 
   /**
@@ -60,5 +68,19 @@ public class Mat4 extends Float32Array {
     return $wnd.mat4.perspective(fieldOfView, aspectRatio, nearBoundary,
         farBoundary, this);
   }-*/;
+
+  public final native Mat4 resetOrtho(double left, double right, double bottom,
+      double top, double near, double far) /*-{
+    return $wnd.mat4.ortho(left, right, bottom, top, near, far, this);
+  }-*/;
+
+  public final String asString() {
+    return "[" +
+      "[" + get( 0) + ", " + get( 1) + ", " + get( 2) + ", " + get( 3) + "]" +
+      "[" + get( 4) + ", " + get( 5) + ", " + get( 6) + ", " + get( 7) + "]" +
+      "[" + get( 8) + ", " + get( 9) + ", " + get(10) + ", " + get(11) + "]" +
+      "[" + get(12) + ", " + get(13) + ", " + get(14) + ", " + get(15) + "]" +
+    "]";
+  }
 
 }
