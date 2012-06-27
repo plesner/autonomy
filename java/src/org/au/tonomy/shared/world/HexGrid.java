@@ -1,6 +1,7 @@
 package org.au.tonomy.shared.world;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -160,13 +161,13 @@ public class HexGrid implements Iterable<Hex> {
     };
   }
 
-  public Iterable<Hex> getHexes(Viewport viewport) {
+  public Collection<Hex> getHexes(double left, double right, double bottom, double top) {
     int rectWidth = 2 * width;
     List<Hex> result = new ArrayList<Hex>();
-    int rgStart = clip(getLeftmostRectStrip(viewport.getLeft()), rectWidth);
-    int rgLimit = clip(getRightmostRectStrip(viewport.getRight()) + 1, rectWidth);
-    int hStart = clip(getLowerRectStrip(viewport.getBottom()), height);
-    int hLimit = clip(getUpperRectStrip(viewport.getTop()) + 1, height);
+    int rgStart = clip(getLeftmostRectStrip(left), rectWidth);
+    int rgLimit = clip(getRightmostRectStrip(right) + 1, rectWidth);
+    int hStart = clip(getLowerRectStrip(bottom), height);
+    int hLimit = clip(getUpperRectStrip(top) + 1, height);
     for (int h = hStart, i = 0; (i == 0) || (h != hLimit); h = clip(h + 1, height), i++) {
       Hex boundary = rectHexes[rgLimit][h];
       Hex current = rectHexes[rgStart][h];
@@ -252,7 +253,7 @@ public class HexGrid implements Iterable<Hex> {
    * g axis line up diagonally and once in a way that makes the h axis
    * line up, and for each it determines which diagonal it's on.
    */
-  public void locate(double x, double y, HexPoint point) {
+  public void rectToHex(double x, double y, HexPoint point) {
     double uGX = Math.floor(getUnitGX(x, y));
     double uGY = Math.floor(getUnitGY(x, y));
     int g = getUnitDiagonal((int) uGX, (int) uGY);

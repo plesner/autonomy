@@ -39,7 +39,7 @@ public class HexGridTest extends TestCase {
     for (int g = 0; g < 4; g++) {
       for (int h = 0; h < 4; h++) {
         Hex hex = new Hex(g, h);
-        grid.locate(hex.getCenterX(), hex.getCenterY(), point);
+        grid.rectToHex(hex.getCenterX(), hex.getCenterY(), point);
         assertEquals(g, point.getG());
         assertEquals(h, point.getH());
       }
@@ -61,7 +61,7 @@ public class HexGridTest extends TestCase {
           double length = random.nextDouble() * Hex.INNER_RADIUS;
           double x = centerX + (Math.cos(angle) * length);
           double y = centerY + (Math.sin(angle) * length);
-          grid.locate(x, y, point);
+          grid.rectToHex(x, y, point);
           assertEquals(g, point.getG());
           assertEquals(h, point.getH());
         }
@@ -232,12 +232,12 @@ public class HexGridTest extends TestCase {
     HexGrid grid = new HexGrid(10, 10);
     double a = Hex.INNER_RADIUS;
     // Get the hexes all the way around hex (1, 1).
-    Iterable<Hex> one = grid.getHexes(new Viewport(2 * a - EPSILON,
-        0, 4 * a + EPSILON, 3));
+    Iterable<Hex> one = grid.getHexes(2 * a - EPSILON,
+        0, 4 * a + EPSILON, 3);
     checkHexPositions(one, pair(1, 0), pair(2, 0), pair(0, 1),
         pair(1, 1), pair(2, 1), pair(0, 2), pair(1, 2));
 
-    Iterable<Hex> two = grid.getHexes(new Viewport(1.5, 0.25, 5.25, 4.0));
+    Iterable<Hex> two = grid.getHexes(1.5, 0.25, 5.25, 4.0);
   }
 
 }

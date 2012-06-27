@@ -1,8 +1,9 @@
 package org.au.tonomy.client.webgl.util;
 
 import org.au.tonomy.client.webgl.Float32Array;
+import org.au.tonomy.shared.util.IVector;
 
-public class Vec4 extends Float32Array {
+public class Vec4 extends Float32Array implements IVector {
 
   protected Vec4() { }
 

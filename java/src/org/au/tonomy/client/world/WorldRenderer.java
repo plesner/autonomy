@@ -7,6 +7,8 @@ import static org.au.tonomy.client.webgl.RenderingContext.FRAGMENT_SHADER;
 import static org.au.tonomy.client.webgl.RenderingContext.STATIC_DRAW;
 import static org.au.tonomy.client.webgl.RenderingContext.VERTEX_SHADER;
 
+import java.util.Collection;
+
 import org.au.tonomy.client.webgl.Buffer;
 import org.au.tonomy.client.webgl.Float32Array;
 import org.au.tonomy.client.webgl.Program;
@@ -15,13 +17,14 @@ import org.au.tonomy.client.webgl.Shader;
 import org.au.tonomy.client.webgl.UniformLocation;
 import org.au.tonomy.client.webgl.util.Color;
 import org.au.tonomy.client.webgl.util.Color.Adjustment;
+import org.au.tonomy.client.webgl.util.IWebGLUtils;
 import org.au.tonomy.client.webgl.util.Mat4;
+import org.au.tonomy.client.webgl.util.Vec4;
 import org.au.tonomy.client.webgl.util.VecColor;
-import org.au.tonomy.client.world.shader.ShaderBundle;
+import org.au.tonomy.client.world.shader.IShaderBundle;
 import org.au.tonomy.shared.world.Hex;
 import org.au.tonomy.shared.world.Hex.Corner;
 import org.au.tonomy.shared.world.Unit;
-import org.au.tonomy.shared.world.Viewport;
 import org.au.tonomy.shared.world.World;
 
 import com.google.gwt.canvas.client.Canvas;
@@ -32,16 +35,15 @@ import com.google.gwt.user.client.ui.Label;
  * The object responsible for rendering the state of the world onto
  * the widget's canvas using WebGL.
  */
-public class WorldRenderer {
+public class WorldRenderer implements ICamera<Vec4, Mat4> {
 
-  private static final ShaderBundle SHADER_BUNDLE = GWT.create(ShaderBundle.class);
+  private static final IShaderBundle SHADER_BUNDLE = GWT.create(IShaderBundle.class);
 
-  private final Viewport viewport;
+  private final IWebGLUtils webGlUtils;
+  private final Viewport<Vec4, Mat4> viewport;
   private final Canvas canvas;
   private final World world;
-  private final WorldView view = new WorldView();
   private final Label log;
-  private int selectedG = -1, selectedH = -1;
 
   private final Buffer hexVertices;
   private final Buffer unitVertices;
@@ -53,18 +55,28 @@ public class WorldRenderer {
   private final Mat4 perspective = Mat4.create();
   private final Mat4 position = Mat4.create();
 
-  public void setSelected(int g, int h) {
-    this.selectedG = g;
-    this.selectedH = h;
+  @Override
+  public double getCanvasWidth() {
+    return canvas.getCoordinateSpaceWidth();
   }
 
-  public WorldRenderer(Canvas canvas, World world, Viewport viewport,
-      Label log) {
+  @Override
+  public double getCanvasHeight() {
+    return canvas.getCoordinateSpaceHeight();
+  }
+
+  public Mat4 getInversePerspective() {
+    return perspective.inverse();
+  }
+
+  public WorldRenderer(IWebGLUtils webGlUtils, Canvas canvas, World world,
+      Viewport<Vec4, Mat4> viewport, Label log) {
+    this.webGlUtils = webGlUtils;
     this.viewport = viewport;
     this.canvas = canvas;
     this.world = world;
     this.log = log;
-    RenderingContext context = RenderingContext.forCanvas(canvas);
+    RenderingContext context = webGlUtils.create3DContext(canvas);
     Program shaderProgram = linkShaders(context);
     this.vertexAttribLocation = context.getAttribLocation(shaderProgram, "vertex");
     context.enableVertexAttribArray(vertexAttribLocation);
@@ -177,22 +189,11 @@ public class WorldRenderer {
         position, colorLocation, stroke.getVector(), vertices);
   }
 
-  public WorldView getView() {
-    return this.view;
-  }
-
-  public Mat4 getPerspective() {
-    return perspective;
-  }
-
   public void paint() {
-    RenderingContext gl = RenderingContext.forCanvas(canvas);
-
-    double viewportWidth = canvas.getCoordinateSpaceWidth();
-    double viewportHeight = canvas.getCoordinateSpaceWidth();
+    RenderingContext gl = webGlUtils.create3DContext(canvas);
 
     // Clear the whole canvas and reset the perspective.
-    gl.viewport(0, 0, viewportWidth, viewportHeight);
+    gl.viewport(0, 0, getCanvasWidth(), getCanvasHeight());
     gl.clear(COLOR_BUFFER_BIT);
     perspective
         .resetOrtho(viewport.getLeft() - 1, viewport.getRight() + 1,
@@ -203,14 +204,14 @@ public class WorldRenderer {
     gl.bindBuffer(ARRAY_BUFFER, hexVertices);
     gl.vertexAttribPointer(vertexAttribLocation, 3, FLOAT, false, 0, 0);
 
-    for (Hex hex : world.getGrid().getHexes(viewport)) {
-      double gRatio = 1 - ((double) hex.getG()) / (world.getWidth() - 1);
-      double hRatio = 1 - ((double) hex.getH()) / (world.getHeight() - 1);
+    Collection<Hex> hexes = world.getGrid().getHexes(viewport.getLeft(),
+        viewport.getRight(), viewport.getBottom(), viewport.getTop());
+    for (Hex hex : hexes) {
+      double gRatio = 1 - ((double) hex.getG()) / (world.getHexWidth() - 1);
+      double hRatio = 1 - ((double) hex.getH()) / (world.getHexHeight() - 1);
       double gAdjustment = 0.75 + (gRatio * 0.25);
       double hAdjustment = 0.75 + (hRatio * 0.25);
       Color ground = Color.create(.929, .749 * gAdjustment, .525 * hAdjustment, 1.0);
-      if (hex.getG() == selectedG && hex.getH() == selectedH)
-        ground = ground.adjust(Adjustment.LIGHTER);
       fillAndStrokeArrayBuffer(gl, hex.getCenterX(), hex.getCenterY(),
           0.90, ground, ground.adjust(Adjustment.DARKER), 6);
     }

@@ -4,9 +4,7 @@ import org.au.tonomy.client.webgl.WebGLError.ProgramLinkError;
 import org.au.tonomy.client.webgl.WebGLError.ShaderSyntaxError;
 import org.au.tonomy.client.webgl.util.Mat4;
 import org.au.tonomy.client.webgl.util.Vec4;
-import org.au.tonomy.client.webgl.util.WebGLUtils;
 
-import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.JavaScriptObject;
 /**
  * Wrapper around a GL context. Modeled on the WebGL IDL spec at
@@ -53,13 +51,6 @@ public class RenderingContext extends JavaScriptObject {
   public static final int TRIANGLE_FAN = 0x0006;
 
   protected RenderingContext() { }
-
-  /**
-   * Returns a context for the given canvas.
-   */
-  public static RenderingContext forCanvas(Canvas canvas) {
-    return WebGLUtils.create3DContext(canvas);
-  }
 
   /**
    * Creates a new program.

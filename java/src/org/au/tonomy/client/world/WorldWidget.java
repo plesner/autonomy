@@ -1,14 +1,15 @@
 package org.au.tonomy.client.world;
 
-import org.au.tonomy.client.webgl.util.RenderingFunction;
+import org.au.tonomy.client.webgl.util.IRenderingFunction;
+import org.au.tonomy.client.webgl.util.IWebGLUtils;
+import org.au.tonomy.client.webgl.util.Mat4;
 import org.au.tonomy.client.webgl.util.Vec4;
-import org.au.tonomy.client.webgl.util.WebGLUtils;
-import org.au.tonomy.shared.world.HexPoint;
-import org.au.tonomy.shared.world.Viewport;
+import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.world.World;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -26,40 +27,77 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * A widget that controls the canvas where the game is rendered.
  */
-public class WorldWidget extends Composite {
+public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
 
-  private static final WorldWidgetUiBinder BINDER = GWT.create(WorldWidgetUiBinder.class);
-  interface WorldWidgetUiBinder extends UiBinder<Widget, WorldWidget> { }
+  private static final IWorldWidgetUiBinder BINDER = GWT.create(IWorldWidgetUiBinder.class);
+  interface IWorldWidgetUiBinder extends UiBinder<Widget, WorldWidget> { }
 
   @UiField Canvas canvas;
   @UiField Label fps;
   @UiField Label load;
   @UiField Label log;
 
-  private final Viewport viewport = new Viewport(1.5, 0.25, 10.25, 8.0);
+  private final IWebGLUtils webGlUtils;
   private final FrameRateMonitor frameRate = new FrameRateMonitor(30);
   private final WorldRenderer renderer;
-  private final World world;
-  private final NavigationHelper navigation;
   private boolean keepRunning = false;
+  private IListener listener = null;
 
-  public WorldWidget(World world) {
+  public WorldWidget(IWebGLUtils webGlUtils, Viewport<Vec4, Mat4> viewport, World world) {
     initWidget(BINDER.createAndBindUi(this));
-    this.world = world;
-    this.renderer = new WorldRenderer(canvas, world, viewport, log);
-    this.renderer.paint();
-    this.navigation = new NavigationHelper(viewport);
-    setUpDragging();
+    this.webGlUtils = webGlUtils;
+    this.renderer = new WorldRenderer(webGlUtils, canvas, world, viewport, log);
+    configureEvents();
   }
 
-  public void start() {
+  private void configureEvents() {
+    canvas.addDomHandler(new MouseDownHandler() {
+      @Override
+      public void onMouseDown(MouseDownEvent event) {
+        getListener().onMouseDown(event.getX(), event.getY());
+      }
+    }, MouseDownEvent.getType());
+    canvas.addDomHandler(new MouseMoveHandler() {
+      @Override
+      public void onMouseMove(MouseMoveEvent event) {
+        getListener().onMouseMove(event.getX(), event.getY());
+      }
+    }, MouseMoveEvent.getType());
+    canvas.addDomHandler(new MouseUpHandler() {
+      @Override
+      public void onMouseUp(MouseUpEvent event) {
+        getListener().onMouseUp();
+      }
+    }, MouseUpEvent.getType());
+    canvas.addDomHandler(new MouseWheelHandler() {
+      @Override
+      public void onMouseWheel(MouseWheelEvent event) {
+        getListener().onMouseWheel(event.getDeltaY());
+      }
+    }, MouseWheelEvent.getType());
+  }
+
+  public ICamera<Vec4, Mat4> getCamera() {
+    return renderer;
+  }
+
+  public void attachListener(IListener listener) {
+    Assert.that(this.listener == null);
+    this.listener = listener;
+  }
+
+  private IListener getListener() {
+    return Assert.notNull(this.listener);
+  }
+
+  public void callAtFrameRate(final Runnable thunk) {
     if (keepRunning)
       return;
     keepRunning = true;
-    WebGLUtils.requestAnimFrame(canvas, new RenderingFunction() {
+    webGlUtils.requestAnimFrame(canvas, new IRenderingFunction() {
       @Override
       public void tick() {
-        refresh();
+        thunk.run();
       }
       @Override
       public boolean shouldContinue() {
@@ -68,11 +106,25 @@ public class WorldWidget extends Composite {
     });
   }
 
+  @Override
+  public void showDragCursor() {
+    canvas.getElement().getStyle().setCursor(Cursor.MOVE);
+  }
+
+  @Override
+  public void hideDragCursor() {
+    canvas.getElement().getStyle().setCursor(Cursor.AUTO);
+  }
+
+  public void stopCallingAtFrameRate() {
+    keepRunning = false;
+  }
+
   private static String toString(double value) {
     return Double.toString(Math.floor(value * 10 + 0.5) / 10);
   }
 
-  private void refresh() {
+  public void refresh() {
     long startMs = System.currentTimeMillis();
     renderer.paint();
     long durationMs = System.currentTimeMillis() - startMs;
@@ -81,50 +133,6 @@ public class WorldWidget extends Composite {
       fps.setText(toString(frameRate.getFps()));
       load.setText(toString(frameRate.getLoad() * 100) + "%");
     }
-  }
-
-  private void setUpDragging() {
-    this.addDomHandler(new MouseDownHandler() {
-      @Override
-      public void onMouseDown(MouseDownEvent event) {
-        navigation.startDragging(event.getX(), event.getY());
-      }
-    }, MouseDownEvent.getType());
-    this.addDomHandler(new MouseMoveHandler() {
-      @Override
-      public void onMouseMove(MouseMoveEvent event) {
-        navigation.drag(event.getX(), event.getY());
-        updateViewport(event.getX(), event.getY());
-      }
-    }, MouseMoveEvent.getType());
-    this.addDomHandler(new MouseUpHandler() {
-      @Override
-      public void onMouseUp(MouseUpEvent event) {
-        navigation.stopDragging();
-      }
-    }, MouseUpEvent.getType());
-    this.addDomHandler(new MouseWheelHandler() {
-      @Override
-      public void onMouseWheel(MouseWheelEvent event) {
-        navigation.zoom(event.getDeltaY());
-      }
-    }, MouseWheelEvent.getType());
-  }
-
-  private void updateViewport(double canvasX, double canvasY) {
-    double viewportWidth = canvas.getCoordinateSpaceWidth();
-    double viewportHeight = canvas.getCoordinateSpaceHeight();
-
-    double normalX = (2 * canvasX - viewportWidth) / viewportWidth;
-    double normalY = (-2 * canvasY + viewportHeight) / viewportHeight;
-
-    Vec4 canvasPos = renderer.getPerspective().inverse().multiply(
-        Vec4.create(normalX, normalY, 0, 1));
-    double sceneX = canvasPos.get(0);
-    double sceneY = canvasPos.get(1);
-
-    HexPoint hexPoint = new HexPoint();
-    world.getGrid().locate(sceneX, sceneY, hexPoint);
   }
 
   @UiFactory

@@ -1,11 +1,12 @@
 package org.au.tonomy.client.webgl.util;
 
 import org.au.tonomy.client.webgl.Float32Array;
+import org.au.tonomy.shared.util.IMatrix;
 
 /**
  * A wrapper around the gl-matrix library.
  */
-public class Mat4 extends Float32Array {
+public class Mat4 extends Float32Array implements IMatrix<Vec4> {
 
   protected Mat4() { }
 
@@ -59,6 +60,11 @@ public class Mat4 extends Float32Array {
   public final native Vec4 multiply(Vec4 vec) /*-{
     return $wnd.mat4.multiplyVec4(this, vec, $wnd.vec4.create());
   }-*/;
+
+  @Override
+  public final Vec4 multiply(double x, double y, double z, double w) {
+    return multiply(Vec4.create(x, y, z, w));
+  }
 
   /**
    * Resets this matrix to a perspective projection with the given bounds.

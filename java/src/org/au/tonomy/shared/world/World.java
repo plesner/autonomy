@@ -28,11 +28,11 @@ public class World {
     return this.units;
   }
 
-  public int getWidth() {
+  public int getHexWidth() {
     return this.width;
   }
 
-  public int getHeight() {
+  public int getHexHeight() {
     return this.height;
   }
 
