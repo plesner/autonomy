@@ -17,7 +17,7 @@ import org.au.tonomy.client.webgl.Shader;
 import org.au.tonomy.client.webgl.UniformLocation;
 import org.au.tonomy.client.webgl.util.Color;
 import org.au.tonomy.client.webgl.util.Color.Adjustment;
-import org.au.tonomy.client.webgl.util.IWebGLUtils;
+import org.au.tonomy.client.webgl.util.IWebGL;
 import org.au.tonomy.client.webgl.util.Mat4;
 import org.au.tonomy.client.webgl.util.Vec4;
 import org.au.tonomy.client.webgl.util.VecColor;
@@ -39,7 +39,7 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
 
   private static final IShaderBundle SHADER_BUNDLE = GWT.create(IShaderBundle.class);
 
-  private final IWebGLUtils webGlUtils;
+  private final IWebGL webGlUtils;
   private final Viewport<Vec4, Mat4> viewport;
   private final Canvas canvas;
   private final World world;
@@ -69,7 +69,7 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     return perspective.inverse();
   }
 
-  public WorldRenderer(IWebGLUtils webGlUtils, Canvas canvas, World world,
+  public WorldRenderer(IWebGL webGlUtils, Canvas canvas, World world,
       Viewport<Vec4, Mat4> viewport, Label log) {
     this.webGlUtils = webGlUtils;
     this.viewport = viewport;

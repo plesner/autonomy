@@ -8,14 +8,14 @@ import com.google.gwt.dom.client.Element;
 /**
  * Wrappers for utility methods from webgl-utils.js.
  */
-public class WebGLUtils implements IWebGLUtils {
+public class WebGL implements IWebGL {
 
-  private static final WebGLUtils INSTANCE = new WebGLUtils();
+  private static final WebGL INSTANCE = new WebGL();
 
   /**
    * Returns the singleton WebGLUtils instance.
    */
-  public static IWebGLUtils get() {
+  public static IWebGL get() {
     return INSTANCE;
   }
 
@@ -47,6 +47,13 @@ public class WebGLUtils implements IWebGLUtils {
   // Native implementation
   private native RenderingContext create3DContext(Element canvas) /*-{
     return $wnd.WebGLUtils.create3DContext(canvas);
+  }-*/;
+
+  @Override
+  public native boolean isSupported() /*-{
+    var canvas = $wnd.document.createElement('canvas');
+    var context = $wnd.WebGLUtils.create3DContext(canvas);
+    return context != null;
   }-*/;
 
 }

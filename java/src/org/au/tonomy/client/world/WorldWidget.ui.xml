@@ -3,8 +3,13 @@
     xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:c="urn:import:com.google.gwt.canvas.client"
     xmlns:d="urn:import:com.google.gwt.dom.client">
+  <ui:with field="res" type="org.au.tonomy.client.world.WorldWidget.Resources"/>
   <g:FlowPanel>
-    <c:Canvas coordinateSpaceWidth="300" coordinateSpaceHeight="300" ui:field="canvas"></c:Canvas>
+    <c:Canvas
+        coordinateSpaceWidth="300"
+        coordinateSpaceHeight="300"
+        ui:field="canvas"
+        styleName="{res.css.world} {res.css.nodrag}"></c:Canvas>
     <g:VerticalPanel>
       <g:HorizontalPanel>
         <g:Label>FPS:&nbsp;</g:Label>

@@ -1,7 +1,7 @@
 package org.au.tonomy.client.world;
 
 import org.au.tonomy.client.webgl.util.IRenderingFunction;
-import org.au.tonomy.client.webgl.util.IWebGLUtils;
+import org.au.tonomy.client.webgl.util.IWebGL;
 import org.au.tonomy.client.webgl.util.Mat4;
 import org.au.tonomy.client.webgl.util.Vec4;
 import org.au.tonomy.shared.util.Assert;
@@ -9,7 +9,6 @@ import org.au.tonomy.shared.world.World;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
@@ -18,6 +17,8 @@ import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.dom.client.MouseWheelEvent;
 import com.google.gwt.event.dom.client.MouseWheelHandler;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
@@ -29,21 +30,18 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
 
-  private static final IWorldWidgetUiBinder BINDER = GWT.create(IWorldWidgetUiBinder.class);
-  interface IWorldWidgetUiBinder extends UiBinder<Widget, WorldWidget> { }
-
   @UiField Canvas canvas;
   @UiField Label fps;
   @UiField Label load;
   @UiField Label log;
 
-  private final IWebGLUtils webGlUtils;
+  private final IWebGL webGlUtils;
   private final FrameRateMonitor frameRate = new FrameRateMonitor(30);
   private final WorldRenderer renderer;
   private boolean keepRunning = false;
   private IListener listener = null;
 
-  public WorldWidget(IWebGLUtils webGlUtils, Viewport<Vec4, Mat4> viewport, World world) {
+  public WorldWidget(IWebGL webGlUtils, Viewport<Vec4, Mat4> viewport, World world) {
     initWidget(BINDER.createAndBindUi(this));
     this.webGlUtils = webGlUtils;
     this.renderer = new WorldRenderer(webGlUtils, canvas, world, viewport, log);
@@ -108,12 +106,14 @@ public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
 
   @Override
   public void showDragCursor() {
-    canvas.getElement().getStyle().setCursor(Cursor.MOVE);
+    canvas.addStyleName(RESOURCES.css().drag());
+    canvas.removeStyleName(RESOURCES.css().nodrag());
   }
 
   @Override
   public void hideDragCursor() {
-    canvas.getElement().getStyle().setCursor(Cursor.AUTO);
+    canvas.addStyleName(RESOURCES.css().nodrag());
+    canvas.removeStyleName(RESOURCES.css().drag());
   }
 
   public void stopCallingAtFrameRate() {
@@ -139,5 +139,34 @@ public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
   public Canvas createCanvas() {
     return Canvas.createIfSupported();
   }
+
+  private static final IWorldWidgetUiBinder BINDER = GWT.create(IWorldWidgetUiBinder.class);
+  interface IWorldWidgetUiBinder extends UiBinder<Widget, WorldWidget> { }
+
+  /**
+   * Bindings for the world widget css.
+   */
+  public interface Css extends CssResource {
+
+    public String drag();
+
+    public String nodrag();
+
+    public String world();
+
+  }
+
+  /**
+   * World widget resource bundle.
+   */
+  public interface Resources extends ClientBundle {
+
+    @Source("WorldWidget.css")
+    public Css css();
+
+  }
+
+  public static final Resources RESOURCES = GWT.create(Resources.class);
+  static { RESOURCES.css().ensureInjected(); }
 
 }
