@@ -1,0 +1,19 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui"
+	xmlns:c="urn:import:com.google.gwt.canvas.client">
+<ui:style>
+.outer {
+  position: static;
+}
+.inner {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+</ui:style>
+  <g:HorizontalPanel ui:field="container" styleName="{style.outer}">
+    <c:Canvas ui:field="canvas" styleName="{style.inner}"></c:Canvas>
+  </g:HorizontalPanel>
+</ui:UiBinder>

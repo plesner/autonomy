@@ -1,9 +1,10 @@
-package org.au.tonomy.client.world;
+package org.au.tonomy.client.widget;
 
 import org.au.tonomy.client.webgl.util.IRenderingFunction;
 import org.au.tonomy.client.webgl.util.IWebGL;
 import org.au.tonomy.client.webgl.util.Mat4;
 import org.au.tonomy.client.webgl.util.Vec4;
+import org.au.tonomy.client.widget.CanvasPlus.IResizeListener;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.world.World;
 
@@ -20,7 +21,6 @@ import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
@@ -30,7 +30,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
 
-  @UiField Canvas canvas;
+  @UiField CanvasPlus canvasWrapper;
   @UiField Label fps;
   @UiField Label load;
   @UiField Label log;
@@ -44,35 +44,49 @@ public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
   public WorldWidget(IWebGL webGlUtils, Viewport<Vec4, Mat4> viewport, World world) {
     initWidget(BINDER.createAndBindUi(this));
     this.webGlUtils = webGlUtils;
-    this.renderer = new WorldRenderer(webGlUtils, canvas, world, viewport, log);
+    this.renderer = new WorldRenderer(webGlUtils, getCanvas(), world, viewport, log);
     configureEvents();
   }
 
+  private Canvas getCanvas() {
+    return canvasWrapper.getCanvas();
+  }
+
   private void configureEvents() {
-    canvas.addDomHandler(new MouseDownHandler() {
+    getCanvas().addDomHandler(new MouseDownHandler() {
       @Override
       public void onMouseDown(MouseDownEvent event) {
         getListener().onMouseDown(event.getX(), event.getY());
       }
     }, MouseDownEvent.getType());
-    canvas.addDomHandler(new MouseMoveHandler() {
+    getCanvas().addDomHandler(new MouseMoveHandler() {
       @Override
       public void onMouseMove(MouseMoveEvent event) {
         getListener().onMouseMove(event.getX(), event.getY());
       }
     }, MouseMoveEvent.getType());
-    canvas.addDomHandler(new MouseUpHandler() {
+    getCanvas().addDomHandler(new MouseUpHandler() {
       @Override
       public void onMouseUp(MouseUpEvent event) {
         getListener().onMouseUp();
       }
     }, MouseUpEvent.getType());
-    canvas.addDomHandler(new MouseWheelHandler() {
+    getCanvas().addDomHandler(new MouseWheelHandler() {
       @Override
       public void onMouseWheel(MouseWheelEvent event) {
         getListener().onMouseWheel(event.getDeltaY());
       }
     }, MouseWheelEvent.getType());
+    canvasWrapper.addResizeListener(new IResizeListener() {
+      @Override
+      public void onBeforeResize(int width, int height) {
+        getListener().onBeforeResize(width, height);
+      }
+      @Override
+      public void onAfterResize(int width, int height) {
+        // ignore
+      }
+    });
   }
 
   public ICamera<Vec4, Mat4> getCamera() {
@@ -92,7 +106,7 @@ public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
     if (keepRunning)
       return;
     keepRunning = true;
-    webGlUtils.requestAnimFrame(canvas, new IRenderingFunction() {
+    webGlUtils.requestAnimFrame(getCanvas(), new IRenderingFunction() {
       @Override
       public void tick() {
         thunk.run();
@@ -106,14 +120,14 @@ public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
 
   @Override
   public void showDragCursor() {
-    canvas.addStyleName(RESOURCES.css().drag());
-    canvas.removeStyleName(RESOURCES.css().nodrag());
+    getCanvas().addStyleName(RESOURCES.css().drag());
+    getCanvas().removeStyleName(RESOURCES.css().nodrag());
   }
 
   @Override
   public void hideDragCursor() {
-    canvas.addStyleName(RESOURCES.css().nodrag());
-    canvas.removeStyleName(RESOURCES.css().drag());
+    getCanvas().addStyleName(RESOURCES.css().nodrag());
+    getCanvas().removeStyleName(RESOURCES.css().drag());
   }
 
   public void stopCallingAtFrameRate() {
@@ -133,11 +147,6 @@ public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
       fps.setText(toString(frameRate.getFps()));
       load.setText(toString(frameRate.getLoad() * 100) + "%");
     }
-  }
-
-  @UiFactory
-  public Canvas createCanvas() {
-    return Canvas.createIfSupported();
   }
 
   private static final IWorldWidgetUiBinder BINDER = GWT.create(IWorldWidgetUiBinder.class);

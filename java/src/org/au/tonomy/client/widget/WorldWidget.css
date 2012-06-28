@@ -1,0 +1,12 @@
+.drag {
+  cursor: grabbing;
+}
+
+.nodrag {
+  cursor: hand;
+}
+
+.world {
+  width: 50%;
+  height: 50%;
+}

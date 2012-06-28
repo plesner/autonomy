@@ -4,19 +4,10 @@ package org.au.tonomy.shared.world;
  */
 public class HexPoint {
 
-  private int g;
-  private int h;
-
-  public HexPoint() {
-    this(0, 0);
-  }
+  private final int g;
+  private final int h;
 
   public HexPoint(int g, int h) {
-    this.g = g;
-    this.h = h;
-  }
-
-  public void set(int g, int h) {
     this.g = g;
     this.h = h;
   }

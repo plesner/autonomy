@@ -14,6 +14,16 @@ public class Vec4 extends Float32Array implements IVector {
     return $wnd.vec4.create();
   }-*/;
 
+  @Override
+  public final double getX() {
+    return get(0);
+  }
+
+  @Override
+  public final double getY() {
+    return get(1);
+  }
+
   /**
    * Creates a new 4-vector with the given components.
    */

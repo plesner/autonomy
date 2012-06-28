@@ -1,4 +1,4 @@
-package org.au.tonomy.client.world;
+package org.au.tonomy.client.widget;
 
 import org.au.tonomy.shared.util.IMatrix;
 import org.au.tonomy.shared.util.IVector;
@@ -50,13 +50,21 @@ public class Viewport<V4 extends IVector, M4 extends IMatrix<V4>> {
     return top - bottom;
   }
 
+  public double getCanvasWidth() {
+    return camera.getCanvasWidth();
+  }
+
+  public double getCanvasHeight() {
+    return camera.getCanvasHeight();
+  }
+
   /**
    * Maps rect coordinates on the canvas to rect coordinates in the
    * scene.
    */
   public V4 canvasToScene(double canvasX, double canvasY) {
-    double canvasWidth = camera.getCanvasWidth();
-    double canvasHeight = camera.getCanvasHeight();
+    double canvasWidth = getCanvasWidth();
+    double canvasHeight = getCanvasHeight();
     double normalX = (2 * canvasX - canvasWidth) / canvasWidth;
     double normalY = (-2 * canvasY + canvasHeight) / canvasHeight;
     return camera.getInversePerspective().multiply(normalX, normalY, 0, 1);
@@ -66,11 +74,11 @@ public class Viewport<V4 extends IVector, M4 extends IMatrix<V4>> {
    * Converts a pair of canvas coordinates into the hex coordinate of
    * the hex drawn under that location.
    */
-  public void canvasToHex(double canvasX, double canvasY, HexPoint pointOut) {
+  public HexPoint canvasToHex(double canvasX, double canvasY) {
     V4 scenePoint = canvasToScene(canvasX, canvasY);
-    double sceneX = scenePoint.get(0);
-    double sceneY = scenePoint.get(1);
-    grid.rectToHex(sceneX, sceneY, pointOut);
+    double sceneX = scenePoint.getX();
+    double sceneY = scenePoint.getY();
+    return grid.rectToHex(sceneX, sceneY);
   }
 
   /**
@@ -82,6 +90,10 @@ public class Viewport<V4 extends IVector, M4 extends IMatrix<V4>> {
     this.right += dX;
     this.top += dY;
     this.bottom += dY;
+  }
+
+  public void adjustToCanvasResize(int width, int height) {
+    // ignore for now
   }
 
 }

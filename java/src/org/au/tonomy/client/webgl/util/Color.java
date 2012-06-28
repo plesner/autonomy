@@ -28,10 +28,10 @@ public class Color {
      */
     private Color adjust(Color input) {
       VecColor vector = input.getVector();
-      double r = adjustComponent(vector.get(0));
-      double g = adjustComponent(vector.get(1));
-      double b = adjustComponent(vector.get(2));
-      double alpha = vector.get(3);
+      double r = adjustComponent(vector.getR());
+      double g = adjustComponent(vector.getG());
+      double b = adjustComponent(vector.getB());
+      double alpha = vector.getAlpha();
       return new Color(VecColor.create(r, g, b, alpha));
     }
 

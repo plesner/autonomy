@@ -1,4 +1,4 @@
-package org.au.tonomy.client.world;
+package org.au.tonomy.client.widget;
 
 import org.au.tonomy.shared.util.IMatrix;
 import org.au.tonomy.shared.util.IVector;
@@ -61,14 +61,19 @@ public class WorldPresenter<V4 extends IVector, M4 extends IMatrix<V4>> implemen
     if (!isPanning)
       return;
     V4 target = viewport.canvasToScene(canvasX, canvasY);
-    double moveX = panHandle.get(0) - target.get(0);
-    double moveY = panHandle.get(1) - target.get(1);
+    double moveX = panHandle.getX() - target.getX();
+    double moveY = panHandle.getY() - target.getY();
     viewport.translate(moveX, moveY);
   }
 
   @Override
   public void onMouseWheel(int deltaY) {
 
+  }
+
+  @Override
+  public void onBeforeResize(int width, int height) {
+    viewport.adjustToCanvasResize(width, height);
   }
 
 }

@@ -253,14 +253,14 @@ public class HexGrid implements Iterable<Hex> {
    * g axis line up diagonally and once in a way that makes the h axis
    * line up, and for each it determines which diagonal it's on.
    */
-  public void rectToHex(double x, double y, HexPoint point) {
+  public HexPoint rectToHex(double x, double y) {
     double uGX = Math.floor(getUnitGX(x, y));
     double uGY = Math.floor(getUnitGY(x, y));
     int g = getUnitDiagonal((int) uGX, (int) uGY);
     double uHX = Math.floor(getUnitHX(x, y));
     double uHY = Math.floor(getUnitHY(x, y));
     int h = getUnitDiagonal((int) uHX, (int) uHY);
-    point.set(g, h);
+    return new HexPoint(g, h);
   }
 
   /**

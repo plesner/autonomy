@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.au.tonomy.shared.syntax.Ast.MacroCall;
+import org.au.tonomy.shared.util.Assert;
 
 
 
@@ -127,7 +128,7 @@ public class MacroParser {
       List<Component> components = statement.getComponents();
       if (index == components.size()) {
         // We're at the end of a sequence so this is an end state.
-        assert onEnd == null;
+        Assert.that(onEnd == null);
         onEnd = statement;
       } else {
         Component next = components.get(index);
@@ -140,7 +141,7 @@ public class MacroParser {
             suppressSemi = next.getPlaceholderType().suppressSemi;
           }
           onAst.addStatement(statement, index + 1);
-          assert suppressSemi == next.getPlaceholderType().suppressSemi;
+          Assert.that(suppressSemi == next.getPlaceholderType().suppressSemi);
         } else {
           // This component is a keyword, add a state that follows if
           // we see that keyword.

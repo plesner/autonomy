@@ -1,15 +1,13 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
     xmlns:g="urn:import:com.google.gwt.user.client.ui"
-    xmlns:c="urn:import:com.google.gwt.canvas.client"
-    xmlns:d="urn:import:com.google.gwt.dom.client">
-  <ui:with field="res" type="org.au.tonomy.client.world.WorldWidget.Resources"/>
+    xmlns:w="urn:import:org.au.tonomy.client.widget">
+  <ui:with field="res" type="org.au.tonomy.client.widget.WorldWidget.Resources"/>
   <g:FlowPanel>
-    <c:Canvas
-        coordinateSpaceWidth="300"
-        coordinateSpaceHeight="300"
-        ui:field="canvas"
-        styleName="{res.css.world} {res.css.nodrag}"></c:Canvas>
+    <w:CanvasPlus
+        ui:field="canvasWrapper"
+        styleName="{res.css.world} {res.css.nodrag}">
+    </w:CanvasPlus>
     <g:VerticalPanel>
       <g:HorizontalPanel>
         <g:Label>FPS:&nbsp;</g:Label>

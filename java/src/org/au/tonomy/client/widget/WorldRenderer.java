@@ -1,4 +1,4 @@
-package org.au.tonomy.client.world;
+package org.au.tonomy.client.widget;
 
 import static org.au.tonomy.client.webgl.RenderingContext.ARRAY_BUFFER;
 import static org.au.tonomy.client.webgl.RenderingContext.COLOR_BUFFER_BIT;

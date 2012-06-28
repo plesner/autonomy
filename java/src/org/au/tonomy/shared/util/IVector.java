@@ -9,4 +9,14 @@ public interface IVector {
    */
   public double get(int index);
 
+  /**
+   * Returns the 0th component.
+   */
+  public double getX();
+
+  /**
+   * Returns the 1st component.
+   */
+  public double getY();
+
 }

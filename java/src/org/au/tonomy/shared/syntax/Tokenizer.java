@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.au.tonomy.shared.syntax.Token.Type;
+import org.au.tonomy.shared.util.Assert;
 
 
 
@@ -44,7 +45,10 @@ public class Tokenizer {
   /**
    * Advances over any whitespace.
    */
+  @SuppressWarnings("deprecation")
   private void skipSpaces() {
+    // GWT doesn't understand isWhitespace so we use the deprecated
+    // isSpace instead.
     while (hasMore() && Character.isSpace(getCurrent()))
       advance();
   }
@@ -93,7 +97,7 @@ public class Tokenizer {
    * Advances over the next token, returning the token that was skipped.
    */
   private Token scanNext() {
-    assert hasMore();
+    Assert.that(hasMore());
     Token result;
     if (isWordStart(getCurrent())) {
       result = scanWord();

@@ -4,10 +4,11 @@ import org.au.tonomy.client.webgl.util.IWebGL;
 import org.au.tonomy.client.webgl.util.Mat4;
 import org.au.tonomy.client.webgl.util.Vec4;
 import org.au.tonomy.client.webgl.util.WebGL;
-import org.au.tonomy.client.world.NotSupportedWidget;
-import org.au.tonomy.client.world.Viewport;
-import org.au.tonomy.client.world.WorldPresenter;
-import org.au.tonomy.client.world.WorldWidget;
+import org.au.tonomy.client.widget.MainWidget;
+import org.au.tonomy.client.widget.NotSupportedWidget;
+import org.au.tonomy.client.widget.Viewport;
+import org.au.tonomy.client.widget.WorldPresenter;
+import org.au.tonomy.client.widget.WorldWidget;
 import org.au.tonomy.shared.world.World;
 
 import com.google.gwt.canvas.client.Canvas;
@@ -27,7 +28,7 @@ public class GwtEntryPoint implements EntryPoint {
       Viewport<Vec4, Mat4> viewport = new Viewport<Vec4, Mat4>(world.getGrid());
       WorldWidget widget = new WorldWidget(webGlUtils, viewport, world);
       viewport.setCamera(widget.getCamera());
-      root.add(widget);
+      root.add(new MainWidget(widget));
       WorldPresenter<Vec4, Mat4> presenter = new WorldPresenter<Vec4, Mat4>(world,
           viewport, widget);
       presenter.startAnimating();

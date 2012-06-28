@@ -1,4 +1,4 @@
-package org.au.tonomy.client.world;
+package org.au.tonomy.client.widget;
 
 import org.au.tonomy.shared.util.IMatrix;
 import org.au.tonomy.shared.util.IVector;
@@ -13,6 +13,7 @@ public interface IWorldWidget<V4 extends IVector, M4 extends IMatrix<V4>> {
     public void onMouseUp();
     public void onMouseMove(int x, int y);
     public void onMouseWheel(int deltaY);
+    public void onBeforeResize(int width, int height);
   }
 
   /**
