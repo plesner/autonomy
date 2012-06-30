@@ -23,7 +23,6 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 /**
  * A widget that controls the canvas where the game is rendered.
@@ -31,9 +30,6 @@ import com.google.gwt.user.client.ui.Widget;
 public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
 
   @UiField CanvasPlus canvasWrapper;
-  @UiField Label fps;
-  @UiField Label load;
-  @UiField Label log;
 
   private final IWebGL webGlUtils;
   private final FrameRateMonitor frameRate = new FrameRateMonitor(30);
@@ -44,7 +40,7 @@ public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
   public WorldWidget(IWebGL webGlUtils, Viewport<Vec4, Mat4> viewport, World world) {
     initWidget(BINDER.createAndBindUi(this));
     this.webGlUtils = webGlUtils;
-    this.renderer = new WorldRenderer(webGlUtils, getCanvas(), world, viewport, log);
+    this.renderer = new WorldRenderer(webGlUtils, getCanvas(), world, viewport);
     configureEvents();
   }
 
@@ -134,19 +130,11 @@ public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
     keepRunning = false;
   }
 
-  private static String toString(double value) {
-    return Double.toString(Math.floor(value * 10 + 0.5) / 10);
-  }
-
   public void refresh() {
     long startMs = System.currentTimeMillis();
     renderer.paint();
     long durationMs = System.currentTimeMillis() - startMs;
     frameRate.record(startMs, durationMs);
-    if (frameRate.hasData()) {
-      fps.setText(toString(frameRate.getFps()));
-      load.setText(toString(frameRate.getLoad() * 100) + "%");
-    }
   }
 
   private static final IWorldWidgetUiBinder BINDER = GWT.create(IWorldWidgetUiBinder.class);

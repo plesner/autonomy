@@ -86,7 +86,8 @@ public class Tokenizer {
    */
   private static boolean isOperatorPart(char c) {
     switch (c) {
-    case '.': case '+': case '-': case '*': case '/':
+    case '.': case '+': case '-': case '*': case '/': case '<': case '>':
+    case '=':
       return true;
     default:
       return false;
@@ -105,11 +106,10 @@ public class Tokenizer {
       result = scanNumber();
     } else if (isOperatorPart(getCurrent())) {
       result = scanOperator();
+    } else if (getCurrent() == '$') {
+      result = scanIdentifier();
     } else {
       switch (getCurrent()) {
-      case '$':
-        result = Token.punctuation(Type.DOLLAR);
-        break;
       case '(':
         result = Token.punctuation(Type.LPAREN);
         break;
@@ -132,7 +132,7 @@ public class Tokenizer {
         result = Token.punctuation(Type.AT);
         break;
       default:
-        result = Token.error();
+        result = Token.error(getCurrent());
         break;
       }
       advance();
@@ -150,6 +150,15 @@ public class Tokenizer {
       advance();
     String value = source.substring(start, cursor);
     return Token.word(value);
+  }
+
+  private Token scanIdentifier() {
+    int start = cursor;
+    advance();
+    while (hasMore() && isWordPart(getCurrent()))
+      advance();
+    String value = source.substring(start, cursor);
+    return Token.identifier(value);
   }
 
   /**

@@ -11,7 +11,7 @@ import org.au.tonomy.shared.syntax.Token.Type;
  */
 public class Parser {
 
-  private static final Token EOF = Token.error();
+  private static final Token EOF = Token.error('\0');
 
   private MacroParser macroParser;
   private final List<Token> tokens;
@@ -120,9 +120,8 @@ public class Parser {
 
   private Ast parseAtomicExpression(boolean expectSemi) throws SyntaxError {
     switch (getCurrent().getType()) {
-    case DOLLAR: {
-      expect(Type.DOLLAR);
-      String word = expect(Type.WORD);
+    case IDENTIFIER: {
+      String word = expect(Type.IDENTIFIER);
       checkSemi(expectSemi);
       return new Ast.Identifier(word);
     }

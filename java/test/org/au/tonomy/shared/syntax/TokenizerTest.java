@@ -1,5 +1,6 @@
 package org.au.tonomy.shared.syntax;
 
+import static org.au.tonomy.shared.syntax.Token.identifier;
 import static org.au.tonomy.shared.syntax.Token.number;
 import static org.au.tonomy.shared.syntax.Token.operator;
 import static org.au.tonomy.shared.syntax.Token.punctuation;
@@ -10,8 +11,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.au.tonomy.shared.syntax.Token;
-import org.au.tonomy.shared.syntax.Tokenizer;
 import org.au.tonomy.shared.syntax.Token.Type;
 import org.junit.Test;
 
@@ -26,7 +25,7 @@ public class TokenizerTest extends TestCase {
   @Test
   public void testScanning() {
     runScanTest("for $i in 0 .. 10",
-        word("for"), punctuation(Type.DOLLAR), word("i"), word("in"),
+        word("for"), identifier("$i"), word("in"),
         number("0"), operator(".."), number("10"));
     runScanTest("+ - * /",
         operator("+"), operator("-"), operator("*"), operator("/"));

@@ -4,23 +4,10 @@
     xmlns:w="urn:import:org.au.tonomy.client.widget">
   <ui:with field="res" type="org.au.tonomy.client.widget.WorldWidget.Resources"/>
   <g:FlowPanel>
-    <w:CanvasPlus
-        ui:field="canvasWrapper"
-        styleName="{res.css.world} {res.css.nodrag}">
-    </w:CanvasPlus>
-    <g:VerticalPanel>
-      <g:HorizontalPanel>
-        <g:Label>FPS:&nbsp;</g:Label>
-        <g:Label ui:field="fps">--</g:Label>
-      </g:HorizontalPanel>
-      <g:HorizontalPanel>
-        <g:Label>Load:&nbsp;</g:Label>
-        <g:Label ui:field="load">--</g:Label>
-      </g:HorizontalPanel>
-      <g:HorizontalPanel>
-        <g:Label>Log:&nbsp;</g:Label>
-        <g:Label ui:field="log">--</g:Label>
-      </g:HorizontalPanel>
-    </g:VerticalPanel>
+    <g:FlowPanel styleName="{res.css.world}">
+      <w:CanvasPlus
+          ui:field="canvasWrapper">
+      </w:CanvasPlus>
+    </g:FlowPanel>
   </g:FlowPanel>
 </ui:UiBinder>

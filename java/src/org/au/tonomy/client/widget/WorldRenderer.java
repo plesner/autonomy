@@ -29,7 +29,6 @@ import org.au.tonomy.shared.world.World;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.ui.Label;
 
 /**
  * The object responsible for rendering the state of the world onto
@@ -43,7 +42,6 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
   private final Viewport<Vec4, Mat4> viewport;
   private final Canvas canvas;
   private final World world;
-  private final Label log;
 
   private final Buffer hexVertices;
   private final Buffer unitVertices;
@@ -70,12 +68,11 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
   }
 
   public WorldRenderer(IWebGL webGlUtils, Canvas canvas, World world,
-      Viewport<Vec4, Mat4> viewport, Label log) {
+      Viewport<Vec4, Mat4> viewport) {
     this.webGlUtils = webGlUtils;
     this.viewport = viewport;
     this.canvas = canvas;
     this.world = world;
-    this.log = log;
     RenderingContext context = webGlUtils.create3DContext(canvas);
     Program shaderProgram = linkShaders(context);
     this.vertexAttribLocation = context.getAttribLocation(shaderProgram, "vertex");

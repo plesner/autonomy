@@ -9,8 +9,37 @@ public class Token {
    * The different classes of tokens.
    */
   public enum Type {
-    WORD, DOLLAR, OPERATOR, ERROR, NUMBER, LPAREN, RPAREN, LBRACE,
-    RBRACE, SEMI, HASH, AT
+
+    WORD(null, "word"),
+    OPERATOR(null, "operator"),
+    ERROR(null, "error"),
+    NUMBER(null, "number"),
+    IDENTIFIER(null, "identifier"),
+    LPAREN("(", "punctuation"),
+    RPAREN(")", "punctuation"),
+    LBRACE("{", "punctuation"),
+    RBRACE("}", "punctuation"),
+    SEMI(";", "punctuation"),
+    HASH("#", "punctuation"),
+    AT("@", "punctuation");
+
+    private final String value;
+    private final String category;
+
+    private Type(String value, String category) {
+      this.value = value;
+      this.category = category;
+    }
+
+    @Override
+    public String toString() {
+      return value;
+    }
+
+    public String getCategory() {
+      return this.category;
+    }
+
   }
 
   private final Type type;
@@ -19,6 +48,10 @@ public class Token {
   private Token(Type type, String value) {
     this.type = type;
     this.value = value;
+  }
+
+  public String getCategory() {
+    return type.getCategory();
   }
 
   /**
@@ -51,6 +84,13 @@ public class Token {
   }
 
   /**
+   * Factory method for creating identifier tokens.
+   */
+  public static Token identifier(String value) {
+    return new Token(Type.IDENTIFIER, value);
+  }
+
+  /**
    * Factory method for creating numbers.
    */
   public static Token number(String value) {
@@ -67,15 +107,15 @@ public class Token {
   /**
    * Factory method for creating error tokens.
    */
-  public static Token error() {
-    return new Token(Type.ERROR, null);
+  public static Token error(char value) {
+    return new Token(Type.ERROR, Character.toString(value));
   }
 
   /**
    * Factory method for creating punctuation.
    */
   public static Token punctuation(Type type) {
-    return new Token(type, null);
+    return new Token(type, type.toString());
   }
 
   @Override
@@ -103,7 +143,7 @@ public class Token {
 
   @Override
   public String toString() {
-    return type + "(" + this.value + ")";
+    return type.name() + "(" + this.value + ")";
   }
 
 }

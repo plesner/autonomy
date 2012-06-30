@@ -3,13 +3,28 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:t="urn:import:org.au.tonomy.client.widget">
 <ui:style>
-.main {
+.editor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 30%;
+}
+.world {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 0;
+  left: 30%;
   right: 0;
 }
 </ui:style>
-  <t:WorldWidget ui:field="world" styleName="{style.main}"></t:WorldWidget>
+  <g:HorizontalPanel>
+    <t:CodeEditorWidget
+        styleName="{style.editor}">
+    </t:CodeEditorWidget>
+    <t:WorldWidget
+        ui:field="world"
+        styleName="{style.world}">
+    </t:WorldWidget>
+  </g:HorizontalPanel>
 </ui:UiBinder> 

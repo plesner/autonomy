@@ -1,0 +1,54 @@
+.root {
+  position: relative;
+  width: 300px;
+  height: 200px;
+}
+
+.display {
+  width: 300px;
+  height: 200px;
+  border: 1px dashed silver;
+  font-family: courier;
+  font-size: 10pt;
+}
+
+.lineSpan {
+  border: 1px dashed green;
+  display: block;
+  height: 1.1em;
+}
+
+.cursor {
+  position: absolute;
+  background: black;
+  height: 1.1em;
+  width: 2px;
+  margin-top: 1px;
+}
+
+.overlay {
+  position: absolute;
+  display: block;
+  float: left;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  opacity: 0;
+  z-index: 1;
+  resizeable: false;
+}
+
+@external .word, .number, .error;
+
+span.word {
+  font-weight: bold;
+}
+
+span.number {
+  text-decoration: underline;
+}
+
+span.error {
+  color: red;
+}

@@ -7,6 +7,7 @@ import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -14,7 +15,7 @@ import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 /**
  * A canvas with some additional functionality, including resizing.
@@ -42,7 +43,7 @@ public class CanvasPlus extends Composite {
 
   }
 
-  @UiField HorizontalPanel container;
+  @UiField FlowPanel container;
   @UiField Canvas canvas;
   private int currentWidth = 0;
   private int currentHeight = 0;
@@ -95,12 +96,12 @@ public class CanvasPlus extends Composite {
       listener.onBeforeResize(newWidth, newHeight);
     if (newWidth != currentWidth) {
       canvas.setCoordinateSpaceWidth(newWidth);
-      canvas.setWidth(newWidth + "px");
+      canvas.getElement().getStyle().setRight(newWidth, Unit.PX);
       currentWidth = newWidth;
     }
     if (newHeight != currentHeight) {
       canvas.setCoordinateSpaceHeight(newHeight);
-      canvas.setHeight(newHeight + "px");
+      canvas.getElement().getStyle().setBottom(newHeight, Unit.PX);
       currentHeight = newHeight;
     }
     for (IResizeListener listener : listeners)
