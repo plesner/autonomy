@@ -7,8 +7,8 @@ import static org.au.tonomy.client.webgl.RenderingContext.FRAGMENT_SHADER;
 import static org.au.tonomy.client.webgl.RenderingContext.STATIC_DRAW;
 import static org.au.tonomy.client.webgl.RenderingContext.VERTEX_SHADER;
 
-import java.util.Collection;
-
+import org.au.tonomy.client.presentation.ICamera;
+import org.au.tonomy.client.presentation.Viewport;
 import org.au.tonomy.client.webgl.Buffer;
 import org.au.tonomy.client.webgl.Float32Array;
 import org.au.tonomy.client.webgl.Program;
@@ -22,6 +22,7 @@ import org.au.tonomy.client.webgl.util.Mat4;
 import org.au.tonomy.client.webgl.util.Vec4;
 import org.au.tonomy.client.webgl.util.VecColor;
 import org.au.tonomy.client.world.shader.IShaderBundle;
+import org.au.tonomy.shared.util.IRect;
 import org.au.tonomy.shared.world.Hex;
 import org.au.tonomy.shared.world.Hex.Corner;
 import org.au.tonomy.shared.world.Unit;
@@ -192,18 +193,17 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     // Clear the whole canvas and reset the perspective.
     gl.viewport(0, 0, getCanvasWidth(), getCanvasHeight());
     gl.clear(COLOR_BUFFER_BIT);
+    IRect bounds = viewport.getBounds();
     perspective
-        .resetOrtho(viewport.getLeft() - 1, viewport.getRight() + 1,
-            viewport.getBottom() - 1, viewport.getTop() + 1, -1.0, 1.0);
+        .resetOrtho(bounds.getLeft() - 1, bounds.getRight() + 1,
+            bounds.getBottom() - 1, bounds.getTop() + 1, -1.0, 1.0);
     gl.uniformMatrix4fv(perspectiveLocation, false, perspective);
 
     // Draw the hexes.
     gl.bindBuffer(ARRAY_BUFFER, hexVertices);
     gl.vertexAttribPointer(vertexAttribLocation, 3, FLOAT, false, 0, 0);
 
-    Collection<Hex> hexes = world.getGrid().getHexes(viewport.getLeft(),
-        viewport.getRight(), viewport.getBottom(), viewport.getTop());
-    for (Hex hex : hexes) {
+    for (Hex hex : world.getGrid().getHexes(bounds)) {
       double gRatio = 1 - ((double) hex.getG()) / (world.getHexWidth() - 1);
       double hRatio = 1 - ((double) hex.getH()) / (world.getHexHeight() - 1);
       double gAdjustment = 0.75 + (gRatio * 0.25);
@@ -227,8 +227,8 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     // Draw the viewport.
     gl.bindBuffer(ARRAY_BUFFER, rectVertices);
     gl.vertexAttribPointer(vertexAttribLocation, 3, FLOAT, false, 0, 0);
-    strokeArrayBuffer(gl, viewport.getLeft(), viewport.getBottom(),
-        viewport.getWidth(), viewport.getHeight(), Color.BLACK, 4);
+    strokeArrayBuffer(gl, bounds.getLeft(), bounds.getBottom(),
+        bounds.getWidth(), bounds.getHeight(), Color.BLACK, 4);
   }
 
 }

@@ -1,17 +1,12 @@
 package org.au.tonomy.shared.world;
 
 import static org.au.tonomy.shared.util.ExtraMath.TAU;
+import static org.au.tonomy.testing.TestUtils.assertClose;
 import junit.framework.TestCase;
 
 import org.junit.Test;
 
 public class HexTest extends TestCase {
-
-  public static final double EPSILON = 1e-10;
-
-  public static void assertClose(double expected, double found) {
-    assertEquals(expected, found, EPSILON);
-  }
 
   @Test
   public void testCenter() {

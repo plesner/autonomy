@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.au.tonomy.shared.util.IRect;
 import org.au.tonomy.shared.world.Hex.Side;
 
 
@@ -64,25 +65,25 @@ import org.au.tonomy.shared.world.Hex.Side;
  */
 public class HexGrid implements Iterable<Hex> {
 
-  private final int width;
-  private final int height;
+  private final int hexWidth;
+  private final int hexHeight;
   private final Hex[][] hexes;
   private final Hex[][] rectHexes;
 
-  public HexGrid(int width, int height) {
-    this.width = width;
-    this.height = height;
-    this.hexes = new Hex[width][height];
-    for (int g = 0; g < width; g++) {
-      for (int h = 0; h < height; h++) {
+  public HexGrid(int hexWidth, int hexHeight) {
+    this.hexWidth = hexWidth;
+    this.hexHeight = hexHeight;
+    this.hexes = new Hex[hexWidth][hexHeight];
+    for (int g = 0; g < hexWidth; g++) {
+      for (int h = 0; h < hexHeight; h++) {
         hexes[g][h] = new Hex(g, h);
       }
     }
-    int rectWidth = 2 * width;
+    int rectWidth = 2 * hexWidth;
     int minusOne = rectWidth - 1;
-    this.rectHexes = new Hex[rectWidth][height];
-    for (int g = 0; g < width; g++) {
-      for (int h = 0; h < height; h++) {
+    this.rectHexes = new Hex[rectWidth][hexHeight];
+    for (int g = 0; g < hexWidth; g++) {
+      for (int h = 0; h < hexHeight; h++) {
         int rectG = getRectG(g, h);
         rectHexes[rectG][h] = hexes[g][h];
         rectHexes[(rectG + minusOne) % rectWidth][h] = hexes[g][h];
@@ -94,17 +95,32 @@ public class HexGrid implements Iterable<Hex> {
    * Returns the width of a bounding rectangule containing this whole
    * grid.
    */
-  public double getBoundingWidth() {
-    return (Hex.INNER_DIAMETER * width) + (Hex.INNER_RADIUS * height);
+  public double getRectWidth() {
+    double baseWidth = Hex.INNER_DIAMETER * hexWidth;
+    double offset = Hex.INNER_RADIUS * (hexHeight - 1);
+    return baseWidth + offset;
   }
 
   /**
    * Returns the height of a bounding rectangle containing this whole
    * grid.
-   * @return
    */
-  public double getBoundingHeight() {
-    return (height * 1.5) + 1.5;
+  public double getRectHeight() {
+    return (hexHeight * 1.5) + 0.5;
+  }
+
+  /**
+   * Returns the width of the hex coordinate system.
+   */
+  public int getHexWidth() {
+    return this.hexWidth;
+  }
+
+  /**
+   * Returns the height of the hex coordinate system.
+   */
+  public int getHexHeight() {
+    return this.hexHeight;
   }
 
   /**
@@ -112,12 +128,12 @@ public class HexGrid implements Iterable<Hex> {
    * at the given hex coordinates.
    */
   public int getRectG(int g, int h) {
-    return (2 * g + h) % (2 * width);
+    return (2 * g + h) % (2 * hexWidth);
   }
 
   public Hex getNeighbour(Hex hex, Hex.Side direction) {
-    int newG = (hex.getG() + width + direction.getDeltaG()) % width;
-    int newH = (hex.getH() + width + direction.getDeltaH()) % width;
+    int newG = (hex.getG() + hexWidth + direction.getDeltaG()) % hexWidth;
+    int newH = (hex.getH() + hexWidth + direction.getDeltaH()) % hexWidth;
     return hexes[newG][newH];
   }
 
@@ -126,7 +142,7 @@ public class HexGrid implements Iterable<Hex> {
    * given direction of one with the given g component.
    */
   public int getMovedG(int g, Hex.Side direction) {
-    return clip(g + direction.getDeltaG(), width);
+    return clip(g + direction.getDeltaG(), hexWidth);
   }
 
   /**
@@ -134,21 +150,24 @@ public class HexGrid implements Iterable<Hex> {
    * given direction of one with the given h component.
    */
   public int getMovedH(int h, Hex.Side direction) {
-    return clip(h + direction.getDeltaH(), height);
+    return clip(h + direction.getDeltaH(), hexHeight);
   }
 
+  /**
+   * Returns an iterator that scans all the hexes.
+   */
   public Iterator<Hex> iterator() {
     return new Iterator<Hex>() {
       private int g = 0;
       private int h = 0;
       @Override
       public boolean hasNext() {
-        return g < width && h < height;
+        return g < hexWidth && h < hexHeight;
       }
       @Override
       public Hex next() {
         Hex result = hexes[g][h];
-        if (++g == width) {
+        if (++g == hexWidth) {
           g = 0;
           h++;
         }
@@ -161,14 +180,17 @@ public class HexGrid implements Iterable<Hex> {
     };
   }
 
-  public Collection<Hex> getHexes(double left, double right, double bottom, double top) {
-    int rectWidth = 2 * width;
+  /**
+   * Returns the hexes that overlap with the given rectangle.
+   */
+  public Collection<Hex> getHexes(IRect bounds) {
+    int rectWidth = 2 * hexWidth;
     List<Hex> result = new ArrayList<Hex>();
-    int rgStart = clip(getLeftmostRectStrip(left), rectWidth);
-    int rgLimit = clip(getRightmostRectStrip(right) + 1, rectWidth);
-    int hStart = clip(getLowerRectStrip(bottom), height);
-    int hLimit = clip(getUpperRectStrip(top) + 1, height);
-    for (int h = hStart, i = 0; (i == 0) || (h != hLimit); h = clip(h + 1, height), i++) {
+    int rgStart = clip(getLeftmostRectStrip(bounds.getLeft()), rectWidth);
+    int rgLimit = clip(getRightmostRectStrip(bounds.getRight()) + 1, rectWidth);
+    int hStart = clip(getLowerRectStrip(bounds.getBottom()), hexHeight);
+    int hLimit = clip(getUpperRectStrip(bounds.getTop()) + 1, hexHeight);
+    for (int h = hStart, i = 0; (i == 0) || (h != hLimit); h = clip(h + 1, hexHeight), i++) {
       Hex boundary = rectHexes[rgLimit][h];
       Hex current = rectHexes[rgStart][h];
       int j = 0;

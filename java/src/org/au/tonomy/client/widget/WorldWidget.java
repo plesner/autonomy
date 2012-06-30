@@ -1,5 +1,9 @@
 package org.au.tonomy.client.widget;
 
+import org.au.tonomy.client.presentation.FrameRateMonitor;
+import org.au.tonomy.client.presentation.ICamera;
+import org.au.tonomy.client.presentation.IWorldWidget;
+import org.au.tonomy.client.presentation.Viewport;
 import org.au.tonomy.client.webgl.util.IRenderingFunction;
 import org.au.tonomy.client.webgl.util.IWebGL;
 import org.au.tonomy.client.webgl.util.Mat4;

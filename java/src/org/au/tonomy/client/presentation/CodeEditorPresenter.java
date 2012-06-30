@@ -1,6 +1,8 @@
-package org.au.tonomy.client.widget;
+package org.au.tonomy.client.presentation;
 
+import org.au.tonomy.client.widget.CodeEditorWidget;
 import org.au.tonomy.client.widget.CodeEditorWidget.IKeyEvent;
+import org.au.tonomy.client.widget.CodeEditorWidget.IListener;
 
 import com.google.gwt.event.dom.client.KeyCodes;
 

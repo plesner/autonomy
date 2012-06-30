@@ -1,4 +1,4 @@
-package org.au.tonomy.client.widget;
+package org.au.tonomy.client.presentation;
 
 import org.au.tonomy.shared.util.IMatrix;
 import org.au.tonomy.shared.util.IVector;

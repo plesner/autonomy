@@ -3,6 +3,7 @@ package org.au.tonomy.client.widget;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.au.tonomy.client.presentation.SourceManager;
 import org.au.tonomy.shared.syntax.Token;
 import org.au.tonomy.shared.syntax.Tokenizer;
 import org.au.tonomy.shared.util.Assert;

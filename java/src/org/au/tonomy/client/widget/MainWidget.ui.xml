@@ -2,24 +2,10 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:t="urn:import:org.au.tonomy.client.widget">
-<ui:style>
-.editor {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 30%;
-}
-.world {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 30%;
-  right: 0;
-}
-</ui:style>
+  <ui:style src="MainWidget.css"></ui:style>
   <g:HorizontalPanel>
     <t:CodeEditorWidget
+        ui:field="editor"
         styleName="{style.editor}">
     </t:CodeEditorWidget>
     <t:WorldWidget

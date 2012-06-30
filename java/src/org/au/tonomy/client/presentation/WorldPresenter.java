@@ -1,4 +1,4 @@
-package org.au.tonomy.client.widget;
+package org.au.tonomy.client.presentation;
 
 import org.au.tonomy.shared.util.IMatrix;
 import org.au.tonomy.shared.util.IVector;
@@ -68,7 +68,7 @@ public class WorldPresenter<V4 extends IVector, M4 extends IMatrix<V4>> implemen
 
   @Override
   public void onMouseWheel(int deltaY) {
-
+    viewport.zoom(deltaY / -100.0);
   }
 
   @Override

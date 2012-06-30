@@ -1,4 +1,4 @@
-package org.au.tonomy.client.widget;
+package org.au.tonomy.client.presentation;
 
 import java.util.LinkedList;
 import java.util.List;

@@ -1,15 +1,15 @@
 package org.au.tonomy.client;
 
+import org.au.tonomy.client.presentation.CodeEditorPresenter;
+import org.au.tonomy.client.presentation.Viewport;
+import org.au.tonomy.client.presentation.WorldPresenter;
 import org.au.tonomy.client.webgl.util.IWebGL;
 import org.au.tonomy.client.webgl.util.Mat4;
 import org.au.tonomy.client.webgl.util.Vec4;
 import org.au.tonomy.client.webgl.util.WebGL;
-import org.au.tonomy.client.widget.CodeEditorPresenter;
 import org.au.tonomy.client.widget.CodeEditorWidget;
 import org.au.tonomy.client.widget.MainWidget;
 import org.au.tonomy.client.widget.NotSupportedWidget;
-import org.au.tonomy.client.widget.Viewport;
-import org.au.tonomy.client.widget.WorldPresenter;
 import org.au.tonomy.client.widget.WorldWidget;
 import org.au.tonomy.shared.world.World;
 
@@ -26,7 +26,7 @@ public class GwtEntryPoint implements EntryPoint {
     Panel root = RootPanel.get();
     if (!isSupported(webGl)) {
       root.add(new NotSupportedWidget());
-    } else if (true) {
+    } else if (false) {
       CodeEditorWidget widget = new CodeEditorWidget();
       root.add(widget);
       CodeEditorPresenter presenter = new CodeEditorPresenter(widget);

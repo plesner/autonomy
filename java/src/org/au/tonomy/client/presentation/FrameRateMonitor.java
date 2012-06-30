@@ -1,4 +1,4 @@
-package org.au.tonomy.client.widget;
+package org.au.tonomy.client.presentation;
 /**
  * Utility for monitoring frame rate and load averaged over N frames.
  */
