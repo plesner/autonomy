@@ -18,7 +18,6 @@ public class Tokenizer {
 
   private Tokenizer(String source) {
     this.source = source;
-    skipSpaces();
   }
 
   /**
@@ -40,17 +39,6 @@ public class Tokenizer {
    */
   private void advance() {
     cursor++;
-  }
-
-  /**
-   * Advances over any whitespace.
-   */
-  @SuppressWarnings("deprecation")
-  private void skipSpaces() {
-    // GWT doesn't understand isWhitespace so we use the deprecated
-    // isSpace instead.
-    while (hasMore() && Character.isSpace(getCurrent()))
-      advance();
   }
 
   /**
@@ -94,13 +82,22 @@ public class Tokenizer {
     }
   }
 
+  @SuppressWarnings("deprecation")
+  private static boolean isSpace(char c) {
+    // GWT doesn't support the non-deprecated character space predicates
+    // so use this one.
+    return Character.isSpace(c);
+  }
+
   /**
    * Advances over the next token, returning the token that was skipped.
    */
   private Token scanNext() {
     Assert.that(hasMore());
     Token result;
-    if (isWordStart(getCurrent())) {
+    if (isSpace(getCurrent())) {
+      result = scanEther();
+    } else if (isWordStart(getCurrent())) {
       result = scanWord();
     } else if (isNumberStart(getCurrent())) {
       result = scanNumber();
@@ -137,8 +134,15 @@ public class Tokenizer {
       }
       advance();
     }
-    skipSpaces();
     return result;
+  }
+
+  private Token scanEther() {
+    int start = cursor;
+    while (hasMore() && isSpace(getCurrent()))
+      advance();
+    String value = source.substring(start, cursor);
+    return Token.ether(value);
   }
 
   /**

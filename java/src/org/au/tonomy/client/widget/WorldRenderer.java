@@ -203,14 +203,11 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     gl.bindBuffer(ARRAY_BUFFER, hexVertices);
     gl.vertexAttribPointer(vertexAttribLocation, 3, FLOAT, false, 0, 0);
 
+    Color ground = Color.create(.929, .749, .525, 1.0);
+    Color stroke = ground.adjust(Adjustment.DARKER);
     for (Hex hex : world.getGrid().getHexes(bounds)) {
-      double gRatio = 1 - ((double) hex.getG()) / (world.getHexWidth() - 1);
-      double hRatio = 1 - ((double) hex.getH()) / (world.getHexHeight() - 1);
-      double gAdjustment = 0.75 + (gRatio * 0.25);
-      double hAdjustment = 0.75 + (hRatio * 0.25);
-      Color ground = Color.create(.929, .749 * gAdjustment, .525 * hAdjustment, 1.0);
       fillAndStrokeArrayBuffer(gl, hex.getCenterX(), hex.getCenterY(),
-          0.90, ground, ground.adjust(Adjustment.DARKER), 6);
+          0.90, ground, stroke, 6);
     }
 
     // Draw the units.

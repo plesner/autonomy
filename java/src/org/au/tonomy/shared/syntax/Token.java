@@ -15,6 +15,7 @@ public class Token {
     ERROR(null, "error"),
     NUMBER(null, "number"),
     IDENTIFIER(null, "identifier"),
+    ETHER(null, "ether"),
     LPAREN("(", "punctuation"),
     RPAREN(")", "punctuation"),
     LBRACE("{", "punctuation"),
@@ -74,6 +75,13 @@ public class Token {
    */
   public String getValue() {
     return this.value;
+  }
+
+  /**
+   * Factory method for creating ether tokens.
+   */
+  public static Token ether(String value) {
+    return new Token(Type.ETHER, value);
   }
 
   /**

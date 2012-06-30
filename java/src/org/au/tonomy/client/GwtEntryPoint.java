@@ -15,6 +15,7 @@ import org.au.tonomy.shared.world.World;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 
@@ -26,24 +27,24 @@ public class GwtEntryPoint implements EntryPoint {
     Panel root = RootPanel.get();
     if (!isSupported(webGl)) {
       root.add(new NotSupportedWidget());
-    } else if (false) {
+    } else if ("editor".equals(Window.Location.getParameter("test"))) {
       CodeEditorWidget widget = new CodeEditorWidget();
       root.add(widget);
-      CodeEditorPresenter presenter = new CodeEditorPresenter(widget);
+      new CodeEditorPresenter(widget);
     } else {
       startMain(webGl, root);
     }
   }
 
   private void startMain(IWebGL webGl, Panel root) {
-    World world = new World(16, 16);
+    World world = new World(24, 24);
     Viewport<Vec4, Mat4> viewport = new Viewport<Vec4, Mat4>(world.getGrid());
     WorldWidget widget = new WorldWidget(webGl, viewport, world);
     viewport.setCamera(widget.getCamera());
     root.add(new MainWidget(widget));
     WorldPresenter<Vec4, Mat4> presenter = new WorldPresenter<Vec4, Mat4>(world,
         viewport, widget);
-    presenter.startAnimating();
+    // presenter.startAnimating();
   }
 
   private static boolean isSupported(IWebGL webGlUtils) {

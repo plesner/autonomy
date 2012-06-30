@@ -68,7 +68,7 @@ public class WorldPresenter<V4 extends IVector, M4 extends IMatrix<V4>> implemen
 
   @Override
   public void onMouseWheel(int deltaY) {
-    viewport.zoom(deltaY / -100.0);
+    viewport.zoom(deltaY / 100.0);
   }
 
   @Override

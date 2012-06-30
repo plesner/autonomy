@@ -31,6 +31,7 @@ public class Viewport<V4 extends IVector, M4 extends IMatrix<V4>> {
     double distY = DEFAULT_SIDE / 2;
     bounds.reset(centerX - distX, centerX + distX, centerY - distY,
         centerY + distY);
+    applyRestrictions();
   }
 
   public void setCamera(ICamera<V4, M4> camera) {
@@ -73,15 +74,22 @@ public class Viewport<V4 extends IVector, M4 extends IMatrix<V4>> {
     double deltaY = (bounds.getHeight() * factor) / 2;
     bounds.reset(bounds.getLeft() - deltaX, bounds.getRight() + deltaX,
         bounds.getBottom() - deltaY, bounds.getTop() + deltaY);
-    applyRestrictions();
+  }
+
+  private static double getAdjustmentZoom(double target, double current) {
+    return (target - current) / current;
   }
 
   private void applyRestrictions() {
     if (bounds.getWidth() < MIN_SIDE) {
-      zoom((MIN_SIDE - bounds.getWidth()) / bounds.getWidth());
+      zoom(getAdjustmentZoom(MIN_SIDE, bounds.getWidth()));
+    } else if (bounds.getWidth() > getMaxWidth()) {
+      zoom(getAdjustmentZoom(getMaxWidth(), bounds.getWidth()));
     }
     if (bounds.getHeight() < MIN_SIDE) {
-      zoom((MIN_SIDE - bounds.getHeight()) / bounds.getHeight());
+      zoom(getAdjustmentZoom(MIN_SIDE, bounds.getHeight()));
+    } else if (bounds.getHeight() > getMaxHeight()) {
+      zoom(getAdjustmentZoom(getMaxHeight(), bounds.getHeight()));
     }
   }
 

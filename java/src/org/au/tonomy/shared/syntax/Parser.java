@@ -32,6 +32,8 @@ public class Parser {
 
   private void advance() {
     cursor++;
+    while (getCurrent().is(Type.ETHER))
+      cursor++;
   }
 
   /**
