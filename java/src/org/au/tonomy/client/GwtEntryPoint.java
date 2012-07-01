@@ -44,7 +44,7 @@ public class GwtEntryPoint implements EntryPoint {
     root.add(new MainWidget(widget));
     WorldPresenter<Vec4, Mat4> presenter = new WorldPresenter<Vec4, Mat4>(world,
         viewport, widget);
-    // presenter.startAnimating();
+    presenter.startAnimating();
   }
 
   private static boolean isSupported(IWebGL webGlUtils) {
