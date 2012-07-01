@@ -4,8 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.au.tonomy.client.presentation.SourceManager;
-import org.au.tonomy.shared.syntax.Token;
-import org.au.tonomy.shared.syntax.Tokenizer;
 import org.au.tonomy.shared.util.Assert;
 
 import com.google.gwt.core.client.GWT;
@@ -21,16 +19,16 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FocusPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
 /**
  * HTML based source code editor.
  */
-public class CodeEditorWidget extends Composite implements SourceManager.IListener {
+public class EditorWidget extends Composite implements SourceManager.IListener {
 
-  private static ICodeEditorWidgetUiBinder BINDER = GWT .create(ICodeEditorWidgetUiBinder.class);
-  interface ICodeEditorWidgetUiBinder extends UiBinder<Widget, CodeEditorWidget> { }
+  private static IEditorWidgetUiBinder BINDER = GWT .create(IEditorWidgetUiBinder.class);
+  interface IEditorWidgetUiBinder extends UiBinder<Widget, EditorWidget> { }
 
   /**
    * A wrapper around native key events.
@@ -49,19 +47,20 @@ public class CodeEditorWidget extends Composite implements SourceManager.IListen
 
   }
 
-  @UiField FocusPanel display;
+  @UiField FlowPanel root;
+  @UiField FlowPanel display;
   @UiField TextArea overlay;
   private IListener listener = null;
 
-  private final LinkedList<SpanElement> lineSpans = new LinkedList<SpanElement>();
+  private final LinkedList<EditorLineWidget> lines = new LinkedList<EditorLineWidget>();
   private final SpanElement cursor;
 
-  public CodeEditorWidget() {
+  public EditorWidget() {
     initWidget(BINDER.createAndBindUi(this));
     configureEvents();
     cursor = Document.get().createSpanElement();
     cursor.setClassName(RESOURCES.css().cursor());
-    display.getElement().appendChild(cursor);
+    root.getElement().appendChild(cursor);
     overlay.getElement().setAttribute("contentEditable", "true");
   }
 
@@ -107,23 +106,9 @@ public class CodeEditorWidget extends Composite implements SourceManager.IListen
   }
 
   @Override
-  public void resetCursor(int row, int column) {
-    Assert.that(row < lineSpans.size());
-    lineSpans.get(row);
-  }
-
-  @Override
   public void onLineChanged(int row, String line) {
-    Assert.that(row < lineSpans.size());
-    SpanElement span = lineSpans.get(row);
-    span.setInnerText("");
-    List<Token> tokens = Tokenizer.tokenize(line);
-    for (Token token : tokens) {
-      SpanElement tokenSpan = Document.get().createSpanElement();
-      tokenSpan.setInnerText(token.getValue());
-      tokenSpan.addClassName(token.getCategory());
-      span.appendChild(tokenSpan);
-    }
+    Assert.that(row < lines.size());
+    lines.get(row).update(line);
   }
 
   @Override
@@ -132,17 +117,19 @@ public class CodeEditorWidget extends Composite implements SourceManager.IListen
   }
 
   private void appendLine(String value) {
-    SpanElement span = Document.get().createSpanElement();
-    span.addClassName(RESOURCES.css().lineSpan());
-    lineSpans.add(span);
-    display.getElement().appendChild(span);
-    onLineChanged(lineSpans.size() - 1, value);
+    EditorLineWidget span = new EditorLineWidget();
+    lines.add(span);
+    display.add(span);
+    onLineChanged(lines.size() - 1, value);
   }
 
   @Override
-  public void onCursorMoved(int row, int column) {
-    SpanElement lineSpan = lineSpans.get(row);
-    cursor.getStyle().setTop(lineSpan.getAbsoluteTop(), Unit.PX);
+  public void setCursor(int row, int column) {
+    Assert.that(row < lines.size());
+    EditorLineWidget lineSpan = lines.get(row);
+    cursor.getStyle().setTop(lineSpan.getContentTop(), Unit.PX);
+    int charWidth = lineSpan.getCharacterWidth();
+    cursor.getStyle().setLeft(charWidth * column, Unit.PX);
   }
 
   /**
@@ -154,13 +141,9 @@ public class CodeEditorWidget extends Composite implements SourceManager.IListen
 
     public String display();
 
-    public String lineSpan();
-
     public String cursor();
 
     public String overlay();
-
-    public String word();
 
   }
 
@@ -169,7 +152,7 @@ public class CodeEditorWidget extends Composite implements SourceManager.IListen
    */
   public interface Resources extends ClientBundle {
 
-    @Source("CodeEditorWidget.css")
+    @Source("EditorWidget.css")
     public Css css();
 
   }

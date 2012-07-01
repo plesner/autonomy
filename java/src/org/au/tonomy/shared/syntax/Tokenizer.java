@@ -101,6 +101,8 @@ public class Tokenizer {
       result = scanWord();
     } else if (isNumberStart(getCurrent())) {
       result = scanNumber();
+    } else if (getCurrent() == '.') {
+      result = scanOperation();
     } else if (isOperatorPart(getCurrent())) {
       result = scanOperator();
     } else if (getCurrent() == '$') {
@@ -143,6 +145,15 @@ public class Tokenizer {
       advance();
     String value = source.substring(start, cursor);
     return Token.ether(value);
+  }
+
+  private Token scanOperation() {
+    int start = cursor;
+    advance();
+    while (hasMore() && isWordPart(getCurrent()))
+      advance();
+    String value = source.substring(start, cursor);
+    return Token.operation(value);
   }
 
   /**

@@ -2,28 +2,25 @@
   position: relative;
   width: 300px;
   height: 200px;
+  top: 30px;
+  left: 30px;
 }
 
 .display {
   width: 300px;
   height: 200px;
   border: 1px dashed silver;
-  font-family: courier;
+  font-family: monospace;
   font-size: 10pt;
-}
-
-.lineSpan {
-  border: 1px dashed green;
-  display: block;
-  height: 1.1em;
 }
 
 .cursor {
   position: absolute;
   background: black;
-  height: 1.1em;
-  width: 2px;
+  height: 1em;
+  width: 1px;
   margin-top: 1px;
+  margin-left: 1px;
 }
 
 .overlay {
@@ -37,18 +34,4 @@
   opacity: 0;
   z-index: 1;
   resizeable: false;
-}
-
-@external .word, .number, .error;
-
-span.word {
-  font-weight: bold;
-}
-
-span.number {
-  text-decoration: underline;
-}
-
-span.error {
-  color: red;
 }

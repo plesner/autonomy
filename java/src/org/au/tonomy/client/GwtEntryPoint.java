@@ -7,7 +7,7 @@ import org.au.tonomy.client.webgl.util.IWebGL;
 import org.au.tonomy.client.webgl.util.Mat4;
 import org.au.tonomy.client.webgl.util.Vec4;
 import org.au.tonomy.client.webgl.util.WebGL;
-import org.au.tonomy.client.widget.CodeEditorWidget;
+import org.au.tonomy.client.widget.EditorWidget;
 import org.au.tonomy.client.widget.MainWidget;
 import org.au.tonomy.client.widget.NotSupportedWidget;
 import org.au.tonomy.client.widget.WorldWidget;
@@ -28,7 +28,7 @@ public class GwtEntryPoint implements EntryPoint {
     if (!isSupported(webGl)) {
       root.add(new NotSupportedWidget());
     } else if ("editor".equals(Window.Location.getParameter("test"))) {
-      CodeEditorWidget widget = new CodeEditorWidget();
+      EditorWidget widget = new EditorWidget();
       root.add(widget);
       new CodeEditorPresenter(widget);
     } else {

@@ -1,0 +1,30 @@
+.line {
+  display: block;
+  height: 1.1em;
+}
+
+.contents {
+  white-space: pre;
+}
+
+@external .word, .number, .error, .ident, .operation;
+
+span.word {
+  font-weight: bold;
+}
+
+span.number {
+  font-style: italic;
+}
+
+span.ident {
+  color: #444444;
+}
+
+span.operation {
+  font-style: italic;
+}
+
+span.error {
+  color: red;
+}

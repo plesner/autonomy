@@ -16,6 +16,7 @@ public class Token {
     NUMBER(null, "number"),
     IDENTIFIER(null, "identifier"),
     ETHER(null, "ether"),
+    OPERATION(null, "operation"),
     LPAREN("(", "punctuation"),
     RPAREN(")", "punctuation"),
     LBRACE("{", "punctuation"),
@@ -110,6 +111,13 @@ public class Token {
    */
   public static Token operator(String value) {
     return new Token(Type.OPERATOR, value);
+  }
+
+  /**
+   * Factory method for creating operators.
+   */
+  public static Token operation(String value) {
+    return new Token(Type.OPERATION, value);
   }
 
   /**

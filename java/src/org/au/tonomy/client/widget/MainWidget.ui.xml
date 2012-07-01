@@ -4,10 +4,10 @@
 	xmlns:t="urn:import:org.au.tonomy.client.widget">
   <ui:style src="MainWidget.css"></ui:style>
   <g:HorizontalPanel>
-    <t:CodeEditorWidget
+    <t:EditorWidget
         ui:field="editor"
         styleName="{style.editor}">
-    </t:CodeEditorWidget>
+    </t:EditorWidget>
     <t:WorldWidget
         ui:field="world"
         styleName="{style.world}">

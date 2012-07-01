@@ -11,8 +11,6 @@ public class SourceManager {
 
     public void resetContent(List<String> lines);
 
-    public void resetCursor(int row, int column);
-
     /**
      * Line 'row' was changed to be the specified value.
      */
@@ -26,7 +24,7 @@ public class SourceManager {
     /**
      * The cursor was move to a new position.
      */
-    public void onCursorMoved(int row, int column);
+    public void setCursor(int row, int column);
 
   }
 
@@ -77,7 +75,7 @@ public class SourceManager {
   private void doUpdateCursor(int row, int column) {
     this.cursorRow = row;
     this.cursorColumn = column;
-    getListener().onCursorMoved(row, column);
+    getListener().setCursor(row, column);
   }
 
   public void insertNewline() {
@@ -100,13 +98,13 @@ public class SourceManager {
    */
   public void resetListener() {
     getListener().resetContent(rows);
-    getListener().resetCursor(cursorRow, cursorColumn);
+    getListener().setCursor(cursorRow, cursorColumn);
   }
 
   public void moveCursor(int columnDelta, int rowDelta) {
     cursorRow = Math.min(Math.max(cursorRow + rowDelta, 0), rows.size() - 1);
-    cursorColumn = Math.min(Math.max(cursorColumn + columnDelta, 0), rows.get(cursorRow).length() - 1);
-    getListener().onCursorMoved(cursorRow, cursorColumn);
+    cursorColumn = Math.min(Math.max(cursorColumn + columnDelta, 0), rows.get(cursorRow).length());
+    getListener().setCursor(cursorRow, cursorColumn);
   }
 
 }

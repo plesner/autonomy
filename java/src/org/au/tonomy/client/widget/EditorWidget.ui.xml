@@ -1,9 +1,9 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:d="urn:import:com.google.gwt.dom.client">
-  <ui:with field="res" type="org.au.tonomy.client.widget.CodeEditorWidget.Resources"/>
-<g:FlowPanel styleName="{res.css.root}">
-  <g:FocusPanel ui:field="display" styleName="{res.css.display}"></g:FocusPanel>
+  <ui:with field="res" type="org.au.tonomy.client.widget.EditorWidget.Resources"/>
+<g:FlowPanel styleName="{res.css.root}" ui:field="root">
+  <g:FlowPanel ui:field="display" styleName="{res.css.display}"></g:FlowPanel>
   <g:TextArea ui:field="overlay" styleName="{res.css.overlay}"></g:TextArea>
 </g:FlowPanel>
 </ui:UiBinder>

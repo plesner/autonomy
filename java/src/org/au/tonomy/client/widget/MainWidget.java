@@ -14,7 +14,7 @@ public class MainWidget extends Composite {
   interface MainWidgetUiBinder extends UiBinder<Widget, MainWidget> { }
 
   @UiField(provided=true) WorldWidget world;
-  @UiField CodeEditorWidget editor;
+  @UiField EditorWidget editor;
 
   public MainWidget(WorldWidget world) {
     this.world = world;

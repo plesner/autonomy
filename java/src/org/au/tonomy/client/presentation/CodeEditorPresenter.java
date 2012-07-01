@@ -1,8 +1,8 @@
 package org.au.tonomy.client.presentation;
 
-import org.au.tonomy.client.widget.CodeEditorWidget;
-import org.au.tonomy.client.widget.CodeEditorWidget.IKeyEvent;
-import org.au.tonomy.client.widget.CodeEditorWidget.IListener;
+import org.au.tonomy.client.widget.EditorWidget;
+import org.au.tonomy.client.widget.EditorWidget.IKeyEvent;
+import org.au.tonomy.client.widget.EditorWidget.IListener;
 
 import com.google.gwt.event.dom.client.KeyCodes;
 
@@ -12,12 +12,12 @@ import com.google.gwt.event.dom.client.KeyCodes;
  * text is in the buffer, it simply does event plumbing and leaves it
  * to the manager to keep track of the buffer contents.
  */
-public class CodeEditorPresenter implements CodeEditorWidget.IListener {
+public class CodeEditorPresenter implements EditorWidget.IListener {
 
-  private final CodeEditorWidget editor;
+  private final EditorWidget editor;
   private final SourceManager manager = new SourceManager();
 
-  public CodeEditorPresenter(CodeEditorWidget editor) {
+  public CodeEditorPresenter(EditorWidget editor) {
     this.editor = editor;
     editor.attachListener(this);
     manager.attachListener(editor);
