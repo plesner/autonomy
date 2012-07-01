@@ -25,8 +25,8 @@ import org.au.tonomy.client.world.shader.IShaderBundle;
 import org.au.tonomy.shared.util.IRect;
 import org.au.tonomy.shared.world.Hex;
 import org.au.tonomy.shared.world.Hex.Corner;
-import org.au.tonomy.shared.world.Unit;
-import org.au.tonomy.shared.world.World;
+import org.au.tonomy.shared.world.WorldTrace;
+import org.au.tonomy.shared.world.WorldTrace.IUnitState;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
@@ -42,7 +42,6 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
   private final IWebGL webGlUtils;
   private final Viewport<Vec4, Mat4> viewport;
   private final Canvas canvas;
-  private final World world;
 
   private final Buffer hexVertices;
   private final Buffer unitVertices;
@@ -72,12 +71,10 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     return perspective.inverse();
   }
 
-  public WorldRenderer(IWebGL webGlUtils, Canvas canvas, World world,
-      Viewport<Vec4, Mat4> viewport) {
+  public WorldRenderer(IWebGL webGlUtils, Canvas canvas, Viewport<Vec4, Mat4> viewport) {
     this.webGlUtils = webGlUtils;
     this.viewport = viewport;
     this.canvas = canvas;
-    this.world = world;
     RenderingContext context = webGlUtils.create3DContext(canvas);
     Program shaderProgram = linkShaders(context);
     this.vertexAttribLocation = context.getAttribLocation(shaderProgram, "vertex");
@@ -184,7 +181,7 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     gl.drawArrays(gl.LINE_LOOP, 0, count);
   }-*/;
 
-  public void paint() {
+  public void paint(WorldTrace trace, double time) {
     RenderingContext gl = webGlUtils.create3DContext(canvas);
 
     // Clear the whole canvas and reset the perspective.
@@ -203,7 +200,7 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     Color ground = Color.create(.929, .749, .525, 1.0);
     setColors(gl, ground.getVector(), ground.adjust(Adjustment.DARKER).getVector());
     setScale(gl, 0.9, 0.9);
-    for (Hex hex : world.getGrid().getHexes(bounds))
+    for (Hex hex : trace.getWorld().getGrid().getHexes(bounds))
       fillAndStrokeArrayBuffer(gl, hex.getCenterX(), hex.getCenterY(), 6);
 
     // Draw the units.
@@ -213,9 +210,13 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     Color red = Color.create(.50, .0, .0, 1.0);
     setScale(gl, 0.5, 0.5);
     setColors(gl, red.getVector(), Color.BLACK.getVector());
-    for (Unit unit : world.getUnits()) {
-      Hex hex = unit.getLocation();
-      fillAndStrokeArrayBuffer(gl, hex.getCenterX(), hex.getCenterY(), 6);
+    for (IUnitState state : trace.getUnits(time)) {
+      Hex from = state.getFrom();
+      Hex to = state.getTo();
+      double p = state.getProgress();
+      double x = (to.getCenterX() * p) + (from.getCenterX() * (1 - p));
+      double y = (to.getCenterY() * p) + (from.getCenterY() * (1 - p));
+      fillAndStrokeArrayBuffer(gl, x, y, 6);
     }
 
     // Draw the viewport.

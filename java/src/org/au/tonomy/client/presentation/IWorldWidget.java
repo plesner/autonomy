@@ -41,7 +41,7 @@ public interface IWorldWidget<V4 extends IVector, M4 extends IMatrix<V4>> {
   /**
    * Repaints the world.
    */
-  public void refresh();
+  public void refresh(double time);
 
   public void showDragCursor();
 

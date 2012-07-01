@@ -10,7 +10,7 @@ import org.au.tonomy.client.webgl.util.Mat4;
 import org.au.tonomy.client.webgl.util.Vec4;
 import org.au.tonomy.client.widget.CanvasPlus.IResizeListener;
 import org.au.tonomy.shared.util.Assert;
-import org.au.tonomy.shared.world.World;
+import org.au.tonomy.shared.world.WorldTrace;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
@@ -35,16 +35,18 @@ public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
 
   @UiField CanvasPlus canvasWrapper;
 
+  private final WorldTrace trace;
   private final IWebGL webGlUtils;
   private final FrameRateMonitor frameRate = new FrameRateMonitor(30);
   private final WorldRenderer renderer;
   private boolean keepRunning = false;
   private IListener listener = null;
 
-  public WorldWidget(IWebGL webGlUtils, Viewport<Vec4, Mat4> viewport, World world) {
+  public WorldWidget(IWebGL webGlUtils, Viewport<Vec4, Mat4> viewport, WorldTrace trace) {
     initWidget(BINDER.createAndBindUi(this));
+    this.trace = trace;
     this.webGlUtils = webGlUtils;
-    this.renderer = new WorldRenderer(webGlUtils, getCanvas(), world, viewport);
+    this.renderer = new WorldRenderer(webGlUtils, getCanvas(), viewport);
     configureEvents();
   }
 
@@ -134,9 +136,9 @@ public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
     keepRunning = false;
   }
 
-  public void refresh() {
+  public void refresh(double time) {
     long startMs = System.currentTimeMillis();
-    renderer.paint();
+    renderer.paint(trace, time);
     long durationMs = System.currentTimeMillis() - startMs;
     frameRate.record(startMs, durationMs);
   }

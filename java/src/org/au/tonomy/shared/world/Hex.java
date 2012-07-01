@@ -141,4 +141,21 @@ public class Hex {
     return "<" + g + ", " + h + ">";
   }
 
+  @Override
+  public int hashCode() {
+    return (g << 8) ^ h;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    } else if (!(obj instanceof Hex)) {
+      return false;
+    } else {
+      Hex that = (Hex) obj;
+      return (this.g == that.g) && (this.h == that.h);
+    }
+  }
+
 }

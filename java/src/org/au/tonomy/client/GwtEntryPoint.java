@@ -12,6 +12,8 @@ import org.au.tonomy.client.widget.MainWidget;
 import org.au.tonomy.client.widget.NotSupportedWidget;
 import org.au.tonomy.client.widget.WorldWidget;
 import org.au.tonomy.shared.world.World;
+import org.au.tonomy.shared.world.WorldSnapshot;
+import org.au.tonomy.shared.world.WorldTrace;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.EntryPoint;
@@ -37,12 +39,15 @@ public class GwtEntryPoint implements EntryPoint {
   }
 
   private void startMain(IWebGL webGl, Panel root) {
-    World world = new World(24, 24);
+    World world = new World(9, 9);
+    WorldSnapshot initial = new WorldSnapshot(world);
+    initial.spawnUnit(4, 4);
+    WorldTrace trace = new WorldTrace(world, initial);
     Viewport<Vec4, Mat4> viewport = new Viewport<Vec4, Mat4>(world.getGrid());
-    WorldWidget widget = new WorldWidget(webGl, viewport, world);
+    WorldWidget widget = new WorldWidget(webGl, viewport, trace);
     viewport.setCamera(widget.getCamera());
     root.add(new MainWidget(widget));
-    WorldPresenter<Vec4, Mat4> presenter = new WorldPresenter<Vec4, Mat4>(world,
+    WorldPresenter<Vec4, Mat4> presenter = new WorldPresenter<Vec4, Mat4>(
         viewport, widget);
     presenter.startAnimating();
   }
