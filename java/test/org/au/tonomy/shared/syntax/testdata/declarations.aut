@@ -1,0 +1,16 @@
+def $f := 10;
+$test.assert_equals(10, $f);
+
+{
+  def $f := 12;
+  $test.assert_equals(12, $f);
+}
+
+$test.assert_equals(10, $f);
+
+def $g := {
+  def $h := 14;
+  $h;
+}
+
+$test.assert_equals(14, $g);

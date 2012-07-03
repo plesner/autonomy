@@ -52,7 +52,7 @@ public class Tokenizer {
    * Can this character occur after the first character of a word?
    */
   private static boolean isWordPart(char c) {
-    return Character.isLetter(c);
+    return Character.isLetter(c) || (c == '_');
   }
 
   /**
@@ -73,6 +73,13 @@ public class Tokenizer {
    * Returns true if the given operation can occur as part of an operator.
    */
   private static boolean isOperatorPart(char c) {
+    return isOperatorStart(c) || isWordStart(c);
+  }
+
+  /**
+   * Returns true if the given operation can occur as part of an operator.
+   */
+  private static boolean isOperatorStart(char c) {
     switch (c) {
     case '.': case '+': case '-': case '*': case '/': case '<': case '>':
     case '=':
@@ -101,9 +108,7 @@ public class Tokenizer {
       result = scanWord();
     } else if (isNumberStart(getCurrent())) {
       result = scanNumber();
-    } else if (getCurrent() == '.') {
-      result = scanOperation();
-    } else if (isOperatorPart(getCurrent())) {
+    } else if (isOperatorStart(getCurrent())) {
       result = scanOperator();
     } else if (getCurrent() == '$') {
       result = scanIdentifier();
@@ -111,30 +116,61 @@ public class Tokenizer {
       switch (getCurrent()) {
       case '(':
         result = Token.punctuation(Type.LPAREN);
+        advance();
         break;
       case ')':
         result = Token.punctuation(Type.RPAREN);
+        advance();
+        break;
+      case '[':
+        result = Token.punctuation(Type.LBRACK);
+        advance();
+        break;
+      case ']':
+        result = Token.punctuation(Type.RBRACK);
+        advance();
         break;
       case '{':
         result = Token.punctuation(Type.LBRACE);
+        advance();
         break;
       case '}':
         result = Token.punctuation(Type.RBRACE);
+        advance();
         break;
       case ';':
         result = Token.punctuation(Type.SEMI);
+        advance();
+        break;
+      case ',':
+        result = Token.punctuation(Type.COMMA);
+        advance();
         break;
       case '#':
         result = Token.punctuation(Type.HASH);
+        advance();
+        break;
+      case ':':
+        advance();
+        switch (getCurrent()) {
+        case '=':
+          result = Token.punctuation(Type.ASSIGN);
+          advance();
+          break;
+        default:
+          result = Token.punctuation(Type.COLON);
+          break;
+        }
         break;
       case '@':
         result = Token.punctuation(Type.AT);
+        advance();
         break;
       default:
         result = Token.error(getCurrent());
+        advance();
         break;
       }
-      advance();
     }
     return result;
   }
@@ -145,15 +181,6 @@ public class Tokenizer {
       advance();
     String value = source.substring(start, cursor);
     return Token.ether(value);
-  }
-
-  private Token scanOperation() {
-    int start = cursor;
-    advance();
-    while (hasMore() && isWordPart(getCurrent()))
-      advance();
-    String value = source.substring(start, cursor);
-    return Token.operation(value);
   }
 
   /**

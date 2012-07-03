@@ -5,25 +5,32 @@ package org.au.tonomy.shared.syntax;
  */
 public class Token {
 
+  private static final String PUNCT = "punctuation";
+
   /**
    * The different classes of tokens.
    */
   public enum Type {
 
-    WORD(null, "word"),
-    OPERATOR(null, "operator"),
-    ERROR(null, "error"),
-    NUMBER(null, "number"),
+    WORD      (null, "word"),
+    OPERATOR  (null, "operator"),
+    ERROR     (null, "error"),
+    EOF       (null, "eof"),
+    NUMBER    (null, "number"),
     IDENTIFIER(null, "identifier"),
-    ETHER(null, "ether"),
-    OPERATION(null, "operation"),
-    LPAREN("(", "punctuation"),
-    RPAREN(")", "punctuation"),
-    LBRACE("{", "punctuation"),
-    RBRACE("}", "punctuation"),
-    SEMI(";", "punctuation"),
-    HASH("#", "punctuation"),
-    AT("@", "punctuation");
+    ETHER     (null, "ether"),
+    LPAREN    ("(",  PUNCT),
+    RPAREN    (")",  PUNCT),
+    LBRACK    ("[",  PUNCT),
+    RBRACK    ("]",  PUNCT),
+    LBRACE    ("{",  PUNCT),
+    RBRACE    ("}",  PUNCT),
+    SEMI      (";",  PUNCT),
+    COMMA     (",",  PUNCT),
+    HASH      ("#",  PUNCT),
+    ASSIGN    (":=", PUNCT),
+    COLON     (":",  PUNCT),
+    AT        ("@",  PUNCT);
 
     private final String value;
     private final String category;
@@ -114,17 +121,17 @@ public class Token {
   }
 
   /**
-   * Factory method for creating operators.
-   */
-  public static Token operation(String value) {
-    return new Token(Type.OPERATION, value);
-  }
-
-  /**
    * Factory method for creating error tokens.
    */
   public static Token error(char value) {
     return new Token(Type.ERROR, Character.toString(value));
+  }
+
+  /**
+   * Factory method for creating eof tokens.
+   */
+  public static Token eof() {
+    return new Token(Type.EOF, null);
   }
 
   /**

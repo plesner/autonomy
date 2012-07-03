@@ -1,7 +1,6 @@
 package org.au.tonomy.shared.syntax;
 
 import java.util.Collection;
-import java.util.List;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
@@ -9,6 +8,11 @@ import junit.framework.TestCase;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
+import org.au.tonomy.shared.runtime.Executor;
+import org.au.tonomy.shared.runtime.IScope;
+import org.au.tonomy.shared.runtime.IValue;
+import org.au.tonomy.shared.runtime.JavaValue;
+import org.au.tonomy.shared.runtime.NullValue;
 import org.au.tonomy.shared.syntax.testdata.TestScript;
 import org.au.tonomy.shared.util.Exceptions;
 /**
@@ -37,6 +41,18 @@ public class AutUnitTest extends TestSuite {
   }
 
   /**
+   * Bridge class the provides access to the unit test methods.
+   */
+  public static class AUnit {
+    public IValue assert_equals(IScope scope, IValue a, IValue b) {
+      TestCase.assertEquals(a, b);
+      return NullValue.get();
+    }
+  }
+
+  public static final IValue JUNIT_WRAPPER = new JavaValue(new AUnit());
+
+  /**
    * Wrapper for a single test script.
    */
   private static class AutUnitTestCase extends TestCase {
@@ -49,14 +65,14 @@ public class AutUnitTest extends TestSuite {
     }
 
     private void runScript() {
-      String source = script.getSource();
-      List<Token> tokens = Tokenizer.tokenize(source);
-      MacroParser macros = new MacroParser();
+      Executor exec;
       try {
-        Ast ast = Parser.parse(macros, tokens);
+        exec = Compiler.compile(script.getSource());
       } catch (SyntaxError se) {
-        Exceptions.propagate(se);
+        throw Exceptions.propagate(se);
       }
+      exec.setGlobal("$test", JUNIT_WRAPPER);
+      exec.execute();
     }
 
     public void runAsJunit(TestResult result) {

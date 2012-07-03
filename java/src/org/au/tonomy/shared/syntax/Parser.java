@@ -1,8 +1,11 @@
 package org.au.tonomy.shared.syntax;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import org.au.tonomy.shared.runtime.IntegerValue;
 import org.au.tonomy.shared.syntax.MacroParser.State;
 import org.au.tonomy.shared.syntax.Token.Type;
 
@@ -11,15 +14,19 @@ import org.au.tonomy.shared.syntax.Token.Type;
  */
 public class Parser {
 
-  private static final Token EOF = Token.error('\0');
+  private static final Token EOF = Token.eof();
 
   private MacroParser macroParser;
   private final List<Token> tokens;
   private int cursor = 0;
+  private Token prev;
+  private Token current;
 
   private Parser(MacroParser macroParser, List<Token> tokens) {
     this.macroParser = macroParser;
     this.tokens = tokens;
+    current = EOF;
+    skipEther();
   }
 
   private boolean hasMore() {
@@ -27,13 +34,22 @@ public class Parser {
   }
 
   private Token getCurrent() {
-    return hasMore() ? tokens.get(cursor) : EOF;
+    return current;
+  }
+
+  private void skipEther() {
+    prev = current;
+    while (hasMore() && tokens.get(cursor).is(Type.ETHER))
+      cursor++;
+    if (hasMore())
+      current = tokens.get(cursor);
+    else
+      current = EOF;
   }
 
   private void advance() {
     cursor++;
-    while (getCurrent().is(Type.ETHER))
-      cursor++;
+    skipEther();
   }
 
   /**
@@ -50,14 +66,25 @@ public class Parser {
     }
   }
 
+  /**
+   * Skips over the current word which must have the specified value.
+   */
+  private void expectWord(String word) throws SyntaxError {
+    if (atWord(word)) {
+      advance();
+    } else {
+      throw newSyntaxError();
+    }
+  }
+
   private SyntaxError newSyntaxError() {
     return new SyntaxError(getCurrent());
   }
 
-  private Ast parseBlockBody() throws SyntaxError {
+  private Ast parseBlockBody(Type endMarker) throws SyntaxError {
     List<Ast> exprs = new ArrayList<Ast>();
-    while (hasMore() && !at(Type.RBRACE)) {
-      Ast next = parseStatement();
+    while (hasMore() && !at(endMarker)) {
+      Ast next = parseStatement(endMarker);
       exprs.add(next);
     }
     return Ast.Block.create(exprs);
@@ -65,6 +92,15 @@ public class Parser {
 
   private boolean at(Type type) {
     return getCurrent().is(type);
+  }
+
+  private boolean atWord(String value) {
+    Token current = getCurrent();
+    return current.is(Type.WORD) && value.equals(current.getValue());
+  }
+
+  private boolean lastWas(Type type) {
+    return prev.is(type);
   }
 
   private Ast parseExpression(boolean expectSemi) throws SyntaxError {
@@ -107,51 +143,101 @@ public class Parser {
     } else {
       // If we can't do anything we give up on macros and just parse
       // this as an atomic expression.
-      return parseAtomicExpression(expectSemi);
+      return parseCompactExpression(expectSemi);
     }
   }
 
+  /**
+   * Parse a compact expression like calls and indexing.
+   */
+  private Ast parseCompactExpression(boolean expectSemi) throws SyntaxError {
+    Ast result = parseAtomicExpression();
+    if (at(Type.OPERATOR)) {
+      String op = expect(Type.OPERATOR);
+      List<Ast> args;
+      if (at(Type.LPAREN)) {
+        args = parseArguments(Type.LPAREN, Type.RPAREN);
+      } else if (at(Type.LBRACK)) {
+        args = parseArguments(Type.LBRACK, Type.RBRACK);
+      } else {
+        args = Arrays.asList(parseAtomicExpression());
+      }
+      result = new Ast.Call(result, op, args);
+    }
+    checkSemi(expectSemi);
+    return result;
+  }
+
   private void checkSemi(boolean expectSemi) throws SyntaxError {
-    if (expectSemi)
+    if (expectSemi && !lastWas(Type.RBRACE))
       expect(Type.SEMI);
   }
 
-  private Ast parseStatement() throws SyntaxError {
-    return parseExpression(true);
+  private static final String DEF = "def";
+
+  private Ast parseStatement(Type endMarker) throws SyntaxError {
+    if (atWord(DEF)) {
+      return parseDefinition(endMarker);
+    } else {
+      return parseExpression(true);
+    }
   }
 
-  private Ast parseAtomicExpression(boolean expectSemi) throws SyntaxError {
+  private Ast parseDefinition(Type endMarker) throws SyntaxError {
+    expectWord(DEF);
+    String name = expect(Type.IDENTIFIER);
+    expect(Type.ASSIGN);
+    Ast value = parseExpression(true);
+    Ast body = parseBlockBody(endMarker);
+    return new Ast.Definition(name, value, body);
+  }
+
+  private Ast parseAtomicExpression() throws SyntaxError {
     switch (getCurrent().getType()) {
     case IDENTIFIER: {
       String word = expect(Type.IDENTIFIER);
-      checkSemi(expectSemi);
       return new Ast.Identifier(word);
     }
     case LPAREN: {
       expect(Type.LPAREN);
       Ast result = parseExpression(false);
       expect(Type.RPAREN);
-      checkSemi(expectSemi);
       return result;
     }
     case LBRACE: {
       expect(Type.LBRACE);
-      Ast result = parseBlockBody();
+      Ast result = parseBlockBody(Type.RBRACE);
       expect(Type.RBRACE);
       return result;
     }
     case NUMBER: {
       String value = expect(Type.NUMBER);
-      checkSemi(expectSemi);
-      return new Ast.Literal(Integer.parseInt(value));
+      return new Ast.Literal(IntegerValue.get(Integer.parseInt(value)));
     }
     default:
       throw newSyntaxError();
     }
   }
 
+  private List<Ast> parseArguments(Type start, Type end) throws SyntaxError {
+    expect(start);
+    if (at(end)) {
+      expect(end);
+      return Collections.<Ast>emptyList();
+    } else {
+      List<Ast> asts = new ArrayList<Ast>();
+      asts.add(parseExpression(false));
+      while (at(Type.COMMA)) {
+        expect(Type.COMMA);
+        asts.add(parseExpression(false));
+      }
+      expect(end);
+      return asts;
+    }
+  }
+
   public static Ast parse(MacroParser keywordParser, List<Token> tokens) throws SyntaxError {
-    return new Parser(keywordParser, tokens).parseBlockBody();
+    return new Parser(keywordParser, tokens).parseBlockBody(Type.EOF);
   }
 
 }
