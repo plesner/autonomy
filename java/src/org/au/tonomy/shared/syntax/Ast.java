@@ -31,6 +31,16 @@ public abstract class Ast {
 
   }
 
+  public static class Literal extends Ast {
+
+    private final Object value;
+
+    public Literal(Object value) {
+      this.value = value;
+    }
+
+  }
+
   /**
    * A sequence of expressions.
    */

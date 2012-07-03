@@ -32,9 +32,9 @@ public class TokenizerTest extends TestCase {
 
   @Test
   public void testScanning() {
-    runScanTest("for $i in 0 .. 10",
+    runScanTest("for $i in 0 -> 10",
         word("for"), identifier("$i"), word("in"),
-        number("0"), operator(".."), number("10"));
+        number("0"), operator("->"), number("10"));
     runScanTest("+ - * /",
         operator("+"), operator("-"), operator("*"), operator("/"));
     runScanTest("( ) { } ; # @", punctuation(Type.LPAREN), punctuation(Type.RPAREN),

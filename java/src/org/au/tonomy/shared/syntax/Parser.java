@@ -140,6 +140,11 @@ public class Parser {
       expect(Type.RBRACE);
       return result;
     }
+    case NUMBER: {
+      String value = expect(Type.NUMBER);
+      checkSemi(expectSemi);
+      return new Ast.Literal(Integer.parseInt(value));
+    }
     default:
       throw newSyntaxError();
     }
