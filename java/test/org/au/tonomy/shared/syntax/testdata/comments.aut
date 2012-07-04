@@ -1,0 +1,23 @@
+## Single line comment.
+
+## Multiple lines of comments.
+## Look, here's another.
+##
+#@ with some code inside too
+#@ and more code
+##
+## ending with a normal line.
+
+#@ A single code line
+
+#@ First some code
+## then some non-code
+#@ then some more code
+
+#[
+The beginning of a multiline comment.
+
+Some more multiline.
+
+Ok now we're done.
+#]

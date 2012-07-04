@@ -35,6 +35,18 @@ public class Tokenizer {
   }
 
   /**
+   * Returns true if we're at the second character of a pair (that is,
+   * we're not at the very beginning or end) and that pair is different
+   * from the specified values.
+   */
+  private boolean atDifferentPair(char first, char second) {
+    boolean isInsideSource = hasMore() && (cursor > 0);
+    return isInsideSource
+        && ((source.charAt(cursor - 1) != first)
+            || getCurrent() != second);
+  }
+
+  /**
    * Advances to the next character.
    */
   private void advance() {
@@ -97,6 +109,13 @@ public class Tokenizer {
   }
 
   /**
+   * Does this character terminate end-of-line comments?
+   */
+  private static boolean isNewline(char c) {
+    return (c == '\n') || (c == '\r') || (c == '\f');
+  }
+
+  /**
    * Advances over the next token, returning the token that was skipped.
    */
   private Token scanNext() {
@@ -110,10 +129,11 @@ public class Tokenizer {
       result = scanNumber();
     } else if (isOperatorStart(getCurrent())) {
       result = scanOperator();
-    } else if (getCurrent() == '$') {
-      result = scanIdentifier();
     } else {
       switch (getCurrent()) {
+      case '$':
+        result = scanIdentifier();
+        break;
       case '(':
         result = Token.punctuation(Type.LPAREN);
         advance();
@@ -147,8 +167,18 @@ public class Tokenizer {
         advance();
         break;
       case '#':
-        result = Token.punctuation(Type.HASH);
         advance();
+        switch (getCurrent()) {
+        case '#': case '@':
+          result = scanEndOfLineComment(cursor - 1);
+          break;
+        case '[':
+          result = scanBlockComment(cursor - 1);
+          break;
+        default:
+          result = Token.punctuation(Type.HASH);
+          break;
+        }
         break;
       case ':':
         advance();
@@ -178,6 +208,24 @@ public class Tokenizer {
   private Token scanEther() {
     int start = cursor;
     while (hasMore() && isSpace(getCurrent()))
+      advance();
+    String value = source.substring(start, cursor);
+    return Token.ether(value);
+  }
+
+  private Token scanEndOfLineComment(int start) {
+    while (hasMore() && !isNewline(getCurrent()))
+      advance();
+    String value = source.substring(start, cursor);
+    return Token.ether(value);
+  }
+
+  private Token scanBlockComment(int start) {
+    while (atDifferentPair('#', ']'))
+      advance();
+    // If we reached the end we're at the final ']' so we advance past
+    // it.
+    if (hasMore())
       advance();
     String value = source.substring(start, cursor);
     return Token.ether(value);

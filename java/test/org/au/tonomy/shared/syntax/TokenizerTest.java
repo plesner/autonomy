@@ -19,11 +19,21 @@ import org.junit.Test;
 public class TokenizerTest extends TestCase {
 
   private void runScanTest(String str, Token... tokens) {
+    runScanTest(true, str, tokens);
+  }
+
+  private void runRawScanTest(String str, Token... tokens) {
+    runScanTest(false, str, tokens);
+  }
+
+  private void runScanTest(boolean insertEther, String str, Token[] tokens) {
     List<Token> expected = new ArrayList<Token>();
     boolean first = true;
     for (Token token : tokens) {
-      if (first) first = false;
-      else expected.add(ether(" "));
+      if (insertEther) {
+        if (first) first = false;
+        else expected.add(ether(" "));
+      }
       expected.add(token);
     }
     List<Token> found = Tokenizer.tokenize(str);
@@ -40,6 +50,8 @@ public class TokenizerTest extends TestCase {
     runScanTest("( ) { } ; # @", punctuation(Type.LPAREN), punctuation(Type.RPAREN),
         punctuation(Type.LBRACE), punctuation(Type.RBRACE),
         punctuation(Type.SEMI), punctuation(Type.HASH), punctuation(Type.AT));
+    runRawScanTest("## foo", ether("## foo"));
+    runRawScanTest("## foo\n## bar", ether("## foo"), ether("\n"), ether("## bar"));
   }
 
 }

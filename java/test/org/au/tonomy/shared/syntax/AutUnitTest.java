@@ -58,6 +58,19 @@ public class AutUnitTest extends TestSuite {
           return NullValue.get();
         }
       });
+      addMethod(".assert_false", new IMethod<TestWrapper>() {
+        @Override
+        public IValue invoke(TestWrapper self, IValue[] args) {
+          TestCase.assertFalse(args[0].isTruthy());
+          return NullValue.get();
+        }
+      });
+      addMethod(".break", new IMethod<TestWrapper>() {
+        @Override
+        public IValue invoke(TestWrapper self, IValue[] args) {
+          return NullValue.get();
+        }
+      });
     }};
 
     @Override
