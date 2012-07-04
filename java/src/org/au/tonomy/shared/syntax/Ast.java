@@ -1,8 +1,8 @@
 package org.au.tonomy.shared.syntax;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import org.au.tonomy.shared.runtime.Context;
 import org.au.tonomy.shared.runtime.IScope;
 import org.au.tonomy.shared.runtime.IValue;
 import org.au.tonomy.shared.runtime.NullValue;
@@ -19,7 +19,7 @@ public abstract class Ast {
   /**
    * Executes this syntax in the given scope.
    */
-  public abstract IValue run(IScope scope);
+  public abstract IValue run(IScope scope, Context context);
 
   /**
    * An identifier reference.
@@ -38,8 +38,8 @@ public abstract class Ast {
     }
 
     @Override
-    public IValue run(IScope scope) {
-      return scope.getValue(name);
+    public IValue run(IScope scope, Context context) {
+      return scope.getValue(name, context);
     }
 
   }
@@ -53,7 +53,7 @@ public abstract class Ast {
     }
 
     @Override
-    public IValue run(IScope scope) {
+    public IValue run(IScope scope, Context context) {
       return value;
     }
 
@@ -81,10 +81,10 @@ public abstract class Ast {
     }
 
     @Override
-    public IValue run(IScope scope) {
+    public IValue run(IScope scope, Context context) {
       IValue result = null;
       for (int i = 0; i < children.size(); i++)
-        result = children.get(i).run(scope);
+        result = children.get(i).run(scope, context);
       return result;
     }
 
@@ -108,12 +108,12 @@ public abstract class Ast {
     }
 
     @Override
-    public IValue run(IScope scope) {
-      IValue recvValue = receiver.run(scope);
-      List<IValue> argValues = new ArrayList<IValue>(args.size());
-      for (Ast arg : args)
-        argValues.add(arg.run(scope));
-      return recvValue.invoke(op, argValues, scope);
+    public IValue run(IScope scope, Context context) {
+      IValue recvValue = receiver.run(scope, context);
+      IValue[] argValues = new IValue[args.size()];
+      for (int i = 0; i < args.size(); i++)
+        argValues[i] = args.get(i).run(scope, context);
+      return recvValue.invoke(op, argValues);
     }
 
   }
@@ -152,7 +152,7 @@ public abstract class Ast {
     }
 
     @Override
-    public IValue run(IScope scope) {
+    public IValue run(IScope scope, Context context) {
       return null;
     }
 
@@ -187,7 +187,7 @@ public abstract class Ast {
     }
 
     @Override
-    public IValue run(IScope scope) {
+    public IValue run(IScope scope, Context context) {
       return null;
     }
 
@@ -206,14 +206,14 @@ public abstract class Ast {
     }
 
     @Override
-    public IValue run(final IScope scope) {
-      final IValue v = value.run(scope);
+    public IValue run(final IScope scope, Context outer) {
+      final IValue v = value.run(scope, outer);
       return body.run(new IScope() {
         @Override
-        public IValue getValue(String n) {
-          return name.equals(n) ? v : scope.getValue(n);
+        public IValue getValue(String n, Context inner) {
+          return name.equals(n) ? v : scope.getValue(n, inner);
         }
-      });
+      }, outer);
     }
 
   }

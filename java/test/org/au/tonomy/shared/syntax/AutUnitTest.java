@@ -8,10 +8,11 @@ import junit.framework.TestCase;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
+import org.au.tonomy.shared.runtime.AbstractValue;
+import org.au.tonomy.shared.runtime.Context;
 import org.au.tonomy.shared.runtime.Executor;
-import org.au.tonomy.shared.runtime.IScope;
 import org.au.tonomy.shared.runtime.IValue;
-import org.au.tonomy.shared.runtime.JavaValue;
+import org.au.tonomy.shared.runtime.MethodRegister;
 import org.au.tonomy.shared.runtime.NullValue;
 import org.au.tonomy.shared.syntax.testdata.TestScript;
 import org.au.tonomy.shared.util.Exceptions;
@@ -40,17 +41,33 @@ public class AutUnitTest extends TestSuite {
     return new AutUnitTest(TestScript.getAll());
   }
 
-  /**
-   * Bridge class the provides access to the unit test methods.
-   */
-  public static class AUnit {
-    public IValue assert_equals(IScope scope, IValue a, IValue b) {
-      TestCase.assertEquals(a, b);
-      return NullValue.get();
+  public static class TestWrapper extends AbstractValue {
+
+    private static final MethodRegister<TestWrapper> METHODS = new MethodRegister<TestWrapper>() {{
+      addMethod(".assert_equals", new IMethod<TestWrapper>() {
+        @Override
+        public IValue invoke(TestWrapper self, IValue[] args) {
+          TestCase.assertEquals(args[0], args[1]);
+          return NullValue.get();
+        }
+      });
+      addMethod(".assert_true", new IMethod<TestWrapper>() {
+        @Override
+        public IValue invoke(TestWrapper self, IValue[] args) {
+          TestCase.assertTrue(args[0].isTruthy());
+          return NullValue.get();
+        }
+      });
+    }};
+
+    @Override
+    public IValue invoke(String name, IValue[] args) {
+      return METHODS.invoke(name, this, args);
     }
+
   }
 
-  public static final IValue JUNIT_WRAPPER = new JavaValue(new AUnit());
+  public static final IValue JUNIT_WRAPPER = new TestWrapper();
 
   /**
    * Wrapper for a single test script.
@@ -71,8 +88,9 @@ public class AutUnitTest extends TestSuite {
       } catch (SyntaxError se) {
         throw Exceptions.propagate(se);
       }
-      exec.setGlobal("$test", JUNIT_WRAPPER);
-      exec.execute();
+      Context context = new Context();
+      context.bind("$test", JUNIT_WRAPPER);
+      exec.execute(context);
     }
 
     public void runAsJunit(TestResult result) {
@@ -81,7 +99,7 @@ public class AutUnitTest extends TestSuite {
         this.runScript();
       } catch (AssertionFailedError afe) {
         result.addFailure(this, afe);
-      } catch (RuntimeException re) {
+      } catch (Throwable re) {
         result.addError(this, re);
       } finally {
         result.endTest(this);
@@ -91,5 +109,3 @@ public class AutUnitTest extends TestSuite {
   }
 
 }
-
-

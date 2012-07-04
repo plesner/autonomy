@@ -1,30 +1,29 @@
 package org.au.tonomy.shared.runtime;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.au.tonomy.shared.syntax.Ast;
-
+/**
+ * A convenience wrapper for executing an ast.
+ */
 public class Executor {
 
+  private static final IScope BOTTOM = new IScope() {
+    @Override
+    public IValue getValue(String name, Context context) {
+      return context.getGlobal(name);
+    }
+  };
+
   private final Ast main;
-  private final Map<String, IValue> globals = new HashMap<String, IValue>();
 
   public Executor(Ast main) {
     this.main = main;
   }
 
-  public void setGlobal(String name, IValue value) {
-    globals.put(name, value);
-  }
-
-  public IValue execute() {
-    return main.run(new IScope() {
-      @Override
-      public IValue getValue(String name) {
-        return globals.get(name);
-      }
-    });
+  /**
+   * Executes the ast in the given context.
+   */
+  public IValue execute(Context context) {
+    return main.run(BOTTOM, context);
   }
 
 }

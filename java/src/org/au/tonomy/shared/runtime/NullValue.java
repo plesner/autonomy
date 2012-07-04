@@ -1,11 +1,14 @@
 package org.au.tonomy.shared.runtime;
 
-import java.util.List;
+
 
 /**
  * The singleton null value type.
  */
-public class NullValue implements IValue {
+public class NullValue extends AbstractValue {
+
+  private static final MethodRegister<NullValue> METHODS = new MethodRegister<NullValue>() {{
+  }};
 
   private static final NullValue INSTANCE = new NullValue();
 
@@ -21,8 +24,8 @@ public class NullValue implements IValue {
   }
 
   @Override
-  public IValue invoke(String method, List<IValue> args, IScope scope) {
-    return NullValue.get();
+  public IValue invoke(String name, IValue[] args) {
+    return METHODS.invoke(name, this, args);
   }
 
 }

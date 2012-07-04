@@ -1,8 +1,41 @@
 package org.au.tonomy.shared.runtime;
 
-import java.util.List;
 
-public class IntegerValue implements IValue {
+
+public class IntegerValue extends AbstractValue {
+
+  private static final MethodRegister<IntegerValue> METHODS = new MethodRegister<IntegerValue>() {{
+    addMethod("+", new IMethod<IntegerValue>() {
+      @Override
+      public IValue invoke(IntegerValue self, IValue[] args) {
+        return IntegerValue.get(self.value + ((IntegerValue) args[0]).value);
+      }
+    });
+    addMethod("-", new IMethod<IntegerValue>() {
+      @Override
+      public IValue invoke(IntegerValue self, IValue[] args) {
+        return IntegerValue.get(self.value - ((IntegerValue) args[0]).value);
+      }
+    });
+    addMethod("*", new IMethod<IntegerValue>() {
+      @Override
+      public IValue invoke(IntegerValue self, IValue[] args) {
+        return IntegerValue.get(self.value * ((IntegerValue) args[0]).value);
+      }
+    });
+    addMethod("<", new IMethod<IntegerValue>() {
+      @Override
+      public IValue invoke(IntegerValue self, IValue[] args) {
+        return BooleanValue.get(self.value < ((IntegerValue) args[0]).value);
+      }
+    });
+    addMethod("=", new IMethod<IntegerValue>() {
+      @Override
+      public IValue invoke(IntegerValue self, IValue[] args) {
+        return BooleanValue.get(self.value == ((IntegerValue) args[0]).value);
+      }
+    });
+  }};
 
   private final int value;
 
@@ -15,13 +48,13 @@ public class IntegerValue implements IValue {
   }
 
   @Override
-  public String toString() {
-    return Integer.toString(value);
+  public IValue invoke(String method, IValue[] args) {
+    return METHODS.invoke(method, this, args);
   }
 
   @Override
-  public IValue invoke(String method, List<IValue> args, IScope scope) {
-    return NullValue.get();
+  public String toString() {
+    return Integer.toString(value);
   }
 
   @Override
