@@ -7,7 +7,7 @@ import org.au.tonomy.shared.syntax.Ast;
 public class LambdaValue extends AbstractValue {
 
   private static final MethodRegister<LambdaValue> METHODS = new MethodRegister<LambdaValue>() {{
-    addMethod(".call", new IMethod<LambdaValue>() {
+    addMethod("()", new IMethod<LambdaValue>() {
       @Override
       public IValue invoke(final LambdaValue self, final IValue[] args) {
         return self.body.run(self.context, new IScope() {

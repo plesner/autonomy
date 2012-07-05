@@ -1,32 +1,38 @@
 def $f0 := (fn => 8);
-$test.assert_equals(8, $f0.call());
+$test.assert_equals(8, $f0());
 
 def $f1 := (fn => fn => 9);
-$test.assert_equals(9, ($f1.call()).call());
+$test.assert_equals(9, ($f1())());
 
 def $f2 := { def $x := 4; fn => $x; }
-$test.assert_equals(4, $f2.call());
+$test.assert_equals(4, $f2());
 
 def $y := 7;
 def $f3 := (fn => $y);
-$test.assert_equals(7, $f3.call());
+$test.assert_equals(7, $f3());
 
 {
   def $y := 8;
-  $test.assert_equals(7, $f3.call());
+  $test.assert_equals(7, $f3());
 }
 
 def $f4 := fn () => 1;
-$test.assert_equals(1, $f4.call());
+$test.assert_equals(1, $f4());
 
 def $f5 := fn ($a) => $a + 1;
-$test.assert_equals(6, $f5.call(5));
+$test.assert_equals(6, $f5(5));
 
 def $f6 := fn ($a, $b) => $a - 1;
-$test.assert_equals(7, $f6.call(8, 0));
+$test.assert_equals(7, $f6(8, 0));
 
 def $f7 := fn ($a, $b) => $b * 2;
-$test.assert_equals(18, $f7.call(5, 9));
+$test.assert_equals(18, $f7(5, 9));
 
 def $f8 := fn ($a, $b, $c, $d, $e) => $d + $e;
-$test.assert_equals(9, $f8.call(1, 2, 3, 4, 5));
+$test.assert_equals(9, $f8(1, 2, 3, 4, 5));
+
+def $f9 := fn ($x) {
+  def $y := $x + $x;
+  $x + $y;
+}
+$test.assert_equals(18, $f9(6));

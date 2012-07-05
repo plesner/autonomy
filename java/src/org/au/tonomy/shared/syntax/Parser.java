@@ -135,8 +135,13 @@ public class Parser {
   private Ast parseLambda(boolean expectSemi) throws SyntaxError {
     expectWord("fn");
     List<String> params = parseParameters();
-    expectOperator("=>");
-    Ast body = parseExpression(expectSemi);
+    Ast body;
+    if (atOperator("=>")) {
+      expectOperator("=>");
+      body = parseExpression(expectSemi);
+    } else {
+      body = parseBlockExpression();
+    }
     return new Lambda(params, body);
   }
 
@@ -218,6 +223,12 @@ public class Parser {
         args = Arrays.asList(parseExpression(false));
       }
       result = new Ast.Call(result, op, args);
+    } else if (at(Type.LPAREN)) {
+      List<Ast> args = parseArguments(Type.LPAREN, Type.RPAREN);
+      result = new Ast.Call(result, "()", args);
+    } else if (at(Type.LBRACK)) {
+      List<Ast> args = parseArguments(Type.LBRACK, Type.RBRACK);
+      result = new Ast.Call(result, "[]", args);
     }
     checkSemi(expectSemi);
     return result;
@@ -245,6 +256,13 @@ public class Parser {
     return new Ast.Definition(name, value, body);
   }
 
+  private Ast parseBlockExpression() throws SyntaxError {
+    expect(Type.LBRACE);
+    Ast result = parseBlockBody(Type.RBRACE);
+    expect(Type.RBRACE);
+    return result;
+  }
+
   private Ast parseAtomicExpression() throws SyntaxError {
     switch (getCurrent().getType()) {
     case IDENTIFIER: {
@@ -258,10 +276,7 @@ public class Parser {
       return result;
     }
     case LBRACE: {
-      expect(Type.LBRACE);
-      Ast result = parseBlockBody(Type.RBRACE);
-      expect(Type.RBRACE);
-      return result;
+      return parseBlockExpression();
     }
     case LBRACK: {
       List<Ast> elms = parseArguments(Type.LBRACK, Type.RBRACK);

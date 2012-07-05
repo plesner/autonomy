@@ -5,7 +5,7 @@ package org.au.tonomy.shared.runtime;
 public class TupleValue extends AbstractValue {
 
   private static final MethodRegister<TupleValue> METHODS = new MethodRegister<TupleValue>() {{
-    addMethod(".get[]", new IMethod<TupleValue>() {
+    addMethod("[]", new IMethod<TupleValue>() {
       @Override
       public IValue invoke(TupleValue self, IValue[] args) {
         return self.elms[args[0].getIntValue()];
