@@ -160,7 +160,7 @@ public class Parser {
       } else if (at(Type.LBRACK)) {
         args = parseArguments(Type.LBRACK, Type.RBRACK);
       } else {
-        args = Arrays.asList(parseAtomicExpression());
+        args = Arrays.asList(parseExpression(false));
       }
       result = new Ast.Call(result, op, args);
     }

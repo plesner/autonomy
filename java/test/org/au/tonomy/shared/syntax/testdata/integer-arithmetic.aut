@@ -1,5 +1,6 @@
 $test.assert_equals(1, 1);
 $test.assert_equals(2, 1 + 1);
+$test.assert_equals(3, 1 + 1 + 1);
 $test.assert_equals(4, 9 - 5);
 $test.assert_equals(42, 7 * 6);
 $test.assert_true(1 < 2);

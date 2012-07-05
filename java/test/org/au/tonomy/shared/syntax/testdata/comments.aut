@@ -14,10 +14,10 @@
 ## then some non-code
 #@ then some more code
 
-#[
+#{
 The beginning of a multiline comment.
 
 Some more multiline.
 
 Ok now we're done.
-#]
+#}
