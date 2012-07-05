@@ -1,0 +1,18 @@
+def $f0 := (fn => 8);
+$test.assert_equals(8, $f0.call());
+
+def $f1 := (fn => fn => 9);
+$test.assert_equals(9, ($f1.call()).call());
+
+def $f2 := { def $x := 4; fn => $x; }
+$test.assert_equals(4, $f2.call());
+
+def $y := 7;
+def $f3 := (fn => $y);
+$test.assert_equals(7, $f3.call());
+
+{
+  def $y := 8;
+  $test.assert_equals(7, $f3.call());
+}
+

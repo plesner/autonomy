@@ -5,6 +5,7 @@ import java.util.List;
 import org.au.tonomy.shared.runtime.Context;
 import org.au.tonomy.shared.runtime.IScope;
 import org.au.tonomy.shared.runtime.IValue;
+import org.au.tonomy.shared.runtime.LambdaValue;
 import org.au.tonomy.shared.runtime.NullValue;
 import org.au.tonomy.shared.runtime.TupleValue;
 import org.au.tonomy.shared.syntax.MacroParser.Component;
@@ -193,6 +194,24 @@ public abstract class Ast {
       for (int i = 0; i < asts.size(); i++)
         values[i] = asts.get(i).run(scope, context);
       return new TupleValue(values);
+    }
+
+  }
+
+  /**
+   * A function closure.
+   */
+  public static class Lambda extends Ast {
+
+    private final Ast body;
+
+    public Lambda(Ast body) {
+      this.body = body;
+    }
+
+    @Override
+    public IValue run(IScope scope, Context context) {
+      return new LambdaValue(body, scope, context);
     }
 
   }

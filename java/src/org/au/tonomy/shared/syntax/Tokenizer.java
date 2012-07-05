@@ -57,14 +57,14 @@ public class Tokenizer {
    * Can this character occur first in a word?
    */
   private static boolean isWordStart(char c) {
-    return isWordPart(c);
+    return Character.isLetter(c) || (c == '_');
   }
 
   /**
    * Can this character occur after the first character of a word?
    */
   private static boolean isWordPart(char c) {
-    return Character.isLetter(c) || (c == '_');
+    return isWordStart(c) || Character.isDigit(c);
   }
 
   /**

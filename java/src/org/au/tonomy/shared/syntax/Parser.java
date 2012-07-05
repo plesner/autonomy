@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.au.tonomy.shared.runtime.IntegerValue;
+import org.au.tonomy.shared.syntax.Ast.Lambda;
 import org.au.tonomy.shared.syntax.Ast.Tuple;
 import org.au.tonomy.shared.syntax.MacroParser.State;
 import org.au.tonomy.shared.syntax.Token.Type;
@@ -14,6 +15,9 @@ import org.au.tonomy.shared.syntax.Token.Type;
  * Parses a sequence of tokens into a syntax tree.
  */
 public class Parser {
+
+  private static final String DEF = "def";
+  private static final String FN = "fn";
 
   private static final Token EOF = Token.eof();
 
@@ -78,6 +82,17 @@ public class Parser {
     }
   }
 
+  /**
+   * Skips over the current operator which must have the specified value.
+   */
+  private void expectOperator(String value) throws SyntaxError {
+    if (atOperator(value)) {
+      advance();
+    } else {
+      throw newSyntaxError();
+    }
+  }
+
   private SyntaxError newSyntaxError() {
     return new SyntaxError(getCurrent());
   }
@@ -100,12 +115,28 @@ public class Parser {
     return current.is(Type.WORD) && value.equals(current.getValue());
   }
 
+  private boolean atOperator(String value) {
+    Token current = getCurrent();
+    return current.is(Type.OPERATOR) && value.equals(current.getValue());
+  }
+
   private boolean lastWas(Type type) {
     return prev.is(type);
   }
 
   private Ast parseExpression(boolean expectSemi) throws SyntaxError {
-    return parseMacroExpression(expectSemi);
+    if (atWord(FN)) {
+      return parseLambda(expectSemi);
+    } else {
+      return parseMacroExpression(expectSemi);
+    }
+  }
+
+  private Ast parseLambda(boolean expectSemi) throws SyntaxError {
+    expectWord("fn");
+    expectOperator("=>");
+    Ast body = parseExpression(expectSemi);
+    return new Lambda(body);
   }
 
   /**
@@ -174,8 +205,6 @@ public class Parser {
     if (expectSemi && !lastWas(Type.RBRACE))
       expect(Type.SEMI);
   }
-
-  private static final String DEF = "def";
 
   private Ast parseStatement(Type endMarker) throws SyntaxError {
     if (atWord(DEF)) {
