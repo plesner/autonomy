@@ -8,31 +8,31 @@ public class IntegerValue extends AbstractValue {
     addMethod("+", new IMethod<IntegerValue>() {
       @Override
       public IValue invoke(IntegerValue self, IValue[] args) {
-        return IntegerValue.get(self.value + ((IntegerValue) args[0]).value);
+        return IntegerValue.get(self.value + args[0].getIntValue());
       }
     });
     addMethod("-", new IMethod<IntegerValue>() {
       @Override
       public IValue invoke(IntegerValue self, IValue[] args) {
-        return IntegerValue.get(self.value - ((IntegerValue) args[0]).value);
+        return IntegerValue.get(self.value - args[0].getIntValue());
       }
     });
     addMethod("*", new IMethod<IntegerValue>() {
       @Override
       public IValue invoke(IntegerValue self, IValue[] args) {
-        return IntegerValue.get(self.value * ((IntegerValue) args[0]).value);
+        return IntegerValue.get(self.value * args[0].getIntValue());
       }
     });
     addMethod("<", new IMethod<IntegerValue>() {
       @Override
       public IValue invoke(IntegerValue self, IValue[] args) {
-        return BooleanValue.get(self.value < ((IntegerValue) args[0]).value);
+        return BooleanValue.get(self.value < args[0].getIntValue());
       }
     });
     addMethod("=", new IMethod<IntegerValue>() {
       @Override
       public IValue invoke(IntegerValue self, IValue[] args) {
-        return BooleanValue.get(self.value == ((IntegerValue) args[0]).value);
+        return BooleanValue.get(self.value == args[0].getIntValue());
       }
     });
   }};
@@ -45,6 +45,11 @@ public class IntegerValue extends AbstractValue {
 
   public static IntegerValue get(int value) {
     return new IntegerValue(value);
+  }
+
+  @Override
+  public int getIntValue() {
+    return value;
   }
 
   @Override

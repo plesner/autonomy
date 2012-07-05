@@ -7,4 +7,9 @@ public abstract class AbstractValue implements IValue {
     return false;
   }
 
+  @Override
+  public int getIntValue() {
+    throw new UnsupportedOperationException();
+  }
+
 }

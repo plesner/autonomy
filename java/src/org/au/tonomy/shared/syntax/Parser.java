@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.au.tonomy.shared.runtime.IntegerValue;
+import org.au.tonomy.shared.syntax.Ast.Tuple;
 import org.au.tonomy.shared.syntax.MacroParser.State;
 import org.au.tonomy.shared.syntax.Token.Type;
 
@@ -158,6 +159,7 @@ public class Parser {
       if (at(Type.LPAREN)) {
         args = parseArguments(Type.LPAREN, Type.RPAREN);
       } else if (at(Type.LBRACK)) {
+        op += "[]";
         args = parseArguments(Type.LBRACK, Type.RBRACK);
       } else {
         args = Arrays.asList(parseExpression(false));
@@ -209,6 +211,10 @@ public class Parser {
       Ast result = parseBlockBody(Type.RBRACE);
       expect(Type.RBRACE);
       return result;
+    }
+    case LBRACK: {
+      List<Ast> elms = parseArguments(Type.LBRACK, Type.RBRACK);
+      return new Tuple(elms);
     }
     case NUMBER: {
       String value = expect(Type.NUMBER);

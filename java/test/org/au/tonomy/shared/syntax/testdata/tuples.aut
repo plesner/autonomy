@@ -1,0 +1,5 @@
+def $t := [3, 2, 1];
+$test.assert_equals(3, $t.length());
+$test.assert_equals(3, $t.get[0]);
+$test.assert_equals(2, $t.get[1]);
+$test.assert_equals(1, $t.get[2]);

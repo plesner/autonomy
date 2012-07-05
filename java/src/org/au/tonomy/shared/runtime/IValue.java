@@ -16,4 +16,10 @@ public interface IValue {
    */
   public boolean isTruthy();
 
+  /**
+   * Returns the integer value of this value if this is an integer,
+   * otherwise throws an exception.
+   */
+  public int getIntValue();
+
 }

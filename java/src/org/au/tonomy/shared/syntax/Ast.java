@@ -6,6 +6,7 @@ import org.au.tonomy.shared.runtime.Context;
 import org.au.tonomy.shared.runtime.IScope;
 import org.au.tonomy.shared.runtime.IValue;
 import org.au.tonomy.shared.runtime.NullValue;
+import org.au.tonomy.shared.runtime.TupleValue;
 import org.au.tonomy.shared.syntax.MacroParser.Component;
 import org.au.tonomy.shared.syntax.MacroParser.Placeholder;
 
@@ -188,7 +189,10 @@ public abstract class Ast {
 
     @Override
     public IValue run(IScope scope, Context context) {
-      return null;
+      IValue[] values = new IValue[asts.size()];
+      for (int i = 0; i < asts.size(); i++)
+        values[i] = asts.get(i).run(scope, context);
+      return new TupleValue(values);
     }
 
   }
