@@ -23,7 +23,7 @@ public class Executor {
    * Executes the ast in the given context.
    */
   public IValue execute(Context context) {
-    return main.run(BOTTOM, context);
+    return main.run(context, BOTTOM);
   }
 
 }

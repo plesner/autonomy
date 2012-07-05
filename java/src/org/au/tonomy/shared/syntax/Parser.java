@@ -134,9 +134,31 @@ public class Parser {
 
   private Ast parseLambda(boolean expectSemi) throws SyntaxError {
     expectWord("fn");
+    List<String> params = parseParameters();
     expectOperator("=>");
     Ast body = parseExpression(expectSemi);
-    return new Lambda(body);
+    return new Lambda(params, body);
+  }
+
+  private List<String> parseParameters() throws SyntaxError {
+    if (at(Type.LPAREN)) {
+      expect(Type.LPAREN);
+      if (at(Type.RPAREN)) {
+        expect(Type.RPAREN);
+        return Collections.emptyList();
+      } else {
+        List<String> result = new ArrayList<String>();
+        result.add(expect(Type.IDENTIFIER));
+        while (hasMore() && at(Type.COMMA)) {
+          expect(Type.COMMA);
+          result.add(expect(Type.IDENTIFIER));
+        }
+        expect(Type.RPAREN);
+        return result;
+      }
+    } else {
+      return Collections.emptyList();
+    }
   }
 
   /**

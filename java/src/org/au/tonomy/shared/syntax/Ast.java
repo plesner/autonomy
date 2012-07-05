@@ -21,7 +21,7 @@ public abstract class Ast {
   /**
    * Executes this syntax in the given scope.
    */
-  public abstract IValue run(IScope scope, Context context);
+  public abstract IValue run(Context context, IScope scope);
 
   /**
    * An identifier reference.
@@ -40,7 +40,7 @@ public abstract class Ast {
     }
 
     @Override
-    public IValue run(IScope scope, Context context) {
+    public IValue run(Context context, IScope scope) {
       return scope.getValue(name, context);
     }
 
@@ -55,7 +55,7 @@ public abstract class Ast {
     }
 
     @Override
-    public IValue run(IScope scope, Context context) {
+    public IValue run(Context context, IScope scope) {
       return value;
     }
 
@@ -83,10 +83,10 @@ public abstract class Ast {
     }
 
     @Override
-    public IValue run(IScope scope, Context context) {
+    public IValue run(Context context, IScope scope) {
       IValue result = null;
       for (int i = 0; i < children.size(); i++)
-        result = children.get(i).run(scope, context);
+        result = children.get(i).run(context, scope);
       return result;
     }
 
@@ -110,11 +110,11 @@ public abstract class Ast {
     }
 
     @Override
-    public IValue run(IScope scope, Context context) {
-      IValue recvValue = receiver.run(scope, context);
+    public IValue run(Context context, IScope scope) {
+      IValue recvValue = receiver.run(context, scope);
       IValue[] argValues = new IValue[args.size()];
       for (int i = 0; i < args.size(); i++)
-        argValues[i] = args.get(i).run(scope, context);
+        argValues[i] = args.get(i).run(context, scope);
       return recvValue.invoke(op, argValues);
     }
 
@@ -154,7 +154,7 @@ public abstract class Ast {
     }
 
     @Override
-    public IValue run(IScope scope, Context context) {
+    public IValue run(Context context, IScope scope) {
       return null;
     }
 
@@ -189,10 +189,10 @@ public abstract class Ast {
     }
 
     @Override
-    public IValue run(IScope scope, Context context) {
+    public IValue run(Context context, IScope scope) {
       IValue[] values = new IValue[asts.size()];
       for (int i = 0; i < asts.size(); i++)
-        values[i] = asts.get(i).run(scope, context);
+        values[i] = asts.get(i).run(context, scope);
       return new TupleValue(values);
     }
 
@@ -204,14 +204,16 @@ public abstract class Ast {
   public static class Lambda extends Ast {
 
     private final Ast body;
+    private final List<String> params;
 
-    public Lambda(Ast body) {
+    public Lambda(List<String> params, Ast body) {
       this.body = body;
+      this.params = params;
     }
 
     @Override
-    public IValue run(IScope scope, Context context) {
-      return new LambdaValue(body, scope, context);
+    public IValue run(Context context, IScope scope) {
+      return new LambdaValue(params, body, scope, context);
     }
 
   }
@@ -229,14 +231,14 @@ public abstract class Ast {
     }
 
     @Override
-    public IValue run(final IScope scope, Context outer) {
-      final IValue v = value.run(scope, outer);
-      return body.run(new IScope() {
+    public IValue run(Context outer, final IScope scope) {
+      final IValue v = value.run(outer, scope);
+      return body.run(outer, new IScope() {
         @Override
         public IValue getValue(String n, Context inner) {
           return name.equals(n) ? v : scope.getValue(n, inner);
         }
-      }, outer);
+      });
     }
 
   }

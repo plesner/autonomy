@@ -16,3 +16,17 @@ $test.assert_equals(7, $f3.call());
   $test.assert_equals(7, $f3.call());
 }
 
+def $f4 := fn () => 1;
+$test.assert_equals(1, $f4.call());
+
+def $f5 := fn ($a) => $a + 1;
+$test.assert_equals(6, $f5.call(5));
+
+def $f6 := fn ($a, $b) => $a - 1;
+$test.assert_equals(7, $f6.call(8, 0));
+
+def $f7 := fn ($a, $b) => $b * 2;
+$test.assert_equals(18, $f7.call(5, 9));
+
+def $f8 := fn ($a, $b, $c, $d, $e) => $d + $e;
+$test.assert_equals(9, $f8.call(1, 2, 3, 4, 5));
