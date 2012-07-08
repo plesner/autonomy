@@ -1,13 +1,10 @@
 package org.au.tonomy.shared.syntax;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.au.tonomy.shared.runtime.IntegerValue;
-import org.au.tonomy.shared.syntax.Ast.Lambda;
-import org.au.tonomy.shared.syntax.Ast.Tuple;
 import org.au.tonomy.shared.syntax.MacroParser.State;
 import org.au.tonomy.shared.syntax.Token.Type;
 
@@ -21,8 +18,10 @@ public class Parser {
 
   private static final Token EOF = Token.eof();
 
-  private MacroParser macroParser;
+  private final MacroParser macroParser;
   private final List<Token> tokens;
+  private final OperatorRegistry operators = new OperatorRegistry();
+
   private int cursor = 0;
   private Token prev;
   private Token current;
@@ -127,6 +126,8 @@ public class Parser {
   private Ast parseExpression(boolean expectSemi) throws SyntaxError {
     if (atWord(FN)) {
       return parseLambda(expectSemi);
+    } else if (at(Type.LBRACE)) {
+      return parseBlockExpression();
     } else {
       return parseMacroExpression(expectSemi);
     }
@@ -142,7 +143,7 @@ public class Parser {
     } else {
       body = parseBlockExpression();
     }
-    return new Lambda(params, body);
+    return new Ast.Lambda(params, body);
   }
 
   private List<String> parseParameters() throws SyntaxError {
@@ -192,7 +193,7 @@ public class Parser {
     if (state != null && state.isPlaceholder()) {
       // If we can advance the state by reading a subexpression we
       // do that.
-      Ast value = parseMacroExpression(expectSemi && !state.suppressSemi());
+      Ast value = parseExpression(expectSemi && !state.suppressSemi());
       return continueMacroExpression(state.advance(value), expectSemi);
     } else if (state != null && state.isFinal()) {
       // If we can't advance the state but it's a final state then
@@ -202,36 +203,44 @@ public class Parser {
     } else {
       // If we can't do anything we give up on macros and just parse
       // this as an atomic expression.
-      return parseCompactExpression(expectSemi);
+      return parseOperatorExpression(expectSemi);
     }
+  }
+
+  private PrecedenceParser<Ast> newPrecedenceParser() {
+    return new PrecedenceParser<Ast>(operators, Ast.Call.FACTORY);
   }
 
   /**
    * Parse a compact expression like calls and indexing.
    */
-  private Ast parseCompactExpression(boolean expectSemi) throws SyntaxError {
-    Ast result = parseAtomicExpression();
-    if (at(Type.OPERATOR)) {
-      String op = expect(Type.OPERATOR);
-      List<Ast> args;
-      if (at(Type.LPAREN)) {
-        args = parseArguments(Type.LPAREN, Type.RPAREN);
-      } else if (at(Type.LBRACK)) {
-        op += "[]";
-        args = parseArguments(Type.LBRACK, Type.RBRACK);
+  private Ast parseOperatorExpression(boolean expectSemi) throws SyntaxError {
+    PrecedenceParser<Ast> parser = newPrecedenceParser();
+    boolean lastWasOperand = false;
+    while (hasMore()) {
+      if (at(Type.OPERATOR)) {
+        String op = expect(Type.OPERATOR);
+        parser.addOperator(op);
+        lastWasOperand = false;
+      } else if (atAtomicStart()) {
+        if (lastWasOperand) {
+          if (at(Type.LPAREN)) {
+            parser.addOperator("()");
+          } else if (at(Type.LBRACK)) {
+            parser.addOperator("[]");
+          } else {
+            throw newSyntaxError();
+          }
+        }
+        Ast operand = parseAtomicExpression();
+        parser.addOperand(operand);
+        lastWasOperand = true;
       } else {
-        args = Arrays.asList(parseExpression(false));
+        break;
       }
-      result = new Ast.Call(result, op, args);
-    } else if (at(Type.LPAREN)) {
-      List<Ast> args = parseArguments(Type.LPAREN, Type.RPAREN);
-      result = new Ast.Call(result, "()", args);
-    } else if (at(Type.LBRACK)) {
-      List<Ast> args = parseArguments(Type.LBRACK, Type.RBRACK);
-      result = new Ast.Call(result, "[]", args);
     }
     checkSemi(expectSemi);
-    return result;
+    return parser.flush();
   }
 
   private void checkSemi(boolean expectSemi) throws SyntaxError {
@@ -263,6 +272,21 @@ public class Parser {
     return result;
   }
 
+  /**
+   * Can the current token start an atomic expression?
+   */
+  private boolean atAtomicStart() {
+    switch (getCurrent().getType()) {
+    case IDENTIFIER: case NUMBER: case LPAREN: case LBRACK: case HASH:
+      return true;
+    default:
+      return false;
+    }
+  }
+
+  /**
+   * Parses the current atomic expression.
+   */
   private Ast parseAtomicExpression() throws SyntaxError {
     switch (getCurrent().getType()) {
     case IDENTIFIER: {
@@ -270,17 +294,17 @@ public class Parser {
       return new Ast.Identifier(word);
     }
     case LPAREN: {
-      expect(Type.LPAREN);
-      Ast result = parseExpression(false);
-      expect(Type.RPAREN);
-      return result;
-    }
-    case LBRACE: {
-      return parseBlockExpression();
+      List<Ast> elms = parseArguments(Type.LPAREN, Type.RPAREN);
+      return Ast.Arguments.create(elms);
     }
     case LBRACK: {
       List<Ast> elms = parseArguments(Type.LBRACK, Type.RBRACK);
-      return new Tuple(elms);
+      return Ast.Arguments.create(elms);
+    }
+    case HASH: {
+      expect(Type.HASH);
+      List<Ast> elms = parseArguments(Type.LBRACK, Type.RBRACK);
+      return new Ast.Tuple(elms);
     }
     case NUMBER: {
       String value = expect(Type.NUMBER);

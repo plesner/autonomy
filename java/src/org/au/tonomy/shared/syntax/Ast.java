@@ -1,5 +1,7 @@
 package org.au.tonomy.shared.syntax;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.au.tonomy.shared.runtime.Context;
@@ -22,6 +24,14 @@ public abstract class Ast {
    * Executes this syntax in the given scope.
    */
   public abstract IValue run(Context context, IScope scope);
+
+  /**
+   * If this ast is used as arguments to an invocation, which arguments
+   * does it represent?
+   */
+  public List<Ast> asArguments() {
+    return Arrays.asList(this);
+  }
 
   /**
    * An identifier reference.
@@ -118,6 +128,29 @@ public abstract class Ast {
       return recvValue.invoke(op, argValues);
     }
 
+    /**
+     * Call factory used by the precedence parser to build operator
+     * expressions.
+     */
+    public static final PrecedenceParser.IFactory<Ast> FACTORY = new PrecedenceParser.IFactory<Ast>() {
+
+      @Override
+      public Ast newSuffix(Ast arg, String op) {
+        return new Call(arg, op, Collections.<Ast>emptyList());
+      }
+
+      @Override
+      public Ast newPrefix(String op, Ast arg) {
+        return new Call(arg, op, Collections.<Ast>emptyList());
+      }
+
+      @Override
+      public Ast newInfix(Ast left, String op, Ast right) {
+        return new Call(left, op, right.asArguments());
+      }
+
+    };
+
   }
 
   /**
@@ -194,6 +227,34 @@ public abstract class Ast {
       for (int i = 0; i < asts.size(); i++)
         values[i] = asts.get(i).run(context, scope);
       return new TupleValue(values);
+    }
+
+  }
+
+  public static class Arguments extends Ast {
+
+    private final List<Ast> children;
+
+    public Arguments(List<Ast> children) {
+      this.children = children;
+    }
+
+    public static Ast create(List<Ast> children) {
+      if (children.size() == 1) {
+        return children.get(0);
+      } else {
+        return new Arguments(children);
+      }
+    }
+
+    @Override
+    public List<Ast> asArguments() {
+      return children;
+    }
+
+    @Override
+    public IValue run(Context context, IScope scope) {
+      throw new UnsupportedOperationException();
     }
 
   }

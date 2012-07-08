@@ -1,4 +1,4 @@
-def $t := [3, 2, 1];
+def $t := #[3, 2, 1];
 $test.assert_equals(3, $t.length());
 $test.assert_equals(3, $t[0]);
 $test.assert_equals(2, $t[1]);
