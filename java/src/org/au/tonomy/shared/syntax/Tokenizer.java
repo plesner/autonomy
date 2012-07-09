@@ -14,10 +14,13 @@ import org.au.tonomy.shared.util.Assert;
 public class Tokenizer {
 
   private final String source;
-  private int cursor = 0;
+  private int cursor;
+  private char current;
 
   private Tokenizer(String source) {
     this.source = source;
+    this.cursor = -1;
+    this.advance();
   }
 
   /**
@@ -31,7 +34,7 @@ public class Tokenizer {
    * Returns the current character.
    */
   private char getCurrent() {
-    return source.charAt(cursor);
+    return current;
   }
 
   /**
@@ -50,7 +53,8 @@ public class Tokenizer {
    * Advances to the next character.
    */
   private void advance() {
-    cursor++;
+    this.cursor++;
+    this.current = hasMore() ? source.charAt(this.cursor) : '\0';
   }
 
   /**
