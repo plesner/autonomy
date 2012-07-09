@@ -1,0 +1,51 @@
+{ "name": "Autonomy",
+  "scopeName": "source.autonomy",
+  "fileTypes": ["aut"],
+  "patterns": [
+    {
+      "match": "\\$\\w+\\b",
+      "name": "variable.other.autonomy",
+      "comment": "variables"
+    },
+    {
+      "match": "\\.\\w+\\b",
+      "name": "entity.name.function.autonomy",
+      "comment": "operator names"
+    },
+    { "match": "(:=|=>)",
+      "name": "keyword.operator.autonomy",
+      "comment": "keyword operators"
+    },
+    {
+      "match": "[+\\-*/=<>]+",
+      "name": "entity.name.function.autonomy",
+      "comment": "operators"
+    },
+    {
+      "name": "constant.numeric.autonomy",
+      "match": "\\b[0-9]+\\b",
+      "comment": "numeric constants"
+    },
+    { "match": "\\b\\w+\\b",
+      "name": "keyword.other.autonomy",
+      "comment": "keywords"
+    },
+    {
+      "name": "comment.line.autonomy",
+      "match": "#-.*$",
+      "comment": "single line plain comment"
+    },
+    {
+      "name": "comment.block.autonomy",
+      "begin": "#{",
+      "end": "#}",
+      "comment": "delimited plain comment"
+    },
+    {
+      "name": "comment.documentation.autonomy",
+      "match": "#[#@].*$",
+      "comment": "single line documentation"
+    }
+  ],
+  "uuid": "7f658267-1d5d-4821-869b-fbb836c06742"
+}
