@@ -38,7 +38,7 @@
     {
       "name": "comment.block.autonomy",
       "begin": "#{",
-      "end": "#}",
+      "end": "}#",
       "comment": "delimited plain comment"
     },
     {
