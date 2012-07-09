@@ -169,7 +169,7 @@ public class Tokenizer {
       case '#':
         advance();
         switch (getCurrent()) {
-        case '#': case '@':
+        case '#': case '@': case '-':
           result = scanEndOfLineComment(cursor - 1);
           break;
         case '{':
@@ -221,9 +221,9 @@ public class Tokenizer {
   }
 
   private Token scanBlockComment(int start) {
-    while (atDifferentPair('#', '}'))
+    while (atDifferentPair('}', '#'))
       advance();
-    // If we reached the end we're at the final ']' so we advance past
+    // If we reached the end we're at the final '#' so we advance past
     // it.
     if (hasMore())
       advance();

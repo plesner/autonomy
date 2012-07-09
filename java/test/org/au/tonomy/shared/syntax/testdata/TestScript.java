@@ -9,17 +9,60 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Exceptions;
+import org.au.tonomy.shared.util.Pair;
+
+import com.google.gwt.regexp.shared.MatchResult;
+import com.google.gwt.regexp.shared.RegExp;
 
 /**
  * A script test case.
  */
 public class TestScript {
 
+  /**
+   * A single section within a multi-section test case.
+   */
+  public static class Section {
+
+    private static final RegExp SYNTAX_ERROR_MARKER = RegExp.compile("!SYNTAX\\s+\"([^\"]+)\"");
+    private final String name;
+    private final String source;
+
+    public Section(String name, String source) {
+      this.name = name;
+      this.source = source;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public String getSource() {
+      return source;
+    }
+
+    /**
+     * Are there any markers in this test script indication that we
+     * expect it to fail?
+     */
+    public boolean expectSuccess() {
+      return getExpectedOffendingToken() == null;
+    }
+
+    public String getExpectedOffendingToken() {
+      MatchResult result = SYNTAX_ERROR_MARKER.exec(source);
+      return (result == null) ? null : result.getGroup(1);
+    }
+
+  }
+
   private static final String TEST_CASE_EXTENSION = ".aut";
+  private static final RegExp SECTION_HEADER = RegExp.compile("#\\{ ---([^-]+)--- \\}#", "g");
 
   private final File origin;
   private final String source;
@@ -27,6 +70,38 @@ public class TestScript {
   public TestScript(File origin, String source) {
     this.origin = origin;
     this.source = source;
+  }
+
+  public List<Section> getSections() {
+    int index = 0;
+    List<Pair<String, Integer>> headers = new ArrayList<Pair<String, Integer>>();
+    MatchResult match = SECTION_HEADER.exec(source);
+    while (match != null) {
+      String header = match.getGroup(0);
+      String name = match.getGroup(1).trim();
+      int matchIndex = source.indexOf(header, index);
+      headers.add(Pair.of(name, matchIndex));
+      index = matchIndex + header.length();
+      SECTION_HEADER.setLastIndex(index);
+      match = SECTION_HEADER.exec(source);
+    }
+    if (headers.size() == 0) {
+      return Collections.singletonList(new Section(getName(), source));
+    } else {
+      List<Section> result = new ArrayList<Section>();
+      for (int i = 0; i < headers.size(); i++) {
+        Pair<String, Integer> header = headers.get(i);
+        int end;
+        if (i == headers.size() - 1) {
+          end = source.length();
+        } else {
+          end = headers.get(i + 1).getSecond();
+        }
+        String data = source.substring(header.getSecond(), end);
+        result.add(new Section(header.getFirst(), data));
+      }
+      return result;
+    }
   }
 
   /**

@@ -1,6 +1,7 @@
 package org.au.tonomy.shared.syntax;
 
 import java.util.Collection;
+import java.util.List;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
@@ -26,15 +27,21 @@ public class AutUnitTest extends TestSuite {
 
   private AutUnitTest(Collection<TestScript> scripts) {
     this.setName(AutUnitTest.class.getName());
-    for (TestScript script : scripts)
-      this.addTest(new AutUnitTestCase(script));
+    for (TestScript script : scripts) {
+      List<TestScript.Section> sections = script.getSections();
+      if (sections.size() == 1) {
+        this.addTest(new AutUnitTestCase(sections.get(0)));
+      } else {
+        this.addTest(new AutUnitTestSuite(script.getName(), sections));
+      }
+    }
   }
 
   @Override
   public void runTest(Test test, TestResult result) {
     // Override the runTest method, otherwise JUnit is going to try
     // to use its reflection-based nonsense.
-    ((AutUnitTestCase) test).runAsJunit(result);
+    ((ICase) test).runAsJunit(result);
   }
 
   public static TestSuite suite() {
@@ -82,24 +89,37 @@ public class AutUnitTest extends TestSuite {
 
   public static final IValue JUNIT_WRAPPER = new TestWrapper();
 
+  private static interface ICase {
+
+    public void runAsJunit(TestResult result);
+
+  }
+
   /**
    * Wrapper for a single test script.
    */
-  private static class AutUnitTestCase extends TestCase {
+  private static class AutUnitTestCase extends TestCase implements ICase {
 
-    private final TestScript script;
+    private final TestScript.Section section;
 
-    public AutUnitTestCase(TestScript script) {
-      super(script.getName());
-      this.script = script;
+    public AutUnitTestCase(TestScript.Section section) {
+      super(section.getName());
+      this.section = section;
     }
 
     private void runScript() {
       Executor exec;
       try {
-        exec = Compiler.compile(script.getSource());
+        exec = Compiler.compile(section.getSource());
+        assertTrue(section.expectSuccess());
       } catch (SyntaxError se) {
-        throw Exceptions.propagate(se);
+        String expected = section.getExpectedOffendingToken();
+        if (expected == null) {
+          throw Exceptions.propagate(se);
+        } else {
+          assertEquals(expected, se.getToken().getValue());
+          return;
+        }
       }
       Context context = new Context();
       context.bind("$test", JUNIT_WRAPPER);
@@ -117,6 +137,26 @@ public class AutUnitTest extends TestSuite {
       } finally {
         result.endTest(this);
       }
+    }
+
+  }
+
+  private static class AutUnitTestSuite extends TestSuite implements ICase {
+
+    public AutUnitTestSuite(String name, List<TestScript.Section> sections) {
+      super(name);
+      for (TestScript.Section section : sections)
+        addTest(new AutUnitTestCase(section));
+    }
+
+    @Override
+    public void runAsJunit(TestResult result) {
+      run(result);
+    }
+
+    @Override
+    public void runTest(Test test, TestResult result) {
+      ((ICase) test).runAsJunit(result);
     }
 
   }

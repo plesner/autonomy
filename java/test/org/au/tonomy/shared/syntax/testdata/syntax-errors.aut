@@ -1,0 +1,7 @@
+#{ --- invalid assignment operator --- }#
+
+def $x = 4; #- !SYNTAX "="
+
+#{ --- invalid variable name --- }#
+
+def x := 4; #- !SYNTAX "x"

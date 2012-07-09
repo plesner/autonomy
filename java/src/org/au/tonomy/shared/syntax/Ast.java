@@ -12,25 +12,28 @@ import org.au.tonomy.shared.runtime.NullValue;
 import org.au.tonomy.shared.runtime.TupleValue;
 import org.au.tonomy.shared.syntax.MacroParser.Component;
 import org.au.tonomy.shared.syntax.MacroParser.Placeholder;
+import org.au.tonomy.shared.util.Assert;
 
 
 
 /**
  * A syntax tree node.
  */
-public abstract class Ast {
+public abstract class Ast extends AstOrArguments {
 
   /**
    * Executes this syntax in the given scope.
    */
   public abstract IValue run(Context context, IScope scope);
 
-  /**
-   * If this ast is used as arguments to an invocation, which arguments
-   * does it represent?
-   */
+  @Override
   public List<Ast> asArguments() {
     return Arrays.asList(this);
+  }
+
+  @Override
+  public Ast asAst() {
+    return this;
   }
 
   /**
@@ -132,21 +135,23 @@ public abstract class Ast {
      * Call factory used by the precedence parser to build operator
      * expressions.
      */
-    public static final PrecedenceParser.IFactory<Ast> FACTORY = new PrecedenceParser.IFactory<Ast>() {
+    public static final PrecedenceParser.IFactory<AstOrArguments> FACTORY =
+        new PrecedenceParser.IFactory<AstOrArguments>() {
 
       @Override
-      public Ast newSuffix(Ast arg, String op) {
-        return new Call(arg, op, Collections.<Ast>emptyList());
+      public AstOrArguments newSuffix(AstOrArguments arg, String op) {
+        return new Call(arg.asAst(), op, Collections.<Ast>emptyList());
       }
 
       @Override
-      public Ast newPrefix(String op, Ast arg) {
-        return new Call(arg, op, Collections.<Ast>emptyList());
+      public AstOrArguments newPrefix(String op, AstOrArguments arg) {
+        return new Call(arg.asAst(), op, Collections.<Ast>emptyList());
       }
 
       @Override
-      public Ast newInfix(Ast left, String op, Ast right) {
-        return new Call(left, op, right.asArguments());
+      public AstOrArguments newInfix(AstOrArguments left, String op,
+          AstOrArguments right) {
+        return new Call(left.asAst(), op, right.asArguments());
       }
 
     };
@@ -231,7 +236,7 @@ public abstract class Ast {
 
   }
 
-  public static class Arguments extends Ast {
+  public static class Arguments extends AstOrArguments {
 
     private final List<Ast> children;
 
@@ -239,7 +244,7 @@ public abstract class Ast {
       this.children = children;
     }
 
-    public static Ast create(List<Ast> children) {
+    public static AstOrArguments create(List<Ast> children) {
       if (children.size() == 1) {
         return children.get(0);
       } else {
@@ -253,8 +258,9 @@ public abstract class Ast {
     }
 
     @Override
-    public IValue run(Context context, IScope scope) {
-      throw new UnsupportedOperationException();
+    public Ast asAst() {
+      Assert.that(children.size() == 1);
+      return children.get(0);
     }
 
   }

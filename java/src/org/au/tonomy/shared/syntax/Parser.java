@@ -207,15 +207,15 @@ public class Parser {
     }
   }
 
-  private PrecedenceParser<Ast> newPrecedenceParser() {
-    return new PrecedenceParser<Ast>(operators, Ast.Call.FACTORY);
+  private PrecedenceParser<AstOrArguments> newPrecedenceParser() {
+    return new PrecedenceParser<AstOrArguments>(operators, Ast.Call.FACTORY);
   }
 
   /**
    * Parse a compact expression like calls and indexing.
    */
   private Ast parseOperatorExpression(boolean expectSemi) throws SyntaxError {
-    PrecedenceParser<Ast> parser = newPrecedenceParser();
+    PrecedenceParser<AstOrArguments> parser = newPrecedenceParser();
     boolean lastWasOperand = false;
     while (hasMore()) {
       if (at(Type.OPERATOR)) {
@@ -232,7 +232,7 @@ public class Parser {
             throw newSyntaxError();
           }
         }
-        Ast operand = parseAtomicExpression();
+        AstOrArguments operand = parseAtomicExpression();
         parser.addOperand(operand);
         lastWasOperand = true;
       } else {
@@ -240,7 +240,7 @@ public class Parser {
       }
     }
     checkSemi(expectSemi);
-    return parser.flush();
+    return parser.flush().asAst();
   }
 
   private void checkSemi(boolean expectSemi) throws SyntaxError {
@@ -287,7 +287,7 @@ public class Parser {
   /**
    * Parses the current atomic expression.
    */
-  private Ast parseAtomicExpression() throws SyntaxError {
+  private AstOrArguments parseAtomicExpression() throws SyntaxError {
     switch (getCurrent().getType()) {
     case IDENTIFIER: {
       String word = expect(Type.IDENTIFIER);

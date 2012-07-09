@@ -20,4 +20,6 @@ The beginning of a multiline comment.
 Some more multiline.
 
 Ok now we're done.
-#}
+}#
+
+#- end of line comment
