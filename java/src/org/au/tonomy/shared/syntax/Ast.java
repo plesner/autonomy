@@ -11,7 +11,6 @@ import org.au.tonomy.shared.runtime.LambdaValue;
 import org.au.tonomy.shared.runtime.NullValue;
 import org.au.tonomy.shared.runtime.TupleValue;
 import org.au.tonomy.shared.syntax.MacroParser.Component;
-import org.au.tonomy.shared.syntax.MacroParser.Placeholder;
 import org.au.tonomy.shared.util.Assert;
 
 
@@ -41,15 +40,15 @@ public abstract class Ast extends AstOrArguments {
    */
   public static class Identifier extends Ast {
 
-    private final String name;
+    private final Object name;
 
-    public Identifier(String name) {
+    public Identifier(Object name) {
       this.name = name;
     }
 
     @Override
     public String toString() {
-      return name;
+      return name.toString();
     }
 
     @Override
@@ -131,6 +130,10 @@ public abstract class Ast extends AstOrArguments {
       return recvValue.invoke(op, argValues);
     }
 
+    public List<Ast> getArguments() {
+      return args;
+    }
+
     /**
      * Call factory used by the precedence parser to build operator
      * expressions.
@@ -161,39 +164,13 @@ public abstract class Ast extends AstOrArguments {
   /**
    * A macro invocation.
    */
-  public static class MacroCall extends Ast {
-
-    /**
-     * A single macro call argument.
-     */
-    public static class Argument {
-
-      private final Ast value;
-      private final Placeholder placeholder;
-
-      public Argument(Ast value, Placeholder placeholder) {
-        this.value = value;
-        this.placeholder = placeholder;
-      }
-
-      @Override
-      public String toString() {
-        return value.toString();
-      }
-
-    }
+  public static class MacroCall extends Call {
 
     private final Macro macro;
-    private final List<Argument> args;
 
-    public MacroCall(Macro macro, List<Argument> args) {
+    public MacroCall(Macro macro, List<Ast> args) {
+      super(new Identifier(macro.getId()), "()", args);
       this.macro = macro;
-      this.args = args;
-    }
-
-    @Override
-    public IValue run(Context context, IScope scope) {
-      return null;
     }
 
     @Override
@@ -212,7 +189,7 @@ public abstract class Ast extends AstOrArguments {
           result.append(keyword);
         }
       }
-      result.append(toString(args)).append(")");
+      result.append(toString(getArguments())).append(")");
       return result.toString();
     }
 
@@ -287,11 +264,11 @@ public abstract class Ast extends AstOrArguments {
 
   public static class Definition extends Ast {
 
-    private final String name;
+    private final Object name;
     private final Ast value;
     private final Ast body;
 
-    public Definition(String name, Ast value, Ast body) {
+    public Definition(Object name, Ast value, Ast body) {
       this.name = name;
       this.value = value;
       this.body = body;
@@ -302,7 +279,7 @@ public abstract class Ast extends AstOrArguments {
       final IValue v = value.run(outer, scope);
       return body.run(outer, new IScope() {
         @Override
-        public IValue getValue(String n, Context inner) {
+        public IValue getValue(Object n, Context inner) {
           return name.equals(n) ? v : scope.getValue(n, inner);
         }
       });

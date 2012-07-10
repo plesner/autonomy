@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.au.tonomy.shared.runtime.IntegerValue;
+import org.au.tonomy.shared.syntax.MacroParser.Component;
+import org.au.tonomy.shared.syntax.MacroParser.Placeholder;
 import org.au.tonomy.shared.syntax.MacroParser.State;
 import org.au.tonomy.shared.syntax.Token.Type;
 
@@ -18,7 +20,7 @@ public class Parser {
 
   private static final Token EOF = Token.eof();
 
-  private final MacroParser macroParser;
+  private MacroParser macroParser;
   private final List<Token> tokens;
   private final OperatorRegistry operators = new OperatorRegistry();
 
@@ -136,14 +138,17 @@ public class Parser {
   private Ast parseLambda(boolean expectSemi) throws SyntaxError {
     expectWord("fn");
     List<String> params = parseParameters();
-    Ast body;
+    Ast body = parseFunctionBody(expectSemi);
+    return new Ast.Lambda(params, body);
+  }
+
+  private Ast parseFunctionBody(boolean expectSemi) throws SyntaxError {
     if (atOperator("=>")) {
       expectOperator("=>");
-      body = parseExpression(expectSemi);
+      return parseExpression(expectSemi);
     } else {
-      body = parseBlockExpression();
+      return parseBlockExpression();
     }
-    return new Ast.Lambda(params, body);
   }
 
   private List<String> parseParameters() throws SyntaxError {
@@ -258,6 +263,61 @@ public class Parser {
 
   private Ast parseDefinition(Type endMarker) throws SyntaxError {
     expectWord(DEF);
+    if (at(Type.LBRACK)) {
+      return parseMacroDefinition(endMarker);
+    } else {
+      return parsePlainDefinition(endMarker);
+    }
+  }
+
+  private Ast parseMacroDefinition(Type endMarker) throws SyntaxError {
+    Macro macro = parseMacroHeader();
+    MacroParser oldParser = macroParser;
+    MacroParser newParser = new MacroParser(macroParser);
+    newParser.addSequence(macro);
+    Ast rest;
+    try {
+      macroParser = newParser;
+      rest = parseBlockBody(endMarker);
+    } finally {
+      macroParser = oldParser;
+    }
+    return new Ast.Definition(macro.getId(), macro.getBody(), rest);
+  }
+
+  private Macro parseMacroHeader() throws SyntaxError {
+    // Parse the header
+    expect(Type.LBRACK);
+    List<MacroParser.Component> components = new ArrayList<MacroParser.Component>();
+    List<String> params = new ArrayList<String>();
+    while (hasMore() && !at(Type.RBRACK)) {
+      Component next;
+      if (at(Type.WORD)) {
+        String word = expect(Type.WORD);
+        next = new MacroParser.Keyword(word);
+      } else {
+        String param = expect(Type.IDENTIFIER);
+        params.add(param);
+        Placeholder.Type type;
+        if (at(Type.LPAREN)) {
+          type = Placeholder.Type.LAZY_EXPRESSION;
+          expect(Type.LPAREN);
+          expect(Type.RPAREN);
+        } else {
+          type = Placeholder.Type.EAGER_EXPRESSION;
+        }
+        next = new MacroParser.Placeholder(type);
+      }
+      components.add(next);
+    }
+    expect(Type.RBRACK);
+    // Parse the body
+    Ast body = parseFunctionBody(true);
+    Macro macro = new Macro(components, new Ast.Lambda(params, body));
+    return macro;
+  }
+
+  private Ast parsePlainDefinition(Type endMarker) throws SyntaxError {
     String name = expect(Type.IDENTIFIER);
     expect(Type.ASSIGN);
     Ast value = parseExpression(true);

@@ -1,6 +1,7 @@
 package org.au.tonomy.shared.syntax;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -219,18 +220,24 @@ public class MacroParser {
     public Ast build() {
       Macro macro = info.onEnd;
       List<Component> components = macro.getComponents();
-      List<MacroCall.Argument> args = new ArrayList<MacroCall.Argument>();
+      List<Ast> args = new ArrayList<Ast>();
       addArguments(args, components, components.size() - 1);
       return new MacroCall(macro, args);
     }
 
-    private void addArguments(List<MacroCall.Argument> args,
-        List<Component> components, int index) {
+    private void addArguments(List<Ast> args, List<Component> components,
+        int index) {
       if (prev != null)
         prev.addArguments(args, components, index - 1);
       if (value != null) {
         Component component = components.get(index);
-        args.add(new MacroCall.Argument(value, (Placeholder) component));
+        Ast arg;
+        if (component.getPlaceholderType().isLazy) {
+          arg = new Ast.Lambda(Collections.<String>emptyList(), value);
+        } else {
+          arg = value;
+        }
+        args.add(arg);
       }
     }
 
@@ -244,13 +251,21 @@ public class MacroParser {
 
   }
 
+  private final List<Macro> macros = new ArrayList<Macro>();
   private final StateInfo root;
 
   public MacroParser() {
     this.root = new StateInfo();
   }
 
+  public MacroParser(MacroParser parent) {
+    this();
+    for (Macro macro : parent.macros)
+      addSequence(macro);
+  }
+
   public void addSequence(Macro statement) {
+    macros.add(statement);
     root.addStatement(statement, 0);
   }
 

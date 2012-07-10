@@ -1,7 +1,7 @@
 package org.au.tonomy.shared.syntax;
 
 import static org.au.tonomy.shared.syntax.MacroParser.Placeholder.Type.EAGER_EXPRESSION;
-import static org.au.tonomy.shared.syntax.MacroParser.Placeholder.Type.LAZY_STATEMENT;
+import static org.au.tonomy.shared.syntax.MacroParser.Placeholder.Type.EAGER_STATEMENT;
 
 import java.util.Arrays;
 
@@ -46,7 +46,7 @@ public class ParserTest extends TestCase {
   }
 
   private static Macro mac(Component... comps) {
-    return new Macro(Arrays.asList(comps));
+    return new Macro(Arrays.asList(comps), null);
   }
 
   private static MacroParser.Keyword kwd(String str) {
@@ -56,7 +56,6 @@ public class ParserTest extends TestCase {
   private static MacroParser.Placeholder phd(Type type) {
     return new Placeholder(type);
   }
-
 
   @Test
   public void testKeywords() throws SyntaxError {
@@ -73,8 +72,8 @@ public class ParserTest extends TestCase {
     runParserTest(p1, "(if-then (if-then $b))", "if if $b then then;");
     // Multiple overlapping
     MacroParser p2 = newParser(
-        mac(kwd("if"), phd(EAGER_EXPRESSION), kwd("then"), phd(LAZY_STATEMENT)),
-        mac(kwd("if"), phd(EAGER_EXPRESSION), kwd("then"), phd(LAZY_STATEMENT), kwd("else"), phd(LAZY_STATEMENT)));
+        mac(kwd("if"), phd(EAGER_EXPRESSION), kwd("then"), phd(EAGER_STATEMENT)),
+        mac(kwd("if"), phd(EAGER_EXPRESSION), kwd("then"), phd(EAGER_STATEMENT), kwd("else"), phd(EAGER_STATEMENT)));
     runParserTest(p2, "(if-then $a $b)", "if $a then $b;");
     runParserTest(p2, "(if-then-else $a $b $c)", "if $a then $b; else $c;");
     runParserTest(p2, "(if-then $a (if-then-else $b $c $d))", "if $a then if $b then $c; else $d;");

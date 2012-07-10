@@ -12,7 +12,7 @@ public class LambdaValue extends AbstractValue {
       public IValue invoke(final LambdaValue self, final IValue[] args) {
         return self.body.run(self.context, new IScope() {
           @Override
-          public IValue getValue(String name, Context context) {
+          public IValue getValue(Object name, Context context) {
             for (int i = 0; i < self.params.size(); i++) {
               if (name.equals(self.params.get(i)))
                 return args[i];

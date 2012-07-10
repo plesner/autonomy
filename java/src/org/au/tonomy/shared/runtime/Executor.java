@@ -8,7 +8,7 @@ public class Executor {
 
   private static final IScope BOTTOM = new IScope() {
     @Override
-    public IValue getValue(String name, Context context) {
+    public IValue getValue(Object name, Context context) {
       return context.getGlobal(name);
     }
   };

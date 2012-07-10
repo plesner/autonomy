@@ -1,9 +1,16 @@
 package org.au.tonomy.shared.runtime;
 
 
+
 public class BooleanValue extends AbstractValue {
 
   private static final MethodRegister<BooleanValue> METHODS = new MethodRegister<BooleanValue>() {{
+    addMethod(".select", new IMethod<BooleanValue>() {
+      @Override
+      public IValue invoke(BooleanValue self, IValue[] args) {
+        return self.value ? args[0] : args[1];
+      }
+    });
   }};
 
   private static final BooleanValue TRUE = new BooleanValue(true);

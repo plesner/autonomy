@@ -9,6 +9,6 @@ public interface IScope {
    * Returns the value bound to the given name, using the given context
    * to resolve global names.
    */
-  public IValue getValue(String name, Context context);
+  public IValue getValue(Object name, Context context);
 
 }
