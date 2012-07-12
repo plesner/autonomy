@@ -1,13 +1,11 @@
 package org.au.tonomy.client;
 
-import org.au.tonomy.client.presentation.CodeEditorPresenter;
 import org.au.tonomy.client.presentation.Viewport;
 import org.au.tonomy.client.presentation.WorldPresenter;
 import org.au.tonomy.client.webgl.util.IWebGL;
 import org.au.tonomy.client.webgl.util.Mat4;
 import org.au.tonomy.client.webgl.util.Vec4;
 import org.au.tonomy.client.webgl.util.WebGL;
-import org.au.tonomy.client.widget.EditorWidget;
 import org.au.tonomy.client.widget.MainWidget;
 import org.au.tonomy.client.widget.NotSupportedWidget;
 import org.au.tonomy.client.widget.WorldWidget;
@@ -17,11 +15,10 @@ import org.au.tonomy.shared.world.WorldTrace;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 
-public class GwtEntryPoint implements EntryPoint {
+public class MainEntryPoint implements EntryPoint {
 
   @Override
   public void onModuleLoad() {
@@ -29,10 +26,6 @@ public class GwtEntryPoint implements EntryPoint {
     Panel root = RootPanel.get();
     if (!isSupported(webGl)) {
       root.add(new NotSupportedWidget());
-    } else if ("editor".equals(Window.Location.getParameter("test"))) {
-      EditorWidget widget = new EditorWidget();
-      root.add(widget);
-      new CodeEditorPresenter(widget);
     } else {
       startMain(webGl, root);
     }

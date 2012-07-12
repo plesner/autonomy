@@ -101,6 +101,14 @@ public class SourceManager {
     getListener().setCursor(cursorRow, cursorColumn);
   }
 
+  public void setSource(String result) {
+    this.rows.clear();
+    for (String line : result.split("\n"))
+      this.rows.add(line);
+    cursorRow = cursorColumn = 0;
+    resetListener();
+  }
+
   public void moveCursor(int columnDelta, int rowDelta) {
     cursorRow = Math.min(Math.max(cursorRow + rowDelta, 0), rows.size() - 1);
     cursorColumn = Math.min(Math.max(cursorColumn + columnDelta, 0), rows.get(cursorRow).length());

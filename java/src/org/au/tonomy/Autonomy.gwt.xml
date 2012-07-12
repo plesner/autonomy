@@ -6,7 +6,7 @@
   <source path="client" />
   <source path="shared" />
   <public path="client/public" />
-  <entry-point class="org.au.tonomy.client.GwtEntryPoint" />
+  <entry-point class="org.au.tonomy.client.MainEntryPoint" />
   <script src="webgl-utils.js"></script>
   <script src="gl-matrix-1.3.7-min.js"></script>
 </module>

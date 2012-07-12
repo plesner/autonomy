@@ -4,7 +4,7 @@
   <!-- Arguments to gwtc and devmode targets -->
   <property name="gwt.args" value="" />
 
-  <property name="out.path" value="out" />
+  <property name="out.path" value="." />
   <property name="war" value="${out.path}/war" />
 
   <!-- Load the local build configuration -->
@@ -154,10 +154,6 @@
 
   <target name="war" depends="build" description="Create a war file">
     <zip destfile="${out.path}/GwtEntryPoint.war" basedir="${war}"/>
-  </target>
-
-  <target name="clean" description="Cleans this project">
-    <delete dir="${out.path}" failonerror="false" />
   </target>
 
 </project>

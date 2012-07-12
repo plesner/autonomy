@@ -2,7 +2,6 @@ package org.au.tonomy.client.presentation;
 
 import org.au.tonomy.client.widget.EditorWidget;
 import org.au.tonomy.client.widget.EditorWidget.IKeyEvent;
-import org.au.tonomy.client.widget.EditorWidget.IListener;
 
 import com.google.gwt.event.dom.client.KeyCodes;
 
@@ -22,6 +21,10 @@ public class CodeEditorPresenter implements EditorWidget.IListener {
     editor.attachListener(this);
     manager.attachListener(editor);
     manager.resetListener();
+  }
+
+  public SourceManager getSourceManager() {
+    return manager;
   }
 
   @Override
