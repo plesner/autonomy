@@ -14,6 +14,7 @@ import org.au.tonomy.client.webgl.Float32Array;
 import org.au.tonomy.client.webgl.Program;
 import org.au.tonomy.client.webgl.RenderingContext;
 import org.au.tonomy.client.webgl.Shader;
+import org.au.tonomy.client.webgl.TriangleStrip;
 import org.au.tonomy.client.webgl.UniformLocation;
 import org.au.tonomy.client.webgl.util.Color;
 import org.au.tonomy.client.webgl.util.Color.Adjustment;
@@ -43,7 +44,7 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
   private final Viewport<Vec4, Mat4> viewport;
   private final Canvas canvas;
 
-  private final Buffer hexVertices;
+  private final TriangleStrip hexVertices;
   private final Buffer unitVertices;
   private final Buffer rectVertices;
   private final int vertexAttribLocation;
@@ -114,18 +115,24 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
   /**
    * Creates the buffer containing the hex vertices.
    */
-  private Buffer createHexVertices(RenderingContext context) {
-    Buffer result = context.createBuffer();
-    context.bindBuffer(ARRAY_BUFFER, result);
-    Float32Array vertices = Float32Array.create(
-        Corner.NORTH_EAST.getX(), Corner.NORTH_EAST.getY(), 0.0,
-        Corner.NORTH.getX(), Corner.NORTH.getY(), 0.0,
-        Corner.NORTH_WEST.getX(), Corner.NORTH_WEST.getY(), 0.0,
-        Corner.SOUTH_WEST.getX(), Corner.SOUTH_WEST.getY(), 0.0,
-        Corner.SOUTH.getX(), Corner.SOUTH.getY(), 0.0,
-        Corner.SOUTH_EAST.getX(), Corner.SOUTH_EAST.getY(), 0.0);
-    context.bufferData(ARRAY_BUFFER, vertices, STATIC_DRAW);
-    return result;
+  private TriangleStrip createHexVertices(RenderingContext context) {
+    return TriangleStrip
+        .builder(4)
+        .start(
+            Corner.NORTH_WEST.getX(), Corner.NORTH_WEST.getY(), 0.0)
+        .set(0,
+            Corner.NORTH.getX(),      Corner.NORTH.getY(),      0.0,
+            Corner.NORTH_EAST.getX(), Corner.NORTH_EAST.getY(), 0.0)
+        .set(1,
+            Corner.SOUTH_EAST.getX(), Corner.SOUTH_EAST.getY(), 0.0,
+            Corner.NORTH_WEST.getX(), Corner.NORTH_WEST.getY(), 0.0)
+        .set(2,
+            Corner.SOUTH_WEST.getX(), Corner.SOUTH_WEST.getY(), 0.0,
+            Corner.SOUTH_EAST.getX(), Corner.SOUTH_EAST.getY(), 0.0)
+        .set(3,
+            Corner.SOUTH.getX(),      Corner.SOUTH.getY(),      0.0,
+            Corner.SOUTH_WEST.getX(), Corner.SOUTH_WEST.getY(), 0.0)
+        .build(context);
   }
 
   private Buffer createRectVertices(RenderingContext context) {
@@ -168,9 +175,7 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     gl.uniform1f(this.@org.au.tonomy.client.widget.WorldRenderer::u1fX, x);
     gl.uniform1f(this.@org.au.tonomy.client.widget.WorldRenderer::u1fY, y);
     gl.uniform1i(this.@org.au.tonomy.client.widget.WorldRenderer::u1iColorSelector, 0);
-    gl.drawArrays(gl.TRIANGLE_FAN, 0, count);
-    gl.uniform1i(this.@org.au.tonomy.client.widget.WorldRenderer::u1iColorSelector, 1);
-    gl.drawArrays(gl.LINE_LOOP, 0, count);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, count);
   }-*/;
 
   private native void strokeArrayBuffer(RenderingContext gl,
@@ -201,7 +206,7 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     setColors(gl, ground.getVector(), ground.adjust(Adjustment.DARKER).getVector());
     setScale(gl, 0.9, 0.9);
     for (Hex hex : trace.getWorld().getGrid().getHexes(bounds))
-      fillAndStrokeArrayBuffer(gl, hex.getCenterX(), hex.getCenterY(), 6);
+      fillAndStrokeArrayBuffer(gl, hex.getCenterX(), hex.getCenterY(), hexVertices.getVertexCount());
 
     // Draw the units.
     gl.bindBuffer(ARRAY_BUFFER, unitVertices);

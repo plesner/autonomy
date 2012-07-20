@@ -181,7 +181,7 @@ public class RenderingContext extends JavaScriptObject {
    * Create a WebGLBuffer object and initialize it with a buffer object
    * name as if by calling glGenBuffers.
    */
-  public final native Buffer createBuffer() /*-{
+  public final native <B extends Buffer> B createBuffer() /*-{
     return this.createBuffer();
   }-*/;
 
