@@ -1,11 +1,13 @@
-package org.au.tonomy.server.local;
+package org.au.tonomy.server.filesystem;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.List;
 
-import org.au.tonomy.client.local.ILocalFileService;
+import org.au.tonomy.client.filesystem.ILocalFileSystemService;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Exceptions;
 
@@ -14,13 +16,23 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
  * Default implementation of the local file service.
  */
 @SuppressWarnings("serial")
-public class LocalFileServiceImpl extends RemoteServiceServlet implements ILocalFileService {
+public class LocalFileSystemServiceImpl extends RemoteServiceServlet implements ILocalFileSystemService {
 
   @Override
-  public String getLocalFile(String name) {
-    File file = new File(name);
+  public String getContents(String path) {
+    File file = new File(path);
     Assert.that(file.exists() && file.isFile());
     return readFile(file);
+  }
+
+  @Override
+  public boolean isDirectory(String path) {
+    return new File(path).isDirectory();
+  }
+
+  @Override
+  public List<String> getChildren(String path) {
+    return Arrays.asList(new File(path).list());
   }
 
   private static String readFile(File file) {

@@ -13,8 +13,6 @@ import org.au.tonomy.shared.runtime.TupleValue;
 import org.au.tonomy.shared.syntax.MacroParser.Component;
 import org.au.tonomy.shared.util.Assert;
 
-
-
 /**
  * A syntax tree node.
  */
@@ -24,6 +22,13 @@ public abstract class Ast extends AstOrArguments {
    * Executes this syntax in the given scope.
    */
   public abstract IValue run(Context context, IScope scope);
+
+  /**
+   * Converts this syntax tree to an ast node.
+   */
+  public AstNode toAstNode() {
+    return AstNode.text(Token.identifier("foo"));
+  }
 
   @Override
   public List<Ast> asArguments() {

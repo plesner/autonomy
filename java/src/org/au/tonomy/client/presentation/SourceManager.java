@@ -3,6 +3,7 @@ package org.au.tonomy.client.presentation;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.au.tonomy.shared.syntax.Ast;
 import org.au.tonomy.shared.util.Assert;
 
 public class SourceManager {
@@ -101,12 +102,8 @@ public class SourceManager {
     getListener().setCursor(cursorRow, cursorColumn);
   }
 
-  public void setSource(String result) {
-    this.rows.clear();
-    for (String line : result.split("\n"))
-      this.rows.add(line);
-    cursorRow = cursorColumn = 0;
-    resetListener();
+  public void setSource(Ast ast) {
+
   }
 
   public void moveCursor(int columnDelta, int rowDelta) {
