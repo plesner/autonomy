@@ -3,6 +3,8 @@ package org.au.tonomy.shared.world;
 import static org.au.tonomy.shared.util.ExtraMath.DEGREES_TO_RADIANS;
 import static org.au.tonomy.shared.util.ExtraMath.TAU;
 
+import org.au.tonomy.shared.util.IPoint;
+
 /**
  * A single hex in a hex grid. The layout of a hex:
  *
@@ -61,7 +63,7 @@ public class Hex {
   /**
    * Enum identifying the corners of a hex.
    */
-  public enum Corner {
+  public enum Corner implements IPoint {
 
     NORTH_EAST(30),
     NORTH(90),
@@ -80,12 +82,19 @@ public class Hex {
       this.y = Math.sin(radians);
     }
 
+    @Override
     public double getX() {
       return this.x;
     }
 
+    @Override
     public double getY() {
       return this.y;
+    }
+
+    @Override
+    public double getZ() {
+      return 0.0;
     }
 
   }

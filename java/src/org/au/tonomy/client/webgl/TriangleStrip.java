@@ -44,15 +44,11 @@ public class TriangleStrip extends Buffer {
     /**
      * Sets the coordinates of the index'th triangle.
      */
-    public final native Builder set(int index, double x0, double y0, double z0,
-        double x1, double y1, double z1) /*-{
-      var offset = 3 + (6 * index);
-      this[offset + 0] = x0;
-      this[offset + 1] = y0;
-      this[offset + 2] = z0;
-      this[offset + 3] = x1;
-      this[offset + 4] = y1;
-      this[offset + 5] = z1;
+    public final native Builder add(int index, double x, double y, double z) /*-{
+      var offset = 3 + (3 * index);
+      this[offset + 0] = x;
+      this[offset + 1] = y;
+      this[offset + 2] = z;
       return this;
     }-*/;
 
@@ -74,7 +70,7 @@ public class TriangleStrip extends Buffer {
    * number of triangles.
    */
   public static native Builder builder(int count) /*-{
-    return new Float32Array(3 + 6 * count);
+    return new Float32Array(3 + 3 * count);
   }-*/;
 
 }

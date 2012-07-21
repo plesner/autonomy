@@ -69,14 +69,18 @@ public class HexGrid implements Iterable<Hex> {
   private final int hexHeight;
   private final Hex[][] hexes;
   private final Hex[][] rectHexes;
+  private final List<Hex> hexList;
 
   public HexGrid(int hexWidth, int hexHeight) {
     this.hexWidth = hexWidth;
     this.hexHeight = hexHeight;
     this.hexes = new Hex[hexWidth][hexHeight];
+    this.hexList = new ArrayList<Hex>();
     for (int g = 0; g < hexWidth; g++) {
       for (int h = 0; h < hexHeight; h++) {
-        hexes[g][h] = new Hex(g, h);
+        Hex hex = new Hex(g, h);
+        hexes[g][h] = hex;
+        hexList.add(hex);
       }
     }
     int rectWidth = 2 * hexWidth;
@@ -322,6 +326,14 @@ public class HexGrid implements Iterable<Hex> {
    */
   public static int getRightmostRectStrip(double x) {
     return getLeftmostRectStrip(x) + 1;
+  }
+
+  /**
+   * Returns a list of all the hexes.
+   * @return
+   */
+  public List<Hex> getHexes() {
+    return hexList;
   }
 
 }

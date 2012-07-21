@@ -24,6 +24,11 @@ public class Vec4 extends Float32Array implements IVector {
     return get(1);
   }
 
+  @Override
+  public final double getZ() {
+    return get(2);
+  }
+
   /**
    * Creates a new 4-vector with the given components.
    */

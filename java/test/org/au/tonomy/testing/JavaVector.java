@@ -31,4 +31,9 @@ public class JavaVector implements IVector {
     return get(1);
   }
 
+  @Override
+  public double getZ() {
+    return get(2);
+  }
+
 }

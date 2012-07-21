@@ -46,7 +46,7 @@ public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
     initWidget(BINDER.createAndBindUi(this));
     this.trace = trace;
     this.webGlUtils = webGlUtils;
-    this.renderer = new WorldRenderer(webGlUtils, getCanvas(), viewport);
+    this.renderer = new WorldRenderer(webGlUtils, getCanvas(), viewport, trace.getWorld());
     configureEvents();
   }
 

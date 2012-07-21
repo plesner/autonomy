@@ -7,6 +7,9 @@ import static org.au.tonomy.client.webgl.RenderingContext.FRAGMENT_SHADER;
 import static org.au.tonomy.client.webgl.RenderingContext.STATIC_DRAW;
 import static org.au.tonomy.client.webgl.RenderingContext.VERTEX_SHADER;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.au.tonomy.client.presentation.ICamera;
 import org.au.tonomy.client.presentation.Viewport;
 import org.au.tonomy.client.webgl.Buffer;
@@ -23,9 +26,11 @@ import org.au.tonomy.client.webgl.util.Mat4;
 import org.au.tonomy.client.webgl.util.Vec4;
 import org.au.tonomy.client.webgl.util.VecColor;
 import org.au.tonomy.client.world.shader.IShaderBundle;
+import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.IRect;
 import org.au.tonomy.shared.world.Hex;
 import org.au.tonomy.shared.world.Hex.Corner;
+import org.au.tonomy.shared.world.World;
 import org.au.tonomy.shared.world.WorldTrace;
 import org.au.tonomy.shared.world.WorldTrace.IUnitState;
 
@@ -45,14 +50,12 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
   private final Canvas canvas;
 
   private final TriangleStrip hexVertices;
-  private final Buffer unitVertices;
+  private final TriangleStrip unitVertices;
   private final Buffer rectVertices;
   private final int vertexAttribLocation;
   private final UniformLocation u4fvPerspective;
   private final UniformLocation u1fX;
   private final UniformLocation u1fY;
-  private final UniformLocation uifScaleX;
-  private final UniformLocation u1fScaleY;
   private final UniformLocation u4fvFill;
   private final UniformLocation u4fvStroke;
   private final UniformLocation u1iColorSelector;
@@ -72,7 +75,8 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     return perspective.inverse();
   }
 
-  public WorldRenderer(IWebGL webGlUtils, Canvas canvas, Viewport<Vec4, Mat4> viewport) {
+  public WorldRenderer(IWebGL webGlUtils, Canvas canvas, Viewport<Vec4, Mat4> viewport,
+      World world) {
     this.webGlUtils = webGlUtils;
     this.viewport = viewport;
     this.canvas = canvas;
@@ -83,13 +87,11 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     this.u4fvPerspective = context.getUniformLocation(shaderProgram, "perspective");
     this.u1fX = context.getUniformLocation(shaderProgram, "x");
     this.u1fY = context.getUniformLocation(shaderProgram, "y");
-    this.uifScaleX = context.getUniformLocation(shaderProgram, "scaleX");
-    this.u1fScaleY = context.getUniformLocation(shaderProgram, "scaleY");
     this.u4fvFill = context.getUniformLocation(shaderProgram, "colors[0]");
     this.u4fvStroke = context.getUniformLocation(shaderProgram, "colors[1]");
     this.u1iColorSelector = context.getUniformLocation(shaderProgram, "colorSelector");
-    this.hexVertices = createHexVertices(context);
-    this.unitVertices = createHexVertices(context);
+    this.hexVertices = newHexStrip(context, world.getGrid().getHexes(), 0.9);
+    this.unitVertices = newHexStrip(context, Arrays.asList(world.getGrid().getHex(0, 0)), 0.5);
     this.rectVertices = createRectVertices(context);
     context.clearColor(.975, .975, .975, 1.0);
   }
@@ -115,24 +117,74 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
   /**
    * Creates the buffer containing the hex vertices.
    */
-  private TriangleStrip createHexVertices(RenderingContext context) {
-    return TriangleStrip
-        .builder(4)
-        .start(
-            Corner.NORTH_WEST.getX(), Corner.NORTH_WEST.getY(), 0.0)
-        .set(0,
-            Corner.NORTH.getX(),      Corner.NORTH.getY(),      0.0,
-            Corner.NORTH_EAST.getX(), Corner.NORTH_EAST.getY(), 0.0)
-        .set(1,
-            Corner.SOUTH_EAST.getX(), Corner.SOUTH_EAST.getY(), 0.0,
-            Corner.NORTH_WEST.getX(), Corner.NORTH_WEST.getY(), 0.0)
-        .set(2,
-            Corner.SOUTH_WEST.getX(), Corner.SOUTH_WEST.getY(), 0.0,
-            Corner.SOUTH_EAST.getX(), Corner.SOUTH_EAST.getY(), 0.0)
-        .set(3,
-            Corner.SOUTH.getX(),      Corner.SOUTH.getY(),      0.0,
-            Corner.SOUTH_WEST.getX(), Corner.SOUTH_WEST.getY(), 0.0)
-        .build(context);
+  private TriangleStrip newHexStrip(RenderingContext context, List<Hex> hexList, double s) {
+    Assert.that(!hexList.isEmpty());
+    TriangleStrip.Builder builder = TriangleStrip.builder(10 * hexList.size() - 3);
+    for (int i = 0; i < hexList.size(); i++) {
+      Hex hex = hexList.get(i);
+      double x = hex.getCenterX();
+      double y = hex.getCenterY();
+      if (i == 0) {
+        // For the very first hex we have to start the triangle strip.
+        builder.start(
+            x + Corner.NORTH_WEST.getX() * s,
+            y + Corner.NORTH_WEST.getY() * s,
+            0.0);
+      }
+      // Then add the four triangles that make up this hex, assuming
+      // that the north west corner has already been taken care of.
+      int offset = i * 10;
+      builder
+          .add(offset + 0,
+              x + Corner.NORTH.getX() * s,
+              y + Corner.NORTH.getY() * s,
+              0.0)
+          .add(offset + 1,
+              x + Corner.NORTH_EAST.getX() * s,
+              y + Corner.NORTH_EAST.getY() * s,
+              0.0)
+          .add(offset + 2,
+              x + Corner.SOUTH_EAST.getX() * s,
+              y + Corner.SOUTH_EAST.getY() * s,
+              0.0)
+          .add(offset + 3,
+              x + Corner.NORTH_WEST.getX() * s,
+              y + Corner.NORTH_WEST.getY() * s,
+              0.0)
+          .add(offset + 4,
+              x + Corner.SOUTH_WEST.getX() * s,
+              y + Corner.SOUTH_WEST.getY() * s,
+              0.0)
+          .add(offset + 5,
+              x + Corner.SOUTH.getX() * s,
+              y + Corner.SOUTH.getY() * s,
+              0.0)
+          .add(offset + 6,
+              x + Corner.SOUTH_EAST.getX() * s,
+              y + Corner.SOUTH_EAST.getY() * s,
+              0.0);
+      if (i < hexList.size() - 1) {
+        // If there are more hexes to come we draw a degenerate triangle
+        // to the north west corner of the next one.
+        Hex next = hexList.get(i + 1);
+        double nx = next.getCenterX();
+        double ny = next.getCenterY();
+        builder
+            .add(offset + 7,
+                x + Corner.SOUTH_EAST.getX() * s,
+                y + Corner.SOUTH_EAST.getY() * s,
+                0.0)
+            .add(offset + 8,
+                nx + Corner.NORTH_WEST.getX() * s,
+                ny + Corner.NORTH_WEST.getY() * s,
+                0.0)
+            .add(offset + 9,
+                nx + Corner.NORTH_WEST.getX() * s,
+                ny + Corner.NORTH_WEST.getY() * s,
+                0.0);
+      }
+    }
+    return builder.build(context);
   }
 
   private Buffer createRectVertices(RenderingContext context) {
@@ -146,15 +198,6 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     context.bufferData(ARRAY_BUFFER, vertices, STATIC_DRAW);
     return result;
   }
-
-  /**
-   * Sets the vertex shader's x and y scaling factors.
-   */
-  private native void setScale(RenderingContext gl, double scaleX,
-      double scaleY) /*-{
-    gl.uniform1f(this.@org.au.tonomy.client.widget.WorldRenderer::uifScaleX, scaleX);
-    gl.uniform1f(this.@org.au.tonomy.client.widget.WorldRenderer::u1fScaleY, scaleY);
-  }-*/;
 
   private native void setColors(RenderingContext gl, VecColor fill,
       VecColor stroke) /*-{
@@ -178,14 +221,6 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, count);
   }-*/;
 
-  private native void strokeArrayBuffer(RenderingContext gl,
-      double x, double y, int count) /*-{
-    gl.uniform1f(this.@org.au.tonomy.client.widget.WorldRenderer::u1fX, x);
-    gl.uniform1f(this.@org.au.tonomy.client.widget.WorldRenderer::u1fY, y);
-    gl.uniform1i(this.@org.au.tonomy.client.widget.WorldRenderer::u1iColorSelector, 1);
-    gl.drawArrays(gl.LINE_LOOP, 0, count);
-  }-*/;
-
   public void paint(WorldTrace trace, double time) {
     RenderingContext gl = webGlUtils.create3DContext(canvas);
 
@@ -204,16 +239,13 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
 
     Color ground = Color.create(.929, .749, .525, 1.0);
     setColors(gl, ground.getVector(), ground.adjust(Adjustment.DARKER).getVector());
-    setScale(gl, 0.9, 0.9);
-    for (Hex hex : trace.getWorld().getGrid().getHexes(bounds))
-      fillAndStrokeArrayBuffer(gl, hex.getCenterX(), hex.getCenterY(), hexVertices.getVertexCount());
+    fillAndStrokeArrayBuffer(gl, 0, 0, hexVertices.getVertexCount());
 
     // Draw the units.
     gl.bindBuffer(ARRAY_BUFFER, unitVertices);
     gl.vertexAttribPointer(vertexAttribLocation, 3, FLOAT, false, 0, 0);
 
     Color red = Color.create(.50, .0, .0, 1.0);
-    setScale(gl, 0.5, 0.5);
     setColors(gl, red.getVector(), Color.BLACK.getVector());
     for (IUnitState state : trace.getUnits(time)) {
       Hex from = state.getFrom();
@@ -221,15 +253,16 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
       double p = state.getProgress();
       double x = (to.getCenterX() * p) + (from.getCenterX() * (1 - p));
       double y = (to.getCenterY() * p) + (from.getCenterY() * (1 - p));
-      fillAndStrokeArrayBuffer(gl, x, y, 6);
+      fillAndStrokeArrayBuffer(gl, x, y, unitVertices.getVertexCount());
     }
 
-    // Draw the viewport.
+    /* Draw the viewport.
     gl.bindBuffer(ARRAY_BUFFER, rectVertices);
     gl.vertexAttribPointer(vertexAttribLocation, 3, FLOAT, false, 0, 0);
     setScale(gl, bounds.getWidth(), bounds.getHeight());
     setColors(gl, Color.BLACK.getVector(), Color.BLACK.getVector());
     strokeArrayBuffer(gl, bounds.getLeft(), bounds.getBottom(), 4);
+    */
   }
 
 }
