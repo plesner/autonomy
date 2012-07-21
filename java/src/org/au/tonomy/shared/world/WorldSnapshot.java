@@ -3,9 +3,8 @@ package org.au.tonomy.shared.world;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
-import org.au.tonomy.shared.world.Hex.Side;
+import org.au.tonomy.client.control.Control;
 
 /**
  * Encapsulates the state of the world at a whole clock tick.
@@ -15,9 +14,11 @@ public class WorldSnapshot {
   private final World world;
   private final Map<Hex, Unit> hexToUnit = new HashMap<Hex, Unit>();
   private final Map<Unit, Hex> unitToHex = new HashMap<Unit, Hex>();
+  private final int step;
 
-  public WorldSnapshot(World world) {
+  public WorldSnapshot(World world, int step) {
     this.world = world;
+    this.step = step;
   }
 
   public World getWorld() {
@@ -43,17 +44,15 @@ public class WorldSnapshot {
     return unitToHex.get(unit);
   }
 
-  public WorldSnapshot advance() {
-    WorldSnapshot next = new WorldSnapshot(world);
-    Side[] sides = Side.values();
-    Side side = sides[random.nextInt(sides.length)];
+  public WorldSnapshot advance(Control control) {
+    int nextStep = step + 1;
+    WorldSnapshot next = new WorldSnapshot(world, nextStep);
     for (Unit unit : getUnits()) {
-      Hex hex = getLocation(unit);
-      next.setUnit(world.getGrid().getNeighbour(hex, side), unit);
+      UnitValue value = new UnitValue(unit, this);
+      control.invoke(nextStep, value);
+      value.commit(next);
     }
     return next;
   }
-
-  private static final Random random = new Random(32);
 
 }

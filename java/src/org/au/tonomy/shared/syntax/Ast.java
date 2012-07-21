@@ -1,13 +1,15 @@
 package org.au.tonomy.shared.syntax;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.au.tonomy.shared.runtime.Context;
+import org.au.tonomy.shared.runtime.HereValue;
 import org.au.tonomy.shared.runtime.IScope;
 import org.au.tonomy.shared.runtime.IValue;
 import org.au.tonomy.shared.runtime.LambdaValue;
+import org.au.tonomy.shared.runtime.ModuleValue;
 import org.au.tonomy.shared.runtime.NullValue;
 import org.au.tonomy.shared.runtime.TupleValue;
 import org.au.tonomy.shared.syntax.MacroParser.Component;
@@ -21,7 +23,7 @@ public abstract class Ast extends AstOrArguments {
   /**
    * Executes this syntax in the given scope.
    */
-  public abstract IValue run(Context context, IScope scope);
+  public abstract IValue run(ModuleValue module, IScope scope);
 
   /**
    * Converts this syntax tree to an ast node.
@@ -57,8 +59,8 @@ public abstract class Ast extends AstOrArguments {
     }
 
     @Override
-    public IValue run(Context context, IScope scope) {
-      return scope.getValue(name, context);
+    public IValue run(ModuleValue module, IScope scope) {
+      return scope.getValue(name, module);
     }
 
   }
@@ -72,7 +74,7 @@ public abstract class Ast extends AstOrArguments {
     }
 
     @Override
-    public IValue run(Context context, IScope scope) {
+    public IValue run(ModuleValue module, IScope scope) {
       return value;
     }
 
@@ -100,16 +102,30 @@ public abstract class Ast extends AstOrArguments {
     }
 
     @Override
-    public IValue run(Context context, IScope scope) {
+    public IValue run(ModuleValue module, IScope scope) {
       IValue result = null;
       for (int i = 0; i < children.size(); i++)
-        result = children.get(i).run(context, scope);
+        result = children.get(i).run(module, scope);
       return result;
     }
 
     @Override
     public String toString() {
       return "(;" + toString(children) + ")";
+    }
+
+  }
+
+  /**
+   * The 'here' expression.
+   */
+  public static class Here extends Ast {
+
+    public Here() { }
+
+    @Override
+    public IValue run(ModuleValue module, IScope scope) {
+      return new HereValue(module, scope);
     }
 
   }
@@ -127,11 +143,11 @@ public abstract class Ast extends AstOrArguments {
     }
 
     @Override
-    public IValue run(Context context, IScope scope) {
-      IValue recvValue = receiver.run(context, scope);
+    public IValue run(ModuleValue module, IScope scope) {
+      IValue recvValue = receiver.run(module, scope);
       IValue[] argValues = new IValue[args.size()];
       for (int i = 0; i < args.size(); i++)
-        argValues[i] = args.get(i).run(context, scope);
+        argValues[i] = args.get(i).run(module, scope);
       return recvValue.invoke(op, argValues);
     }
 
@@ -209,10 +225,10 @@ public abstract class Ast extends AstOrArguments {
     }
 
     @Override
-    public IValue run(Context context, IScope scope) {
+    public IValue run(ModuleValue module, IScope scope) {
       IValue[] values = new IValue[asts.size()];
       for (int i = 0; i < asts.size(); i++)
-        values[i] = asts.get(i).run(context, scope);
+        values[i] = asts.get(i).run(module, scope);
       return new TupleValue(values);
     }
 
@@ -261,33 +277,115 @@ public abstract class Ast extends AstOrArguments {
     }
 
     @Override
-    public IValue run(Context context, IScope scope) {
-      return new LambdaValue(params, body, scope, context);
+    public IValue run(ModuleValue module, IScope scope) {
+      return new LambdaValue(params, body, scope, module);
     }
 
   }
 
-  public static class Definition extends Ast {
+  /**
+   * A generic definition.
+   */
+  public static abstract class Definition extends Ast {
 
+    private final List<Ast> annots;
     private final Object name;
     private final Ast value;
     private final Ast body;
 
-    public Definition(Object name, Ast value, Ast body) {
+    public Definition(List<Ast> annots, Object name, Ast value, Ast body) {
+      this.annots = annots;
       this.name = name;
       this.value = value;
       this.body = body;
     }
 
+    protected List<Ast> getAnnotations() {
+      return this.annots;
+    }
+
+    protected Object getName() {
+      return this.name;
+    }
+
+    protected Ast getValue() {
+      return this.value;
+    }
+
+    protected Ast getBody() {
+      return this.body;
+    }
+
+  }
+
+  /**
+   * A locally scoped definition.
+   */
+  public static class LocalDefinition extends Definition {
+
+    public LocalDefinition(List<Ast> annots, Object name, Ast value, Ast body) {
+      super(annots, name, value, body);
+    }
+
     @Override
-    public IValue run(Context outer, final IScope scope) {
-      final IValue v = value.run(outer, scope);
-      return body.run(outer, new IScope() {
+    public IValue run(ModuleValue outerContext, final IScope outerScope) {
+      final List<IValue> annotValues;
+      final IValue v = getValue().run(outerContext, outerScope);
+      if (getAnnotations().isEmpty()) {
+        annotValues = Collections.emptyList();
+      } else {
+        annotValues = new ArrayList<IValue>();
+        for (Ast annotAst : getAnnotations()) {
+          IValue annotValue = annotAst.run(outerContext, outerScope);
+          annotValues.add(annotValue);
+        }
+      }
+      return getBody().run(outerContext, new IScope() {
         @Override
-        public IValue getValue(Object n, Context inner) {
-          return name.equals(n) ? v : scope.getValue(n, inner);
+        public IValue getValue(Object name, ModuleValue innerContext) {
+          return getName().equals(name)
+              ? v
+              : outerScope.getValue(name, innerContext);
+        }
+        @Override
+        public void addAnnotated(IValue annot, List<IValue> values) {
+          for (IValue annotValue : annotValues) {
+            if (annotValue == annot) {
+              values.add(v);
+              break;
+            }
+          }
+          outerScope.addAnnotated(annot, values);
         }
       });
+    }
+
+  }
+
+  /**
+   * A toplevel definition.
+   */
+  public static class ToplevelDefinition extends Definition {
+
+    public ToplevelDefinition(List<Ast> annots, Object name, Ast value, Ast body) {
+      super(annots, name, value, body);
+    }
+
+    @Override
+    public IValue run(ModuleValue outerContext, final IScope outerScope) {
+      final List<IValue> annotValues;
+      IValue value = getValue().run(outerContext, outerScope);
+      if (getAnnotations().isEmpty()) {
+        annotValues = Collections.emptyList();
+      } else {
+        annotValues = new ArrayList<IValue>();
+        for (Ast annotAst : getAnnotations()) {
+          IValue annotValue = annotAst.run(outerContext, outerScope);
+          annotValues.add(annotValue);
+        }
+      }
+      outerContext.bind(getName(), value);
+      return getBody().run(outerContext, outerScope);
     }
 
   }

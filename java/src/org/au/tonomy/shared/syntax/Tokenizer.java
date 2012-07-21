@@ -98,7 +98,7 @@ public class Tokenizer {
   private static boolean isOperatorStart(char c) {
     switch (c) {
     case '.': case '+': case '-': case '*': case '/': case '<': case '>':
-    case '=':
+    case '=': case '%':
       return true;
     default:
       return false;

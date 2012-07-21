@@ -1,0 +1,10 @@
+def $EAST := 0;
+def $NORTH_EAST := 1;
+def $NORTH_WEST := 2;
+def $WEST := 3;
+def $SOUTH_WEST := 4;
+def $SOUTH_EAST := 5;
+
+def $main := fn ($unit) {
+  $unit.move(($step / 4) % 6);
+}

@@ -30,4 +30,23 @@ public class TupleValue extends AbstractValue {
     return METHODS.invoke(name, this, args);
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this) {
+      return true;
+    } else if (!(obj instanceof TupleValue)) {
+      return false;
+    } else {
+      IValue[] mine = elms;
+      IValue[] others = ((TupleValue) obj).elms;
+      if (mine.length != others.length)
+        return false;
+      for (int i = 0; i < mine.length; i++) {
+        if (!mine[i].equals(others[i]))
+          return false;
+      }
+      return true;
+    }
+  }
+
 }

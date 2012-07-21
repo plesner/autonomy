@@ -10,14 +10,18 @@ public class LambdaValue extends AbstractValue {
     addMethod("()", new IMethod<LambdaValue>() {
       @Override
       public IValue invoke(final LambdaValue self, final IValue[] args) {
-        return self.body.run(self.context, new IScope() {
+        return self.body.run(self.module, new IScope() {
           @Override
-          public IValue getValue(Object name, Context context) {
+          public IValue getValue(Object name, ModuleValue module) {
             for (int i = 0; i < self.params.size(); i++) {
               if (name.equals(self.params.get(i)))
                 return args[i];
             }
-            return self.scope.getValue(name, context);
+            return self.outerScope.getValue(name, module);
+          }
+          @Override
+          public void addAnnotated(IValue annotation, List<IValue> values) {
+            self.outerScope.addAnnotated(annotation, values);
           }
         });
       }
@@ -26,14 +30,14 @@ public class LambdaValue extends AbstractValue {
 
   private final List<String> params;
   private final Ast body;
-  private final IScope scope;
-  private final Context context;
+  private final IScope outerScope;
+  private final ModuleValue module;
 
-  public LambdaValue(List<String> params, Ast body, IScope scope, Context context) {
+  public LambdaValue(List<String> params, Ast body, IScope scope, ModuleValue module) {
     this.params = params;
     this.body = body;
-    this.scope = scope;
-    this.context = context;
+    this.outerScope = scope;
+    this.module = module;
   }
 
   @Override

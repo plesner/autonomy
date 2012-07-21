@@ -1,5 +1,6 @@
 package org.au.tonomy.client;
 
+import org.au.tonomy.client.control.Control;
 import org.au.tonomy.client.presentation.Viewport;
 import org.au.tonomy.client.presentation.WorldPresenter;
 import org.au.tonomy.client.webgl.util.IWebGL;
@@ -33,9 +34,9 @@ public class MainEntryPoint implements EntryPoint {
 
   private void startMain(IWebGL webGl, Panel root) {
     World world = new World(32, 32);
-    WorldSnapshot initial = new WorldSnapshot(world);
-    initial.spawnUnit(4, 4);
-    WorldTrace trace = new WorldTrace(world, initial);
+    WorldSnapshot initial = new WorldSnapshot(world, 0);
+    initial.spawnUnit(16, 16);
+    WorldTrace trace = new WorldTrace(world, Control.load(), initial);
     Viewport<Vec4, Mat4> viewport = new Viewport<Vec4, Mat4>(world.getGrid());
     WorldWidget widget = new WorldWidget(webGl, viewport, trace);
     viewport.setCamera(widget.getCamera());

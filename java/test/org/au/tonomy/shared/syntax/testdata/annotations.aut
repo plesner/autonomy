@@ -1,0 +1,6 @@
+def $annot := fn ($decl) {
+  
+}
+
+@$annot
+def $tester := 4;

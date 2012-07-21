@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.au.tonomy.client.control.Control;
 import org.au.tonomy.shared.util.Assert;
 
 /**
@@ -31,10 +32,12 @@ public class WorldTrace {
   }
 
   private final World world;
+  private final Control control;
   private final List<WorldSnapshot> timeline = new ArrayList<WorldSnapshot>();
 
-  public WorldTrace(World world, WorldSnapshot initial) {
+  public WorldTrace(World world, Control control, WorldSnapshot initial) {
     this.world = world;
+    this.control = control;
     timeline.add(initial);
   }
 
@@ -75,7 +78,7 @@ public class WorldTrace {
 
   private WorldSnapshot calcSnapshot(int index) {
     WorldSnapshot prev = getSnapshot(index - 1);
-    return prev.advance();
+    return prev.advance(control);
   }
 
   /**

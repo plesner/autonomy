@@ -23,6 +23,18 @@ public class IntegerValue extends AbstractValue {
         return IntegerValue.get(self.value * args[0].getIntValue());
       }
     });
+    addMethod("/", new IMethod<IntegerValue>() {
+      @Override
+      public IValue invoke(IntegerValue self, IValue[] args) {
+        return IntegerValue.get(self.value / args[0].getIntValue());
+      }
+    });
+    addMethod("%", new IMethod<IntegerValue>() {
+      @Override
+      public IValue invoke(IntegerValue self, IValue[] args) {
+        return IntegerValue.get(self.value % args[0].getIntValue());
+      }
+    });
     addMethod("<", new IMethod<IntegerValue>() {
       @Override
       public IValue invoke(IntegerValue self, IValue[] args) {

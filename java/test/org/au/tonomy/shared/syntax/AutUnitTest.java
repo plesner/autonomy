@@ -89,6 +89,9 @@ public class AutUnitTest extends TestSuite {
 
   public static final IValue JUNIT_WRAPPER = new TestWrapper();
 
+  /**
+   * A single runnable test case.
+   */
   private static interface ICase {
 
     public void runAsJunit(TestResult result);
@@ -108,9 +111,12 @@ public class AutUnitTest extends TestSuite {
     }
 
     private void runScript() {
+      Context context = new Context();
+      context.bind("$test", JUNIT_WRAPPER);
+      context.bind("$null", NullValue.get());
       Executor exec;
       try {
-        exec = Compiler.compile(section.getSource());
+        exec = Compiler.compile(context, section.getSource());
         assertTrue(section.expectSuccess());
       } catch (SyntaxError se) {
         String expected = section.getExpectedOffendingToken();
@@ -121,9 +127,7 @@ public class AutUnitTest extends TestSuite {
           return;
         }
       }
-      Context context = new Context();
-      context.bind("$test", JUNIT_WRAPPER);
-      exec.execute(context);
+      exec.execute();
     }
 
     public void runAsJunit(TestResult result) {

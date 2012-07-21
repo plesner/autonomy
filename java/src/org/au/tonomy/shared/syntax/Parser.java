@@ -15,6 +15,10 @@ import org.au.tonomy.shared.syntax.Token.Type;
  */
 public class Parser {
 
+  private enum NestingLevel {
+    TOPLEVEL, LOCAL
+  }
+
   private static final String DEF = "def";
   private static final String FN = "fn";
 
@@ -98,10 +102,10 @@ public class Parser {
     return new SyntaxError(getCurrent());
   }
 
-  private Ast parseBlockBody(Type endMarker) throws SyntaxError {
+  private Ast parseBlockBody(NestingLevel level, Type endMarker) throws SyntaxError {
     List<Ast> exprs = new ArrayList<Ast>();
     while (hasMore() && !at(endMarker)) {
-      Ast next = parseStatement(endMarker);
+      Ast next = parseStatement(level, endMarker);
       exprs.add(next);
     }
     return Ast.Block.create(exprs);
@@ -130,6 +134,9 @@ public class Parser {
       return parseLambda(expectSemi);
     } else if (at(Type.LBRACE)) {
       return parseBlockExpression();
+    } else if (atWord("here")) {
+      expectWord("here");
+      return new Ast.Here();
     } else {
       return parseMacroExpression(expectSemi);
     }
@@ -253,24 +260,33 @@ public class Parser {
       expect(Type.SEMI);
   }
 
-  private Ast parseStatement(Type endMarker) throws SyntaxError {
+  private Ast parseStatement(NestingLevel level, Type endMarker) throws SyntaxError {
+    List<Ast> annots = Collections.emptyList();
+    while (at(Type.AT)) {
+      expect(Type.AT);
+      AstOrArguments annot = parseAtomicExpression();
+      if (annots.isEmpty())
+        annots = new ArrayList<Ast>();
+      annots.add(annot.asAst());
+    }
     if (atWord(DEF)) {
-      return parseDefinition(endMarker);
+      return parseDefinition(level, annots, endMarker);
     } else {
       return parseExpression(true);
     }
   }
 
-  private Ast parseDefinition(Type endMarker) throws SyntaxError {
+  private Ast parseDefinition(NestingLevel level, List<Ast> annots,
+      Type endMarker) throws SyntaxError {
     expectWord(DEF);
     if (at(Type.LBRACK)) {
-      return parseMacroDefinition(endMarker);
+      return parseMacroDefinition(annots, endMarker);
     } else {
-      return parsePlainDefinition(endMarker);
+      return parsePlainDefinition(level, annots, endMarker);
     }
   }
 
-  private Ast parseMacroDefinition(Type endMarker) throws SyntaxError {
+  private Ast parseMacroDefinition(List<Ast> annots, Type endMarker) throws SyntaxError {
     Macro macro = parseMacroHeader();
     MacroParser oldParser = macroParser;
     MacroParser newParser = new MacroParser(macroParser);
@@ -278,11 +294,11 @@ public class Parser {
     Ast rest;
     try {
       macroParser = newParser;
-      rest = parseBlockBody(endMarker);
+      rest = parseBlockBody(NestingLevel.LOCAL, endMarker);
     } finally {
       macroParser = oldParser;
     }
-    return new Ast.Definition(macro.getId(), macro.getBody(), rest);
+    return new Ast.LocalDefinition(annots, macro.getId(), macro.getBody(), rest);
   }
 
   private Macro parseMacroHeader() throws SyntaxError {
@@ -317,17 +333,22 @@ public class Parser {
     return macro;
   }
 
-  private Ast parsePlainDefinition(Type endMarker) throws SyntaxError {
+  private Ast parsePlainDefinition(NestingLevel level, List<Ast> annots,
+      Type endMarker) throws SyntaxError {
     String name = expect(Type.IDENTIFIER);
     expect(Type.ASSIGN);
     Ast value = parseExpression(true);
-    Ast body = parseBlockBody(endMarker);
-    return new Ast.Definition(name, value, body);
+    Ast body = parseBlockBody(level, endMarker);
+    if (level == NestingLevel.TOPLEVEL) {
+      return new Ast.ToplevelDefinition(annots, name, value, body);
+    } else {
+      return new Ast.LocalDefinition(annots, name, value, body);
+    }
   }
 
   private Ast parseBlockExpression() throws SyntaxError {
     expect(Type.LBRACE);
-    Ast result = parseBlockBody(Type.RBRACE);
+    Ast result = parseBlockBody(NestingLevel.LOCAL, Type.RBRACE);
     expect(Type.RBRACE);
     return result;
   }
@@ -393,7 +414,7 @@ public class Parser {
   }
 
   public static Ast parse(MacroParser keywordParser, List<Token> tokens) throws SyntaxError {
-    return new Parser(keywordParser, tokens).parseBlockBody(Type.EOF);
+    return new Parser(keywordParser, tokens).parseBlockBody(NestingLevel.TOPLEVEL, Type.EOF);
   }
 
 }

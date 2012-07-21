@@ -3,6 +3,8 @@ package org.au.tonomy.shared.runtime;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.au.tonomy.shared.util.Assert;
+
 /**
  * Global state associated with runtime execution.
  */
@@ -18,7 +20,8 @@ public class Context {
    * Looks up a name in the global namespace.
    */
   public IValue getGlobal(Object name) {
-    return globals.get(name);
+    IValue result = globals.get(name);
+    return Assert.notNull(result);
   }
 
 }
