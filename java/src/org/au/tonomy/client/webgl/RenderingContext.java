@@ -245,6 +245,13 @@ public class RenderingContext extends JavaScriptObject {
   }-*/;
 
   /**
+   * Sets the specified uniform to the value provided.
+   */
+  public final native void uniform1f(UniformLocation location, double value) /*-{
+    this.uniform1f(location, value);
+  }-*/;
+
+  /**
    * Render to the drawing buffer.
    */
   public final native void drawArrays(int mode, int first, int count) /*-{

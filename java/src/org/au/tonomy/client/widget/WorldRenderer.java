@@ -4,7 +4,7 @@ import static org.au.tonomy.client.webgl.RenderingContext.ARRAY_BUFFER;
 import static org.au.tonomy.client.webgl.RenderingContext.COLOR_BUFFER_BIT;
 import static org.au.tonomy.client.webgl.RenderingContext.FLOAT;
 import static org.au.tonomy.client.webgl.RenderingContext.FRAGMENT_SHADER;
-import static org.au.tonomy.client.webgl.RenderingContext.STATIC_DRAW;
+import static org.au.tonomy.client.webgl.RenderingContext.TRIANGLE_STRIP;
 import static org.au.tonomy.client.webgl.RenderingContext.VERTEX_SHADER;
 
 import java.util.Arrays;
@@ -12,19 +12,15 @@ import java.util.List;
 
 import org.au.tonomy.client.presentation.ICamera;
 import org.au.tonomy.client.presentation.Viewport;
-import org.au.tonomy.client.webgl.Buffer;
-import org.au.tonomy.client.webgl.Float32Array;
 import org.au.tonomy.client.webgl.Program;
 import org.au.tonomy.client.webgl.RenderingContext;
 import org.au.tonomy.client.webgl.Shader;
 import org.au.tonomy.client.webgl.TriangleStrip;
 import org.au.tonomy.client.webgl.UniformLocation;
 import org.au.tonomy.client.webgl.util.Color;
-import org.au.tonomy.client.webgl.util.Color.Adjustment;
 import org.au.tonomy.client.webgl.util.IWebGL;
 import org.au.tonomy.client.webgl.util.Mat4;
 import org.au.tonomy.client.webgl.util.Vec4;
-import org.au.tonomy.client.webgl.util.VecColor;
 import org.au.tonomy.client.world.shader.IShaderBundle;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.IRect;
@@ -49,16 +45,14 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
   private final Viewport<Vec4, Mat4> viewport;
   private final Canvas canvas;
 
-  private final TriangleStrip hexVertices;
+  private final TriangleStrip innerHexStrip;
+  private final TriangleStrip outerHexStrip;
   private final TriangleStrip unitVertices;
-  private final Buffer rectVertices;
   private final int vertexAttribLocation;
   private final UniformLocation u4fvPerspective;
   private final UniformLocation u1fX;
   private final UniformLocation u1fY;
-  private final UniformLocation u4fvFill;
-  private final UniformLocation u4fvStroke;
-  private final UniformLocation u1iColorSelector;
+  private final UniformLocation u4fvColor;
   private final Mat4 perspective = Mat4.create();
 
   @Override
@@ -87,12 +81,10 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     this.u4fvPerspective = context.getUniformLocation(shaderProgram, "perspective");
     this.u1fX = context.getUniformLocation(shaderProgram, "x");
     this.u1fY = context.getUniformLocation(shaderProgram, "y");
-    this.u4fvFill = context.getUniformLocation(shaderProgram, "colors[0]");
-    this.u4fvStroke = context.getUniformLocation(shaderProgram, "colors[1]");
-    this.u1iColorSelector = context.getUniformLocation(shaderProgram, "colorSelector");
-    this.hexVertices = newHexStrip(context, world.getGrid().getHexes(), 0.9);
+    this.u4fvColor = context.getUniformLocation(shaderProgram, "color");
+    this.innerHexStrip = newHexStrip(context, world.getGrid().getHexes(), 0.8);
+    this.outerHexStrip = newHexStrip(context, world.getGrid().getHexes(), 0.9);
     this.unitVertices = newHexStrip(context, Arrays.asList(world.getGrid().getHex(0, 0)), 0.5);
-    this.rectVertices = createRectVertices(context);
     context.clearColor(.975, .975, .975, 1.0);
   }
 
@@ -187,82 +179,54 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     return builder.build(context);
   }
 
-  private Buffer createRectVertices(RenderingContext context) {
-    Buffer result = context.createBuffer();
-    context.bindBuffer(ARRAY_BUFFER, result);
-    Float32Array vertices = Float32Array.create(
-        1.0, 1.0, 0.0,
-        0,   1.0, 0.0,
-        0,   0,   0.0,
-        1.0, 0,   0.0);
-    context.bufferData(ARRAY_BUFFER, vertices, STATIC_DRAW);
-    return result;
+  private void setColor(RenderingContext context, Color color) {
+    context.uniform4fv(u4fvColor, color.getVector());
   }
 
-  private native void setColors(RenderingContext gl, VecColor fill,
-      VecColor stroke) /*-{
-     gl.uniform4fv(this.@org.au.tonomy.client.widget.WorldRenderer::u4fvFill, fill);
-     gl.uniform4fv(this.@org.au.tonomy.client.widget.WorldRenderer::u4fvStroke, stroke);
-  }-*/;
+  private void setLocation(RenderingContext context, double x, double y) {
+    context.uniform1f(u1fX, x);
+    context.uniform1f(u1fY, y);
+  }
 
-  /**
-   * Draws the current array buffer at the given x, y, and scale using
-   * the given stroke and fill colors and stroke ratio. The position
-   * matrix is clobbered.
-   *
-   * This is all bundled into one native function to reduce the number
-   * of gwt calls between java and javascript in hosted mode.
-   */
-  private native void fillAndStrokeArrayBuffer(RenderingContext gl, double x,
-      double y, int count) /*-{
-    gl.uniform1f(this.@org.au.tonomy.client.widget.WorldRenderer::u1fX, x);
-    gl.uniform1f(this.@org.au.tonomy.client.widget.WorldRenderer::u1fY, y);
-    gl.uniform1i(this.@org.au.tonomy.client.widget.WorldRenderer::u1iColorSelector, 0);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, count);
-  }-*/;
+  private void draw(RenderingContext context, TriangleStrip strip) {
+    context.bindBuffer(ARRAY_BUFFER, strip);
+    context.vertexAttribPointer(vertexAttribLocation, 3, FLOAT, false, 0, 0);
+    context.drawArrays(TRIANGLE_STRIP, 0, strip.getVertexCount());
+  }
 
   public void paint(WorldTrace trace, double time) {
-    RenderingContext gl = webGlUtils.create3DContext(canvas);
+    RenderingContext context = webGlUtils.create3DContext(canvas);
 
     // Clear the whole canvas and reset the perspective.
-    gl.viewport(0, 0, getCanvasWidth(), getCanvasHeight());
-    gl.clear(COLOR_BUFFER_BIT);
+    context.viewport(0, 0, getCanvasWidth(), getCanvasHeight());
+    context.clear(COLOR_BUFFER_BIT);
     IRect bounds = viewport.getBounds();
     perspective
-        .resetOrtho(bounds.getLeft() - 1, bounds.getRight() + 1,
-            bounds.getBottom() - 1, bounds.getTop() + 1, -1.0, 1.0);
-    gl.uniformMatrix4fv(u4fvPerspective, false, perspective);
+        .resetOrtho(bounds.getLeft(), bounds.getRight(),
+            bounds.getBottom(), bounds.getTop(), -1.0, 1.0);
+    context.uniformMatrix4fv(u4fvPerspective, false, perspective);
+
+    setLocation(context, 0, 0);
 
     // Draw the hexes.
-    gl.bindBuffer(ARRAY_BUFFER, hexVertices);
-    gl.vertexAttribPointer(vertexAttribLocation, 3, FLOAT, false, 0, 0);
-
     Color ground = Color.create(.929, .749, .525, 1.0);
-    setColors(gl, ground.getVector(), ground.adjust(Adjustment.DARKER).getVector());
-    fillAndStrokeArrayBuffer(gl, 0, 0, hexVertices.getVertexCount());
+    setColor(context, ground.adjust(Color.Adjustment.DARKER));
+    draw(context, outerHexStrip);
+    setColor(context, ground);
+    draw(context, innerHexStrip);
 
     // Draw the units.
-    gl.bindBuffer(ARRAY_BUFFER, unitVertices);
-    gl.vertexAttribPointer(vertexAttribLocation, 3, FLOAT, false, 0, 0);
-
     Color red = Color.create(.50, .0, .0, 1.0);
-    setColors(gl, red.getVector(), Color.BLACK.getVector());
+    setColor(context, red);
     for (IUnitState state : trace.getUnits(time)) {
       Hex from = state.getFrom();
       Hex to = state.getTo();
       double p = state.getProgress();
       double x = (to.getCenterX() * p) + (from.getCenterX() * (1 - p));
       double y = (to.getCenterY() * p) + (from.getCenterY() * (1 - p));
-      fillAndStrokeArrayBuffer(gl, x, y, unitVertices.getVertexCount());
+      setLocation(context, x, y);
+      draw(context, unitVertices);
     }
-
-    /* Draw the viewport.
-    gl.bindBuffer(ARRAY_BUFFER, rectVertices);
-    gl.vertexAttribPointer(vertexAttribLocation, 3, FLOAT, false, 0, 0);
-    setScale(gl, bounds.getWidth(), bounds.getHeight());
-    setColors(gl, Color.BLACK.getVector(), Color.BLACK.getVector());
-    strokeArrayBuffer(gl, bounds.getLeft(), bounds.getBottom(), 4);
-    */
   }
 
 }

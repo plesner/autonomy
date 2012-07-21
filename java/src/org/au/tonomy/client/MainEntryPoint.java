@@ -32,7 +32,7 @@ public class MainEntryPoint implements EntryPoint {
   }
 
   private void startMain(IWebGL webGl, Panel root) {
-    World world = new World(9, 9);
+    World world = new World(32, 32);
     WorldSnapshot initial = new WorldSnapshot(world);
     initial.spawnUnit(4, 4);
     WorldTrace trace = new WorldTrace(world, initial);
