@@ -4,25 +4,26 @@ import static org.au.tonomy.client.webgl.RenderingContext.ARRAY_BUFFER;
 import static org.au.tonomy.client.webgl.RenderingContext.COLOR_BUFFER_BIT;
 import static org.au.tonomy.client.webgl.RenderingContext.FLOAT;
 import static org.au.tonomy.client.webgl.RenderingContext.FRAGMENT_SHADER;
-import static org.au.tonomy.client.webgl.RenderingContext.TRIANGLE_STRIP;
 import static org.au.tonomy.client.webgl.RenderingContext.VERTEX_SHADER;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.au.tonomy.client.presentation.ICamera;
 import org.au.tonomy.client.presentation.Viewport;
 import org.au.tonomy.client.webgl.Program;
 import org.au.tonomy.client.webgl.RenderingContext;
+import org.au.tonomy.client.webgl.RenderingContext.DrawMode;
 import org.au.tonomy.client.webgl.Shader;
-import org.au.tonomy.client.webgl.TriangleStrip;
+import org.au.tonomy.client.webgl.Triangles;
 import org.au.tonomy.client.webgl.UniformLocation;
 import org.au.tonomy.client.webgl.util.Color;
 import org.au.tonomy.client.webgl.util.IWebGL;
 import org.au.tonomy.client.webgl.util.Mat4;
 import org.au.tonomy.client.webgl.util.Vec4;
+import org.au.tonomy.client.webmon.Counter;
 import org.au.tonomy.client.world.shader.IShaderBundle;
 import org.au.tonomy.shared.util.Assert;
+import org.au.tonomy.shared.util.ExtraMath;
 import org.au.tonomy.shared.util.IRect;
 import org.au.tonomy.shared.world.Hex;
 import org.au.tonomy.shared.world.Hex.Corner;
@@ -39,15 +40,16 @@ import com.google.gwt.core.client.GWT;
  */
 public class WorldRenderer implements ICamera<Vec4, Mat4> {
 
+  private static final Counter PAINT_COUNTER = Counter.create("renderer ticks");
   private static final IShaderBundle SHADER_BUNDLE = GWT.create(IShaderBundle.class);
 
   private final IWebGL webGlUtils;
   private final Viewport<Vec4, Mat4> viewport;
   private final Canvas canvas;
 
-  private final TriangleStrip innerHexStrip;
-  private final TriangleStrip outerHexStrip;
-  private final TriangleStrip unitVertices;
+  private final Triangles innerHexStrip;
+  private final Triangles outerHexStrip;
+  private final Triangles unitVertices;
   private final int vertexAttribLocation;
   private final UniformLocation u4fvPerspective;
   private final UniformLocation u1fX;
@@ -84,7 +86,7 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     this.u4fvColor = context.getUniformLocation(shaderProgram, "color");
     this.innerHexStrip = newHexStrip(context, world.getGrid().getHexes(), 0.8);
     this.outerHexStrip = newHexStrip(context, world.getGrid().getHexes(), 0.9);
-    this.unitVertices = newHexStrip(context, Arrays.asList(world.getGrid().getHex(0, 0)), 0.5);
+    this.unitVertices = newCircleFan(context, 20, 0.5);
     context.clearColor(.975, .975, .975, 1.0);
   }
 
@@ -106,12 +108,25 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     return program;
   }
 
+  private Triangles newCircleFan(RenderingContext context, int segmentCount,
+      double radius) {
+    Triangles.Builder builder = Triangles.builder(segmentCount + 1);
+    builder.start(0, 0, 0);
+    for (int i = 0; i <= segmentCount; i++) {
+      double degree = (((double) i) / segmentCount) * ExtraMath.TAU;
+      double x = Math.cos(degree) * radius;
+      double y = Math.sin(degree) * radius;
+      builder.add(i, x, y, 0);
+    }
+    return builder.build(context, DrawMode.TRIANGLE_FAN);
+  }
+
   /**
    * Creates the buffer containing the hex vertices.
    */
-  private TriangleStrip newHexStrip(RenderingContext context, List<Hex> hexList, double s) {
+  private Triangles newHexStrip(RenderingContext context, List<Hex> hexList, double s) {
     Assert.that(!hexList.isEmpty());
-    TriangleStrip.Builder builder = TriangleStrip.builder(10 * hexList.size() - 3);
+    Triangles.Builder builder = Triangles.builder(10 * hexList.size() - 3);
     for (int i = 0; i < hexList.size(); i++) {
       Hex hex = hexList.get(i);
       double x = hex.getCenterX();
@@ -176,7 +191,7 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
                 0.0);
       }
     }
-    return builder.build(context);
+    return builder.build(context, DrawMode.TRIANGLE_STRIP);
   }
 
   private void setColor(RenderingContext context, Color color) {
@@ -188,13 +203,14 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     context.uniform1f(u1fY, y);
   }
 
-  private void draw(RenderingContext context, TriangleStrip strip) {
+  private void drawTriangles(RenderingContext context, Triangles strip) {
     context.bindBuffer(ARRAY_BUFFER, strip);
     context.vertexAttribPointer(vertexAttribLocation, 3, FLOAT, false, 0, 0);
-    context.drawArrays(TRIANGLE_STRIP, 0, strip.getVertexCount());
+    context.drawArrays(strip.getDrawMode(), 0, strip.getVertexCount());
   }
 
   public void paint(WorldTrace trace, double time) {
+    PAINT_COUNTER.increment();
     RenderingContext context = webGlUtils.create3DContext(canvas);
 
     // Clear the whole canvas and reset the perspective.
@@ -211,9 +227,9 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     // Draw the hexes.
     Color ground = Color.create(.929, .749, .525, 1.0);
     setColor(context, ground.adjust(Color.Adjustment.DARKER));
-    draw(context, outerHexStrip);
+    drawTriangles(context, outerHexStrip);
     setColor(context, ground);
-    draw(context, innerHexStrip);
+    drawTriangles(context, innerHexStrip);
 
     // Draw the units.
     Color red = Color.create(.50, .0, .0, 1.0);
@@ -225,7 +241,7 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
       double x = (to.getCenterX() * p) + (from.getCenterX() * (1 - p));
       double y = (to.getCenterY() * p) + (from.getCenterY() * (1 - p));
       setLocation(context, x, y);
-      draw(context, unitVertices);
+      drawTriangles(context, unitVertices);
     }
   }
 

@@ -42,13 +42,23 @@ public class RenderingContext extends JavaScriptObject {
   public static final int UNSIGNED_INT = 0x1405;
   public static final int FLOAT = 0x1406;
 
-  public static final int POINTS = 0x0000;
-  public static final int LINES = 0x0001;
-  public static final int LINE_LOOP = 0x0002;
-  public static final int LINE_STRIP = 0x0003;
-  public static final int TRIANGLES = 0x0004;
-  public static final int TRIANGLE_STRIP = 0x0005;
-  public static final int TRIANGLE_FAN = 0x0006;
+  public enum DrawMode {
+
+    POINTS(0x0000),
+    LINES(0x0001),
+    LINE_LOOP(0x0002),
+    LINE_STRIP(0x0003),
+    TRIANGLES(0x0004),
+    TRIANGLE_STRIP(0x0005),
+    TRIANGLE_FAN(0x0006);
+
+    private final int code;
+
+    private DrawMode(int code) {
+      this.code = code;
+    }
+
+  }
 
   protected RenderingContext() { }
 
@@ -254,8 +264,9 @@ public class RenderingContext extends JavaScriptObject {
   /**
    * Render to the drawing buffer.
    */
-  public final native void drawArrays(int mode, int first, int count) /*-{
-    this.drawArrays(mode, first, count);
+  public final native void drawArrays(DrawMode mode, int first, int count) /*-{
+    this.drawArrays(mode.@org.au.tonomy.client.webgl.RenderingContext.DrawMode::code,
+        first, count);
   }-*/;
 
   /**

@@ -3,12 +3,14 @@ package org.au.tonomy.client.webgl;
 import static org.au.tonomy.client.webgl.RenderingContext.ARRAY_BUFFER;
 import static org.au.tonomy.client.webgl.RenderingContext.STATIC_DRAW;
 
+import org.au.tonomy.client.webgl.RenderingContext.DrawMode;
+
 /**
  * A buffer that contains data for a triangle strip.
  */
-public class TriangleStrip extends Buffer {
+public class Triangles extends Buffer {
 
-  protected TriangleStrip() { }
+  protected Triangles() { }
 
   /**
    * Initializes the vertex count field.
@@ -18,10 +20,24 @@ public class TriangleStrip extends Buffer {
   }-*/;
 
   /**
+   * Initializes the draw mode field.
+   */
+  private final native void initDrawMode(DrawMode mode) /*-{
+    this.drawMode = mode;
+  }-*/;
+
+  /**
    * Returns the number of vertices stored in this strip.
    */
   public final native int getVertexCount() /*-{
     return this.vertexCount;
+  }-*/;
+
+  /**
+   * Returns the draw mode of this set of triangles.
+   */
+  public final native DrawMode getDrawMode() /*-{
+    return this.drawMode;
   }-*/;
 
   /**
@@ -55,11 +71,12 @@ public class TriangleStrip extends Buffer {
     /**
      * Builds a triangle strip containing the data from this builder.
      */
-    public final TriangleStrip build(RenderingContext context) {
-      TriangleStrip result = context.<TriangleStrip>createBuffer();
+    public final Triangles build(RenderingContext context, DrawMode mode) {
+      Triangles result = context.<Triangles>createBuffer();
       context.bindBuffer(ARRAY_BUFFER, result);
       context.bufferData(ARRAY_BUFFER, this, STATIC_DRAW);
       result.initVertexCount(getLength() / 3);
+      result.initDrawMode(mode);
       return result;
     }
 
