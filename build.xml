@@ -59,7 +59,7 @@
       <arg value="${war}"/>
       <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
       <arg line="${gwt.args}"/>
-      <arg value="org.au.tonomy.GwtModule"/>
+      <arg value="org.au.tonomy.Autonomy"/>
     </java>
   </target>
 
@@ -73,12 +73,14 @@
       </classpath>
       <jvmarg value="-Xmx256M"/>
       <arg value="-startupUrl"/>
-      <arg value="org.au.tonomy.GwtModule/index.html"/>
+      <arg value="org.au.tonomy.Autonomy/main.html"/>
       <arg line="-war"/>
       <arg value="${war}"/>
       <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
       <arg line="${gwt.args}"/>
-      <arg value="org.au.tonomy.GwtModule"/>
+      <arg value="org.au.tonomy.Autonomy"/>
+      <arg value="-bindAddress"/>
+      <arg value="0.0.0.0"/>
     </java>
   </target>
 
@@ -153,7 +155,7 @@
   <target name="build" depends="gwtc" description="Build this project" />
 
   <target name="war" depends="build" description="Create a war file">
-    <zip destfile="${out.path}/GwtEntryPoint.war" basedir="${war}"/>
+    <zip destfile="${out.path}/Autonomy.war" basedir="${war}"/>
   </target>
 
 </project>

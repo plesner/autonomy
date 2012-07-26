@@ -19,10 +19,6 @@ public class LambdaValue extends AbstractValue {
             }
             return self.outerScope.getValue(name, module);
           }
-          @Override
-          public void addAnnotated(IValue annotation, List<IValue> values) {
-            self.outerScope.addAnnotated(annotation, values);
-          }
         });
       }
     });

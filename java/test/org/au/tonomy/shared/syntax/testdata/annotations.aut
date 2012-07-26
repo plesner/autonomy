@@ -1,6 +1,9 @@
 def $annot := fn ($decl) {
-  
+  $test.assert_equals(4, $decl.value());
+  $decl.set_value(5);
 }
 
 @$annot
 def $tester := 4;
+
+$test.assert_equals(5, $tester);

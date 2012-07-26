@@ -1,7 +1,5 @@
 package org.au.tonomy.shared.runtime;
 
-import java.util.List;
-
 import org.au.tonomy.shared.syntax.Ast;
 /**
  * A convenience wrapper for executing an ast.
@@ -12,10 +10,6 @@ public class Executor {
     @Override
     public IValue getValue(Object name, ModuleValue module) {
       return module.getGlobal(name);
-    }
-    @Override
-    public void addAnnotated(IValue annotation, List<IValue> values) {
-      // nothing to do
     }
   };
 

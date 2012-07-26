@@ -5,10 +5,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.au.tonomy.shared.runtime.AbstractValue;
 import org.au.tonomy.shared.runtime.HereValue;
 import org.au.tonomy.shared.runtime.IScope;
 import org.au.tonomy.shared.runtime.IValue;
 import org.au.tonomy.shared.runtime.LambdaValue;
+import org.au.tonomy.shared.runtime.MethodRegister;
 import org.au.tonomy.shared.runtime.ModuleValue;
 import org.au.tonomy.shared.runtime.NullValue;
 import org.au.tonomy.shared.runtime.TupleValue;
@@ -18,7 +20,7 @@ import org.au.tonomy.shared.util.Assert;
 /**
  * A syntax tree node.
  */
-public abstract class Ast extends AstOrArguments {
+public abstract class Ast implements AstOrArguments {
 
   /**
    * Executes this syntax in the given scope.
@@ -234,7 +236,7 @@ public abstract class Ast extends AstOrArguments {
 
   }
 
-  public static class Arguments extends AstOrArguments {
+  public static class Arguments implements AstOrArguments {
 
     private final List<Ast> children;
 
@@ -347,16 +349,6 @@ public abstract class Ast extends AstOrArguments {
               ? v
               : outerScope.getValue(name, innerContext);
         }
-        @Override
-        public void addAnnotated(IValue annot, List<IValue> values) {
-          for (IValue annotValue : annotValues) {
-            if (annotValue == annot) {
-              values.add(v);
-              break;
-            }
-          }
-          outerScope.addAnnotated(annot, values);
-        }
       });
     }
 
@@ -378,14 +370,47 @@ public abstract class Ast extends AstOrArguments {
       if (getAnnotations().isEmpty()) {
         annotValues = Collections.emptyList();
       } else {
+        DeclarationValue declValue = new DeclarationValue(value);
         annotValues = new ArrayList<IValue>();
         for (Ast annotAst : getAnnotations()) {
           IValue annotValue = annotAst.run(outerContext, outerScope);
+          annotValue.invoke("()", new IValue[] {declValue});
           annotValues.add(annotValue);
         }
+        value = declValue.value;
       }
       outerContext.bind(getName(), value);
       return getBody().run(outerContext, outerScope);
+    }
+
+  }
+
+  private static class DeclarationValue extends AbstractValue {
+
+    private static final MethodRegister<DeclarationValue> METHODS = new MethodRegister<DeclarationValue>() {{
+      addMethod(".value", new IMethod<DeclarationValue>() {
+        @Override
+        public IValue invoke(DeclarationValue self, IValue[] args) {
+          return self.value;
+        }
+      });
+      addMethod(".set_value", new IMethod<DeclarationValue>() {
+        @Override
+        public IValue invoke(DeclarationValue self, IValue[] args) {
+          return self.value = args[0];
+        }
+      });
+    }};
+
+    private IValue value;
+
+    public DeclarationValue(IValue value) {
+      this.value = value;
+    }
+
+    @Override
+    public IValue invoke(String name, IValue[] args) {
+      return METHODS.invoke(name, this, args);
     }
 
   }
