@@ -1,4 +1,4 @@
-def $annot := fn ($decl) {
+def $annot($decl) {
   $test.assert_equals(4, $decl.value());
   $decl.set_value(5);
 }

@@ -144,6 +144,10 @@ public class Parser {
 
   private Ast parseLambda(boolean expectSemi) throws SyntaxError {
     expectWord("fn");
+    return parseLambdaTail(expectSemi);
+  }
+
+  private Ast parseLambdaTail(boolean expectSemi) throws SyntaxError {
     List<String> params = parseParameters();
     Ast body = parseFunctionBody(expectSemi);
     return new Ast.Lambda(params, body);
@@ -336,8 +340,13 @@ public class Parser {
   private Ast parsePlainDefinition(NestingLevel level, List<Ast> annots,
       Type endMarker) throws SyntaxError {
     String name = expect(Type.IDENTIFIER);
-    expect(Type.ASSIGN);
-    Ast value = parseExpression(true);
+    Ast value;
+    if (at(Type.ASSIGN)) {
+      expect(Type.ASSIGN);
+      value = parseExpression(true);
+    } else {
+      value = parseLambdaTail(true);
+    }
     Ast body = parseBlockBody(level, endMarker);
     if (level == NestingLevel.TOPLEVEL) {
       return new Ast.ToplevelDefinition(annots, name, value, body);

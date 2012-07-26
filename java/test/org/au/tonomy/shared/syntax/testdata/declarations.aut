@@ -14,3 +14,7 @@ def $g := {
 }
 
 $test.assert_equals(14, $g);
+
+def $h() => 3;
+
+$test.assert_equals($h(), 3);

@@ -5,6 +5,6 @@ def $WEST := 3;
 def $SOUTH_WEST := 4;
 def $SOUTH_EAST := 5;
 
-def $main := fn ($unit) {
+def $main($unit) {
   $unit.move(($step / 4) % 6);
 }
