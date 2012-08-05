@@ -2,7 +2,9 @@ package org.au.tonomy.client.webgl;
 
 import org.au.tonomy.client.webgl.WebGLError.ProgramLinkError;
 import org.au.tonomy.client.webgl.WebGLError.ShaderSyntaxError;
+import org.au.tonomy.client.webgl.util.AttributeLocation;
 import org.au.tonomy.client.webgl.util.Mat4;
+import org.au.tonomy.client.webgl.util.Vec3;
 import org.au.tonomy.client.webgl.util.Vec4;
 
 import com.google.gwt.core.client.JavaScriptObject;
@@ -161,19 +163,28 @@ public class RenderingContext extends JavaScriptObject {
   }-*/;
 
   /**
-   * Returns the generic attribute index that the attribute variable
+   * Returns the generic attribute location that the attribute variable
    * named name was bound to when the program object named program was
    * last linked.
    */
-  public final native int getAttribLocation(Program program, String name) /*-{
+  public final AttributeLocation getAttribLocation(Program program, String name) {
+    return new AttributeLocation(getAttribLocationIndex(program, name));
+  }
+
+  /**
+   * Returns the raw attribute index that the attribute variable
+   * named name was bound to when the program object named program was
+   * last linked.
+   */
+  private final native int getAttribLocationIndex(Program program, String name) /*-{
     return this.getAttribLocation(program, name);
   }-*/;
 
   /**
    * Enable the vertex attribute at index as an array.
    */
-  public final native void enableVertexAttribArray(int index) /*-{
-    this.enableVertexAttribArray(index);
+  public final native void enableVertexAttribArray(AttributeLocation location) /*-{
+    this.enableVertexAttribArray(location.@org.au.tonomy.client.webgl.util.AttributeLocation::getIndex());
   }-*/;
 
   /**
@@ -234,9 +245,10 @@ public class RenderingContext extends JavaScriptObject {
    * target to the vertex attribute at the passed index. Size is number
    * of components per attribute. Stride and offset are in units of bytes.
    */
-  public final native void vertexAttribPointer(int index, int size,
-      int type, boolean normalized, int stride, int offset) /*-{
-    this.vertexAttribPointer(index, size, type, normalized, stride, offset);
+  public final native void vertexAttribPointer(AttributeLocation attrib,
+      int size, int type, boolean normalized, int stride, int offset) /*-{
+    this.vertexAttribPointer(attrib.@org.au.tonomy.client.webgl.util.AttributeLocation::getIndex(),
+        size, type, normalized, stride, offset);
   }-*/;
 
   /**
@@ -252,6 +264,13 @@ public class RenderingContext extends JavaScriptObject {
    */
   public final native void uniform4fv(UniformLocation location, Vec4 vector) /*-{
     this.uniform4fv(location, vector);
+  }-*/;
+
+  /**
+   * Sets the specified uniform or uniforms to the values provided.
+   */
+  public final native void uniform3fv(UniformLocation location, Vec3 vector) /*-{
+    this.uniform3fv(location, vector);
   }-*/;
 
   /**
