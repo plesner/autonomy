@@ -1,10 +1,9 @@
 package org.au.tonomy.client.webmon;
 
-import com.google.gwt.core.client.JavaScriptObject;
 /**
  * A wrapper around a webmon counter.
  */
-public class Counter extends JavaScriptObject {
+public class Counter extends Variable<Counter> {
 
   protected Counter() { }
 

@@ -8,9 +8,9 @@ import org.au.tonomy.client.webgl.RenderingContext.DrawMode;
 /**
  * A buffer that contains data for a triangle strip.
  */
-public class Triangles extends Buffer {
+public class TriangleBuffer extends Buffer {
 
-  protected Triangles() { }
+  protected TriangleBuffer() { }
 
   /**
    * Initializes the vertex count field.
@@ -43,14 +43,14 @@ public class Triangles extends Buffer {
   /**
    * A utility for constructing a triangle strip.
    */
-  public static class Builder extends Float32Array {
+  public static class TriangleArray extends Float32Array {
 
-    protected Builder() { }
+    protected TriangleArray() { }
 
     /**
      * Sets the coordinates of the start point.
      */
-    public final native Builder start(double x, double y, double z) /*-{
+    public final native TriangleArray start(double x, double y, double z) /*-{
       this[0] = x;
       this[1] = y;
       this[2] = z;
@@ -60,7 +60,7 @@ public class Triangles extends Buffer {
     /**
      * Sets the coordinates of the index'th triangle.
      */
-    public final native Builder add(int index, double x, double y, double z) /*-{
+    public final native TriangleArray add(int index, double x, double y, double z) /*-{
       var offset = 3 + (3 * index);
       this[offset + 0] = x;
       this[offset + 1] = y;
@@ -71,8 +71,8 @@ public class Triangles extends Buffer {
     /**
      * Builds a triangle strip containing the data from this builder.
      */
-    public final Triangles build(RenderingContext context, DrawMode mode) {
-      Triangles result = context.<Triangles>createBuffer();
+    public final TriangleBuffer toBuffer(RenderingContext context, DrawMode mode) {
+      TriangleBuffer result = context.<TriangleBuffer>createBuffer();
       context.bindBuffer(ARRAY_BUFFER, result);
       context.bufferData(ARRAY_BUFFER, this, STATIC_DRAW);
       result.initVertexCount(getLength() / 3);
@@ -86,7 +86,7 @@ public class Triangles extends Buffer {
    * Creates a new all-zero triangle strip with room for the given
    * number of triangles.
    */
-  public static native Builder builder(int count) /*-{
+  public static native TriangleArray builder(int count) /*-{
     return new Float32Array(3 + 3 * count);
   }-*/;
 

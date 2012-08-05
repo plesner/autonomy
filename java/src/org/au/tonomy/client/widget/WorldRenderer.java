@@ -14,13 +14,14 @@ import org.au.tonomy.client.webgl.Program;
 import org.au.tonomy.client.webgl.RenderingContext;
 import org.au.tonomy.client.webgl.RenderingContext.DrawMode;
 import org.au.tonomy.client.webgl.Shader;
-import org.au.tonomy.client.webgl.Triangles;
+import org.au.tonomy.client.webgl.TriangleBuffer;
 import org.au.tonomy.client.webgl.UniformLocation;
 import org.au.tonomy.client.webgl.util.Color;
 import org.au.tonomy.client.webgl.util.IWebGL;
 import org.au.tonomy.client.webgl.util.Mat4;
 import org.au.tonomy.client.webgl.util.Vec4;
 import org.au.tonomy.client.webmon.Counter;
+import org.au.tonomy.client.webmon.Timer;
 import org.au.tonomy.client.world.shader.IShaderBundle;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.ExtraMath;
@@ -40,16 +41,24 @@ import com.google.gwt.core.client.GWT;
  */
 public class WorldRenderer implements ICamera<Vec4, Mat4> {
 
-  private static final Counter PAINT_COUNTER = Counter.create("renderer ticks");
+  private static final Counter FRAME_RATE_COUNTER = Counter
+      .create("Frame rate")
+      .setDescription("Renderer frame rate")
+      .calcRate("1s");
+
+  private static final Timer RENDER_TIMER = Timer
+      .create("Render time")
+      .setDescription("The time it takes to render a frame");
+
   private static final IShaderBundle SHADER_BUNDLE = GWT.create(IShaderBundle.class);
 
   private final IWebGL webGlUtils;
   private final Viewport<Vec4, Mat4> viewport;
   private final Canvas canvas;
 
-  private final Triangles innerHexStrip;
-  private final Triangles outerHexStrip;
-  private final Triangles unitVertices;
+  private final TriangleBuffer innerHexStrip;
+  private final TriangleBuffer outerHexStrip;
+  private final TriangleBuffer unitVertices;
   private final int vertexAttribLocation;
   private final UniformLocation u4fvPerspective;
   private final UniformLocation u1fX;
@@ -78,12 +87,12 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     this.canvas = canvas;
     RenderingContext context = webGlUtils.create3DContext(canvas);
     Program shaderProgram = linkShaders(context);
-    this.vertexAttribLocation = context.getAttribLocation(shaderProgram, "vertex");
+    this.vertexAttribLocation = context.getAttribLocation(shaderProgram, "aVertex");
     context.enableVertexAttribArray(vertexAttribLocation);
-    this.u4fvPerspective = context.getUniformLocation(shaderProgram, "perspective");
-    this.u1fX = context.getUniformLocation(shaderProgram, "x");
-    this.u1fY = context.getUniformLocation(shaderProgram, "y");
-    this.u4fvColor = context.getUniformLocation(shaderProgram, "color");
+    this.u4fvPerspective = context.getUniformLocation(shaderProgram, "uPerspective");
+    this.u1fX = context.getUniformLocation(shaderProgram, "uX");
+    this.u1fY = context.getUniformLocation(shaderProgram, "uY");
+    this.u4fvColor = context.getUniformLocation(shaderProgram, "uColor");
     this.innerHexStrip = newHexStrip(context, world.getGrid().getHexes(), 0.8);
     this.outerHexStrip = newHexStrip(context, world.getGrid().getHexes(), 0.9);
     this.unitVertices = newCircleFan(context, 20, 0.5);
@@ -108,9 +117,9 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     return program;
   }
 
-  private Triangles newCircleFan(RenderingContext context, int segmentCount,
+  private TriangleBuffer newCircleFan(RenderingContext context, int segmentCount,
       double radius) {
-    Triangles.Builder builder = Triangles.builder(segmentCount + 1);
+    TriangleBuffer.TriangleArray builder = TriangleBuffer.builder(segmentCount + 1);
     builder.start(0, 0, 0);
     for (int i = 0; i <= segmentCount; i++) {
       double degree = (((double) i) / segmentCount) * ExtraMath.TAU;
@@ -118,15 +127,15 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
       double y = Math.sin(degree) * radius;
       builder.add(i, x, y, 0);
     }
-    return builder.build(context, DrawMode.TRIANGLE_FAN);
+    return builder.toBuffer(context, DrawMode.TRIANGLE_FAN);
   }
 
   /**
    * Creates the buffer containing the hex vertices.
    */
-  private Triangles newHexStrip(RenderingContext context, List<Hex> hexList, double s) {
+  private TriangleBuffer newHexStrip(RenderingContext context, List<Hex> hexList, double s) {
     Assert.that(!hexList.isEmpty());
-    Triangles.Builder builder = Triangles.builder(10 * hexList.size() - 3);
+    TriangleBuffer.TriangleArray builder = TriangleBuffer.builder(10 * hexList.size() - 3);
     for (int i = 0; i < hexList.size(); i++) {
       Hex hex = hexList.get(i);
       double x = hex.getCenterX();
@@ -191,7 +200,7 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
                 0.0);
       }
     }
-    return builder.build(context, DrawMode.TRIANGLE_STRIP);
+    return builder.toBuffer(context, DrawMode.TRIANGLE_STRIP);
   }
 
   private void setColor(RenderingContext context, Color color) {
@@ -203,14 +212,23 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     context.uniform1f(u1fY, y);
   }
 
-  private void drawTriangles(RenderingContext context, Triangles strip) {
+  private void drawTriangles(RenderingContext context, TriangleBuffer strip) {
     context.bindBuffer(ARRAY_BUFFER, strip);
     context.vertexAttribPointer(vertexAttribLocation, 3, FLOAT, false, 0, 0);
     context.drawArrays(strip.getDrawMode(), 0, strip.getVertexCount());
   }
 
   public void paint(WorldTrace trace, double time) {
-    PAINT_COUNTER.increment();
+    FRAME_RATE_COUNTER.increment();
+    long start = System.currentTimeMillis();
+    try {
+      render(trace, time);
+    } finally {
+      RENDER_TIMER.record(System.currentTimeMillis() - start);
+    }
+  }
+
+  private void render(WorldTrace trace, double time) {
     RenderingContext context = webGlUtils.create3DContext(canvas);
 
     // Clear the whole canvas and reset the perspective.
