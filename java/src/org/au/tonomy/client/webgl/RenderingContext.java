@@ -60,6 +60,10 @@ public class RenderingContext extends JavaScriptObject {
       this.code = code;
     }
 
+    public int getCode() {
+      return code;
+    }
+
   }
 
   protected RenderingContext() { }

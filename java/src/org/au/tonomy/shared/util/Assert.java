@@ -18,4 +18,9 @@ public class Assert {
     return obj;
   }
 
+  public static <T> T isNull(T obj) {
+    that(obj == null);
+    return obj;
+  }
+
 }

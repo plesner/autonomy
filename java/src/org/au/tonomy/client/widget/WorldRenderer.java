@@ -1,22 +1,14 @@
 package org.au.tonomy.client.widget;
 
-import static org.au.tonomy.client.webgl.RenderingContext.ARRAY_BUFFER;
 import static org.au.tonomy.client.webgl.RenderingContext.COLOR_BUFFER_BIT;
-import static org.au.tonomy.client.webgl.RenderingContext.FLOAT;
-import static org.au.tonomy.client.webgl.RenderingContext.FRAGMENT_SHADER;
-import static org.au.tonomy.client.webgl.RenderingContext.VERTEX_SHADER;
 
 import java.util.List;
 
 import org.au.tonomy.client.presentation.ICamera;
 import org.au.tonomy.client.presentation.Viewport;
-import org.au.tonomy.client.webgl.Program;
 import org.au.tonomy.client.webgl.RenderingContext;
 import org.au.tonomy.client.webgl.RenderingContext.DrawMode;
-import org.au.tonomy.client.webgl.Shader;
 import org.au.tonomy.client.webgl.TriangleBuffer;
-import org.au.tonomy.client.webgl.UniformLocation;
-import org.au.tonomy.client.webgl.util.AttributeLocation;
 import org.au.tonomy.client.webgl.util.Color;
 import org.au.tonomy.client.webgl.util.IWebGL;
 import org.au.tonomy.client.webgl.util.Mat4;
@@ -24,7 +16,9 @@ import org.au.tonomy.client.webgl.util.Vec3;
 import org.au.tonomy.client.webgl.util.Vec4;
 import org.au.tonomy.client.webmon.Counter;
 import org.au.tonomy.client.webmon.Timer;
+import org.au.tonomy.client.world.shader.BoardProgram;
 import org.au.tonomy.client.world.shader.IShaderBundle;
+import org.au.tonomy.client.world.shader.UnitProgram;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.ExtraMath;
 import org.au.tonomy.shared.util.IRect;
@@ -61,13 +55,9 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
   private final TriangleBuffer innerHexStrip;
   private final TriangleBuffer outerHexStrip;
   private final TriangleBuffer unitVertices;
-  private final AttributeLocation vertexPosition;
-  private final UniformLocation uM4fvPerspective;
-  private final UniformLocation u3fvSourcePosition;
-  private final UniformLocation u3fvTargetPosition;
-  private final UniformLocation u1fProgress;
-  private final UniformLocation u4fvColor;
   private final Mat4 perspective = Mat4.create();
+  private final BoardProgram boardProgram;
+  private final UnitProgram unitProgram;
 
   @Override
   public double getCanvasWidth() {
@@ -89,14 +79,8 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     this.viewport = viewport;
     this.canvas = canvas;
     RenderingContext context = webGlUtils.create3DContext(canvas);
-    Program shaderProgram = linkShaders(context);
-    this.vertexPosition = context.getAttribLocation(shaderProgram, "aVertexPosition");
-    context.enableVertexAttribArray(vertexPosition);
-    this.uM4fvPerspective = context.getUniformLocation(shaderProgram, "uPerspective");
-    this.u3fvSourcePosition = context.getUniformLocation(shaderProgram, "uSourcePosition");
-    this.u3fvTargetPosition = context.getUniformLocation(shaderProgram, "uTargetPosition");
-    this.u1fProgress = context.getUniformLocation(shaderProgram, "uProgress");
-    this.u4fvColor = context.getUniformLocation(shaderProgram, "uColor");
+    this.boardProgram =  linkBoardProgram(context);
+    this.unitProgram =  linkUnitProgram(context);
     this.innerHexStrip = newHexStrip(context, world.getGrid().getHexes(), 0.8);
     this.outerHexStrip = newHexStrip(context, world.getGrid().getHexes(), 0.9);
     this.unitVertices = newCircleFan(context, 20, 0.5);
@@ -104,21 +88,27 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
   }
 
   /**
-   * Compiles the shaders and links them into a program.
+   * Compiles the board shaders and links them into a program.
    */
-  private Program linkShaders(RenderingContext context) {
-    // Compile the shader scripts.
-    Shader fragmentShader = context.compileShader(FRAGMENT_SHADER,
+  private BoardProgram linkBoardProgram(RenderingContext context) {
+    BoardProgram result = new BoardProgram();
+    result.createAndLink(context,
+        SHADER_BUNDLE.getVertexShaderCommon().getText() +
+        SHADER_BUNDLE.getBoardVertexShader().getText(),
         SHADER_BUNDLE.getFragmentShader().getText());
-    Shader vertexShader = context.compileShader(VERTEX_SHADER,
-        SHADER_BUNDLE.getVertexShader().getText());
+    return result;
+  }
 
-    // Install the shaders into the context.
-    Program program = context.createProgram();
-    context.attachShader(program, vertexShader);
-    context.attachShader(program, fragmentShader);
-    context.linkAndUseProgram(program);
-    return program;
+  /**
+   * Compiles the board shaders and links them into a program.
+   */
+  private UnitProgram linkUnitProgram(final RenderingContext context) {
+    return new UnitProgram() {{
+      createAndLink(context,
+        SHADER_BUNDLE.getVertexShaderCommon().getText() +
+        SHADER_BUNDLE.getUnitVertexShader().getText(),
+        SHADER_BUNDLE.getFragmentShader().getText());
+    }};
   }
 
   private TriangleBuffer newCircleFan(RenderingContext context, int segmentCount,
@@ -207,26 +197,6 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     return builder.toBuffer(context, DrawMode.TRIANGLE_STRIP);
   }
 
-  private void setColor(RenderingContext context, Color color) {
-    context.uniform4fv(u4fvColor, color.getVector());
-  }
-
-  /**
-   * Sets the full locations and progress.
-   */
-  private void setLocations(RenderingContext context, Vec3 source,
-      Vec3 target, double progress) {
-    context.uniform3fv(u3fvSourcePosition, source);
-    context.uniform3fv(u3fvTargetPosition, target);
-    context.uniform1f(u1fProgress, progress);
-  }
-
-  private void drawTriangles(RenderingContext context, TriangleBuffer strip) {
-    context.bindBuffer(ARRAY_BUFFER, strip);
-    context.vertexAttribPointer(vertexPosition, 3, FLOAT, false, 0, 0);
-    context.drawArrays(strip.getDrawMode(), 0, strip.getVertexCount());
-  }
-
   public void paint(WorldTrace trace, double time) {
     FRAME_RATE_COUNTER.increment();
     long start = System.currentTimeMillis();
@@ -237,8 +207,33 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     }
   }
 
+  private void renderBoard(WorldTrace trace, double time) {
+    boardProgram.setPerspective(perspective);
+    boardProgram.setLocation(ORIGIN);
+    Color ground = Color.create(.929, .749, .525, 1.0);
+    boardProgram.setColor(ground.adjust(Color.Adjustment.DARKER));
+    boardProgram.drawTriangles(outerHexStrip);
+    boardProgram.setColor(ground);
+    boardProgram.drawTriangles(innerHexStrip);
+  }
+
+  private void renderUnits(WorldTrace trace, double time) {
+    unitProgram.setPerspective(perspective);
+    Color red = Color.create(.50, .0, .0, 1.0);
+    unitProgram.setColor(red);
+    for (IUnitState state : trace.getUnits(time)) {
+      Hex from = state.getFrom();
+      Hex to = state.getTo();
+      unitProgram.setLocations(
+          Vec3.create(from.getCenterX(), from.getCenterY(), 0),
+          Vec3.create(to.getCenterX(), to.getCenterY(), 0),
+          state.getProgress());
+      unitProgram.drawTriangles(unitVertices);
+    }
+  }
+
   private static final Vec3 ORIGIN = Vec3.create(0, 0, 0);
-  private void render(WorldTrace trace, double time) {
+  private void render(final WorldTrace trace, final double time) {
     RenderingContext context = webGlUtils.create3DContext(canvas);
 
     // Clear the whole canvas and reset the perspective.
@@ -248,29 +243,22 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     perspective
         .resetOrtho(bounds.getLeft(), bounds.getRight(),
             bounds.getBottom(), bounds.getTop(), -1.0, 1.0);
-    context.uniformMatrix4fv(uM4fvPerspective, false, perspective);
 
-    setLocations(context, ORIGIN, ORIGIN, 0);
-
-    // Draw the hexes.
-    Color ground = Color.create(.929, .749, .525, 1.0);
-    setColor(context, ground.adjust(Color.Adjustment.DARKER));
-    drawTriangles(context, outerHexStrip);
-    setColor(context, ground);
-    drawTriangles(context, innerHexStrip);
+    // Draw the board.
+    boardProgram.use(context, new Runnable() {
+      @Override
+      public void run() {
+        renderBoard(trace, time);
+      }
+    });
 
     // Draw the units.
-    Color red = Color.create(.50, .0, .0, 1.0);
-    setColor(context, red);
-    for (IUnitState state : trace.getUnits(time)) {
-      Hex from = state.getFrom();
-      Hex to = state.getTo();
-      setLocations(context,
-          Vec3.create(from.getCenterX(), from.getCenterY(), 0),
-          Vec3.create(to.getCenterX(), to.getCenterY(), 0),
-          state.getProgress());
-      drawTriangles(context, unitVertices);
-    }
+    unitProgram.use(context, new Runnable() {
+      @Override
+      public void run() {
+        renderUnits(trace, time);
+      }
+    });
   }
 
 }

@@ -8,7 +8,13 @@ public interface IShaderBundle extends ClientBundle {
   @Source("fragment.glsl")
   public TextResource getFragmentShader();
 
-  @Source("vertex.glsl")
-  public TextResource getVertexShader();
+  @Source("units.glsl")
+  public TextResource getUnitVertexShader();
+
+  @Source("board.glsl")
+  public TextResource getBoardVertexShader();
+
+  @Source("common.glsl")
+  public TextResource getVertexShaderCommon();
 
 }
