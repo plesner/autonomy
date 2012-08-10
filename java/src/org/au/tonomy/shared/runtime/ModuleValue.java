@@ -1,7 +1,8 @@
 package org.au.tonomy.shared.runtime;
 
-import java.util.HashMap;
 import java.util.Map;
+
+import org.au.tonomy.shared.util.Factory;
 
 
 public class ModuleValue extends AbstractValue {
@@ -10,7 +11,7 @@ public class ModuleValue extends AbstractValue {
   }};
 
   private final Context context;
-  private final Map<Object, IValue> bindings = new HashMap<Object, IValue>();
+  private final Map<Object, IValue> bindings = Factory.newHashMap();
 
   public ModuleValue(Context context) {
     this.context = context;

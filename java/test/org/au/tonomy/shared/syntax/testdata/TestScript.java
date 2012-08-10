@@ -7,13 +7,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Exceptions;
+import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.Pair;
 
 import com.google.gwt.regexp.shared.MatchResult;
@@ -74,7 +74,7 @@ public class TestScript {
 
   public List<Section> getSections() {
     int index = 0;
-    List<Pair<String, Integer>> headers = new ArrayList<Pair<String, Integer>>();
+    List<Pair<String, Integer>> headers = Factory.newArrayList();
     MatchResult match = SECTION_HEADER.exec(source);
     while (match != null) {
       String header = match.getGroup(0);
@@ -88,7 +88,7 @@ public class TestScript {
     if (headers.size() == 0) {
       return Collections.singletonList(new Section(getName(), source));
     } else {
-      List<Section> result = new ArrayList<Section>();
+      List<Section> result = Factory.newArrayList();
       for (int i = 0; i < headers.size(); i++) {
         Pair<String, Integer> header = headers.get(i);
         int end;
@@ -142,7 +142,7 @@ public class TestScript {
         return name.endsWith(TEST_CASE_EXTENSION);
       }
     });
-    List<TestScript> result = new ArrayList<TestScript>();
+    List<TestScript> result = Factory.newArrayList();
     for (File file : files) {
       String source = readFile(file);
       result.add(new TestScript(file, source));

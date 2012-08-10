@@ -1,6 +1,5 @@
 package org.au.tonomy.shared.syntax;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +7,7 @@ import java.util.Map;
 
 import org.au.tonomy.shared.syntax.Ast.MacroCall;
 import org.au.tonomy.shared.util.Assert;
+import org.au.tonomy.shared.util.Factory;
 
 
 
@@ -116,7 +116,7 @@ public class MacroParser {
    */
   private static class StateInfo {
 
-    private final Map<String, StateInfo> onWord = new HashMap<String, StateInfo>();
+    private final Map<String, StateInfo> onWord = Factory.newHashMap();
     private StateInfo onAst = null;
     private Macro onEnd = null;
     private boolean suppressSemi = false;
@@ -220,7 +220,7 @@ public class MacroParser {
     public Ast build() {
       Macro macro = info.onEnd;
       List<Component> components = macro.getComponents();
-      List<Ast> args = new ArrayList<Ast>();
+      List<Ast> args = Factory.newArrayList();
       addArguments(args, components, components.size() - 1);
       return new MacroCall(macro, args);
     }
@@ -251,7 +251,7 @@ public class MacroParser {
 
   }
 
-  private final List<Macro> macros = new ArrayList<Macro>();
+  private final List<Macro> macros = Factory.newArrayList();
   private final StateInfo root;
 
   public MacroParser() {

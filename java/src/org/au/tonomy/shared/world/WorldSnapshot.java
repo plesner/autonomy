@@ -1,10 +1,10 @@
 package org.au.tonomy.shared.world;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.au.tonomy.client.control.Control;
+import org.au.tonomy.shared.util.Factory;
 
 /**
  * Encapsulates the state of the world at a whole clock tick.
@@ -12,8 +12,8 @@ import org.au.tonomy.client.control.Control;
 public class WorldSnapshot {
 
   private final World world;
-  private final Map<Hex, Unit> hexToUnit = new HashMap<Hex, Unit>();
-  private final Map<Unit, Hex> unitToHex = new HashMap<Unit, Hex>();
+  private final Map<Hex, Unit> hexToUnit = Factory.newHashMap();
+  private final Map<Unit, Hex> unitToHex = Factory.newHashMap();
   private final int step;
 
   public WorldSnapshot(World world, int step) {

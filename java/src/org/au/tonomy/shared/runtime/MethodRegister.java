@@ -1,7 +1,8 @@
 package org.au.tonomy.shared.runtime;
 
-import java.util.HashMap;
 import java.util.Map;
+
+import org.au.tonomy.shared.util.Factory;
 
 /**
  * A mapping from method names to methods.
@@ -17,7 +18,7 @@ public class MethodRegister<T extends IValue> {
 
   }
 
-  private final Map<String, IMethod<T>> methods = new HashMap<String, IMethod<T>>();
+  private final Map<String, IMethod<T>> methods = Factory.newHashMap();
 
   private IMethod<T> getMethod(String name) {
     IMethod<T> method = methods.get(name);

@@ -1,10 +1,10 @@
 package org.au.tonomy.shared.world;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.IRect;
 import org.au.tonomy.shared.world.Hex.Side;
 
@@ -75,7 +75,7 @@ public class HexGrid implements Iterable<Hex> {
     this.hexWidth = hexWidth;
     this.hexHeight = hexHeight;
     this.hexes = new Hex[hexWidth][hexHeight];
-    this.hexList = new ArrayList<Hex>();
+    this.hexList = Factory.newArrayList();
     for (int g = 0; g < hexWidth; g++) {
       for (int h = 0; h < hexHeight; h++) {
         Hex hex = new Hex(g, h);
@@ -189,7 +189,7 @@ public class HexGrid implements Iterable<Hex> {
    */
   public Collection<Hex> getHexes(IRect bounds) {
     int rectWidth = 2 * hexWidth;
-    List<Hex> result = new ArrayList<Hex>();
+    List<Hex> result = Factory.newArrayList();
     int rgStart = clip(getLeftmostRectStrip(bounds.getLeft()), rectWidth);
     int rgLimit = clip(getRightmostRectStrip(bounds.getRight()) + 1, rectWidth);
     int hStart = clip(getLowerRectStrip(bounds.getBottom()), hexHeight);

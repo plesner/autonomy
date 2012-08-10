@@ -1,6 +1,5 @@
 package org.au.tonomy.shared.syntax;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -9,6 +8,7 @@ import org.au.tonomy.shared.syntax.MacroParser.Component;
 import org.au.tonomy.shared.syntax.MacroParser.Placeholder;
 import org.au.tonomy.shared.syntax.MacroParser.State;
 import org.au.tonomy.shared.syntax.Token.Type;
+import org.au.tonomy.shared.util.Factory;
 
 /**
  * Parses a sequence of tokens into a syntax tree.
@@ -103,7 +103,7 @@ public class Parser {
   }
 
   private Ast parseBlockBody(NestingLevel level, Type endMarker) throws SyntaxError {
-    List<Ast> exprs = new ArrayList<Ast>();
+    List<Ast> exprs = Factory.newArrayList();
     while (hasMore() && !at(endMarker)) {
       Ast next = parseStatement(level, endMarker);
       exprs.add(next);
@@ -169,7 +169,7 @@ public class Parser {
         expect(Type.RPAREN);
         return Collections.emptyList();
       } else {
-        List<String> result = new ArrayList<String>();
+        List<String> result = Factory.newArrayList();
         result.add(expect(Type.IDENTIFIER));
         while (hasMore() && at(Type.COMMA)) {
           expect(Type.COMMA);
@@ -270,7 +270,7 @@ public class Parser {
       expect(Type.AT);
       AstOrArguments annot = parseAtomicExpression();
       if (annots.isEmpty())
-        annots = new ArrayList<Ast>();
+        annots = Factory.newArrayList();
       annots.add(annot.asAst());
     }
     if (atWord(DEF)) {
@@ -308,8 +308,8 @@ public class Parser {
   private Macro parseMacroHeader() throws SyntaxError {
     // Parse the header
     expect(Type.LBRACK);
-    List<MacroParser.Component> components = new ArrayList<MacroParser.Component>();
-    List<String> params = new ArrayList<String>();
+    List<MacroParser.Component> components = Factory.newArrayList();
+    List<String> params = Factory.newArrayList();
     while (hasMore() && !at(Type.RBRACK)) {
       Component next;
       if (at(Type.WORD)) {
@@ -411,7 +411,7 @@ public class Parser {
       expect(end);
       return Collections.<Ast>emptyList();
     } else {
-      List<Ast> asts = new ArrayList<Ast>();
+      List<Ast> asts = Factory.newArrayList();
       asts.add(parseExpression(false));
       while (at(Type.COMMA)) {
         expect(Type.COMMA);

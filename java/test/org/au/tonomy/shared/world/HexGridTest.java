@@ -6,13 +6,13 @@ import static org.au.tonomy.testing.TestUtils.EPSILON;
 import static org.au.tonomy.testing.TestUtils.assertClose;
 import static org.au.tonomy.testing.TestUtils.pair;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import junit.framework.TestCase;
 
 import org.au.tonomy.shared.util.ExtraMath;
+import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.testing.Rect;
 import org.junit.Test;
 
@@ -206,7 +206,7 @@ public class HexGridTest extends TestCase {
   }
 
   private static void checkHexPositions(Iterable<Hex> hexIter, int[]... pairs) {
-    List<Hex> hexes = new ArrayList<Hex>();
+    List<Hex> hexes = Factory.newArrayList();
     for (Hex hex : hexIter)
       hexes.add(hex);
     assertEquals(pairs.length, hexes.size());

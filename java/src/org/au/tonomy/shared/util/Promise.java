@@ -60,7 +60,7 @@ public class Promise<T> {
       fireCallback(callback);
     } else {
       if (callbacks == null)
-        callbacks = new ArrayList<ICallback<T>>();
+        callbacks = Factory.newArrayList();
       callbacks.add(callback);
     }
   }

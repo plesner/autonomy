@@ -1,11 +1,11 @@
 package org.au.tonomy.shared.world;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.au.tonomy.client.control.Control;
 import org.au.tonomy.shared.util.Assert;
+import org.au.tonomy.shared.util.Factory;
 
 /**
  * A trace of the changes taking place in a world object.
@@ -33,7 +33,7 @@ public class WorldTrace {
 
   private final World world;
   private final Control control;
-  private final List<WorldSnapshot> timeline = new ArrayList<WorldSnapshot>();
+  private final List<WorldSnapshot> timeline = Factory.newArrayList();
 
   public WorldTrace(World world, Control control, WorldSnapshot initial) {
     this.world = world;

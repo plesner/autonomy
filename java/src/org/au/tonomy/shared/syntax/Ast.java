@@ -1,6 +1,5 @@
 package org.au.tonomy.shared.syntax;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -16,6 +15,7 @@ import org.au.tonomy.shared.runtime.NullValue;
 import org.au.tonomy.shared.runtime.TupleValue;
 import org.au.tonomy.shared.syntax.MacroParser.Component;
 import org.au.tonomy.shared.util.Assert;
+import org.au.tonomy.shared.util.Factory;
 
 /**
  * A syntax tree node.
@@ -336,7 +336,7 @@ public abstract class Ast implements AstOrArguments {
       if (getAnnotations().isEmpty()) {
         annotValues = Collections.emptyList();
       } else {
-        annotValues = new ArrayList<IValue>();
+        annotValues = Factory.newArrayList();
         for (Ast annotAst : getAnnotations()) {
           IValue annotValue = annotAst.run(outerContext, outerScope);
           annotValues.add(annotValue);
@@ -371,7 +371,7 @@ public abstract class Ast implements AstOrArguments {
         annotValues = Collections.emptyList();
       } else {
         DeclarationValue declValue = new DeclarationValue(value);
-        annotValues = new ArrayList<IValue>();
+        annotValues = Factory.newArrayList();
         for (Ast annotAst : getAnnotations()) {
           IValue annotValue = annotAst.run(outerContext, outerScope);
           annotValue.invoke("()", new IValue[] {declValue});

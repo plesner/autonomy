@@ -1,7 +1,8 @@
 package org.au.tonomy.client.widget;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import org.au.tonomy.shared.util.Factory;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
@@ -47,7 +48,7 @@ public class CanvasPlus extends Composite {
   @UiField Canvas canvas;
   private int currentWidth = 0;
   private int currentHeight = 0;
-  private final List<IResizeListener> listeners = new ArrayList<IResizeListener>();
+  private final List<IResizeListener> listeners = Factory.newArrayList();
 
 
   public CanvasPlus() {

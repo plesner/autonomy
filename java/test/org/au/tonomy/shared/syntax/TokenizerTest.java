@@ -7,12 +7,12 @@ import static org.au.tonomy.shared.syntax.Token.operator;
 import static org.au.tonomy.shared.syntax.Token.punctuation;
 import static org.au.tonomy.shared.syntax.Token.word;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
 
 import org.au.tonomy.shared.syntax.Token.Type;
+import org.au.tonomy.shared.util.Factory;
 import org.junit.Test;
 
 
@@ -27,7 +27,7 @@ public class TokenizerTest extends TestCase {
   }
 
   private void runScanTest(boolean insertEther, String str, Token[] tokens) {
-    List<Token> expected = new ArrayList<Token>();
+    List<Token> expected = Factory.newArrayList();
     boolean first = true;
     for (Token token : tokens) {
       if (insertEther) {

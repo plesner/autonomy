@@ -1,9 +1,9 @@
 package org.au.tonomy.client.filesystem;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.au.tonomy.client.util.PromiseUtil;
+import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.Promise;
 
 import com.google.gwt.core.client.GWT;
@@ -48,7 +48,7 @@ public class LocalFile {
     STUB.getChildren(path, new AsyncCallback<List<String>>() {
       @Override
       public void onSuccess(List<String> names) {
-        List<LocalFile> files = new ArrayList<LocalFile>();
+        List<LocalFile> files = Factory.newArrayList();
         for (String name : names)
           files.add(forPath(name));
         result.fulfill(files);

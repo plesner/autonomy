@@ -1,10 +1,10 @@
 package org.au.tonomy.shared.syntax;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.au.tonomy.shared.syntax.Token.Type;
 import org.au.tonomy.shared.util.Assert;
+import org.au.tonomy.shared.util.Factory;
 
 
 
@@ -282,7 +282,7 @@ public class Tokenizer {
    * Returns the tokens of the string held by this tokenizer.
    */
   private List<Token> tokenize() {
-    List<Token> tokens = new ArrayList<Token>();
+    List<Token> tokens = Factory.newArrayList();
     while (hasMore()) {
       tokens.add(scanNext());
     }
