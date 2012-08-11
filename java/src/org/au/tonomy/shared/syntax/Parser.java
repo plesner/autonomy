@@ -4,10 +4,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.au.tonomy.shared.runtime.IntegerValue;
+import org.au.tonomy.shared.syntax.IToken.IFactory;
+import org.au.tonomy.shared.syntax.IToken.Type;
 import org.au.tonomy.shared.syntax.MacroParser.Component;
 import org.au.tonomy.shared.syntax.MacroParser.Placeholder;
 import org.au.tonomy.shared.syntax.MacroParser.State;
-import org.au.tonomy.shared.syntax.Token.Type;
 import org.au.tonomy.shared.util.Factory;
 
 /**
@@ -15,6 +16,10 @@ import org.au.tonomy.shared.util.Factory;
  */
 public class Parser {
 
+  /**
+   * Marker that identifies, while parsing a block, whether it is a
+   * nested block or the program toplevel.
+   */
   private enum NestingLevel {
     TOPLEVEL, LOCAL
   }
@@ -22,20 +27,20 @@ public class Parser {
   private static final String DEF = "def";
   private static final String FN = "fn";
 
-  private static final Token EOF = Token.eof();
-
   private MacroParser macroParser;
-  private final List<Token> tokens;
+  private final IFactory<?> tokenFactory;
+  private final List<? extends IToken> tokens;
   private final OperatorRegistry operators = new OperatorRegistry();
 
   private int cursor = 0;
-  private Token prev;
-  private Token current;
+  private IToken prev;
+  private IToken current;
 
-  private Parser(MacroParser macroParser, List<Token> tokens) {
+  private Parser(MacroParser macroParser, IFactory<?> tokenFactory, List<? extends IToken> tokens) {
     this.macroParser = macroParser;
+    this.tokenFactory = tokenFactory;
     this.tokens = tokens;
-    current = EOF;
+    current = tokenFactory.newEof();
     skipEther();
   }
 
@@ -43,7 +48,7 @@ public class Parser {
     return cursor < tokens.size();
   }
 
-  private Token getCurrent() {
+  private IToken getCurrent() {
     return current;
   }
 
@@ -54,7 +59,7 @@ public class Parser {
     if (hasMore())
       current = tokens.get(cursor);
     else
-      current = EOF;
+      current = tokenFactory.newEof();
   }
 
   private void advance() {
@@ -116,12 +121,12 @@ public class Parser {
   }
 
   private boolean atWord(String value) {
-    Token current = getCurrent();
+    IToken current = getCurrent();
     return current.is(Type.WORD) && value.equals(current.getValue());
   }
 
   private boolean atOperator(String value) {
-    Token current = getCurrent();
+    IToken current = getCurrent();
     return current.is(Type.OPERATOR) && value.equals(current.getValue());
   }
 
@@ -134,9 +139,6 @@ public class Parser {
       return parseLambda(expectSemi);
     } else if (at(Type.LBRACE)) {
       return parseBlockExpression();
-    } else if (atWord("here")) {
-      expectWord("here");
-      return new Ast.Here();
     } else {
       return parseMacroExpression(expectSemi);
     }
@@ -422,8 +424,9 @@ public class Parser {
     }
   }
 
-  public static Ast parse(MacroParser keywordParser, List<Token> tokens) throws SyntaxError {
-    return new Parser(keywordParser, tokens).parseBlockBody(NestingLevel.TOPLEVEL, Type.EOF);
+  public static Ast parse(MacroParser keywordParser, IFactory<?> tokenFactory,
+      List<? extends IToken> tokens) throws SyntaxError {
+    return new Parser(keywordParser, tokenFactory, tokens).parseBlockBody(NestingLevel.TOPLEVEL, Type.EOF);
   }
 
 }

@@ -1,55 +1,10 @@
 package org.au.tonomy.shared.syntax;
 
+
 /**
  * A single token within some source code.
  */
-public class Token {
-
-  private static final String PUNCT = "punctuation";
-
-  /**
-   * The different classes of tokens.
-   */
-  public enum Type {
-
-    WORD      (null, "word"),
-    OPERATOR  (null, "operator"),
-    ERROR     (null, "error"),
-    EOF       (null, "eof"),
-    NUMBER    (null, "number"),
-    IDENTIFIER(null, "identifier"),
-    ETHER     (null, "ether"),
-    LPAREN    ("(",  PUNCT),
-    RPAREN    (")",  PUNCT),
-    LBRACK    ("[",  PUNCT),
-    RBRACK    ("]",  PUNCT),
-    LBRACE    ("{",  PUNCT),
-    RBRACE    ("}",  PUNCT),
-    SEMI      (";",  PUNCT),
-    COMMA     (",",  PUNCT),
-    HASH      ("#",  PUNCT),
-    ASSIGN    (":=", PUNCT),
-    COLON     (":",  PUNCT),
-    AT        ("@",  PUNCT);
-
-    private final String value;
-    private final String category;
-
-    private Type(String value, String category) {
-      this.value = value;
-      this.category = category;
-    }
-
-    @Override
-    public String toString() {
-      return value;
-    }
-
-    public String getCategory() {
-      return this.category;
-    }
-
-  }
+public class Token implements IToken {
 
   private final Type type;
   private final String value;
@@ -63,83 +18,71 @@ public class Token {
     return type.getCategory();
   }
 
-  /**
-   * Is this token of the given type?
-   */
+  @Override
   public boolean is(Type type) {
     return this.type == type;
   }
 
-  /**
-   * Returns the type of this token.
-   */
+  @Override
   public Type getType() {
     return this.type;
   }
 
-  /**
-   * Returns the value of this token, null for tokens that don't have
-   * a value.
-   */
+  @Override
   public String getValue() {
     return this.value;
   }
 
   /**
-   * Factory method for creating ether tokens.
+   * Returns the singleton token factory.
    */
-  public static Token ether(String value) {
-    return new Token(Type.ETHER, value);
+  public static IFactory<Token> getFactory() {
+    return FACTORY;
   }
 
-  /**
-   * Factory method for creating word tokens.
-   */
-  public static Token word(String value) {
-    return new Token(Type.WORD, value);
-  }
+  private static final IFactory<Token> FACTORY = new IFactory<Token>() {
 
-  /**
-   * Factory method for creating identifier tokens.
-   */
-  public static Token identifier(String value) {
-    return new Token(Type.IDENTIFIER, value);
-  }
+    @Override
+    public Token newEther(String value) {
+      return new Token(Type.ETHER, value);
+    }
 
-  /**
-   * Factory method for creating numbers.
-   */
-  public static Token number(String value) {
-    return new Token(Type.NUMBER, value);
-  }
+    @Override
+    public Token newWord(String value) {
+      return new Token(Type.WORD, value);
+    }
 
-  /**
-   * Factory method for creating operators.
-   */
-  public static Token operator(String value) {
-    return new Token(Type.OPERATOR, value);
-  }
+    @Override
+    public Token newIdentifier(String value) {
+      return new Token(Type.IDENTIFIER, value);
+    }
 
-  /**
-   * Factory method for creating error tokens.
-   */
-  public static Token error(char value) {
-    return new Token(Type.ERROR, Character.toString(value));
-  }
+    @Override
+    public Token newNumber(String value) {
+      return new Token(Type.NUMBER, value);
+    }
 
-  /**
-   * Factory method for creating eof tokens.
-   */
-  public static Token eof() {
-    return new Token(Type.EOF, null);
-  }
+    @Override
+    public Token newOperator(String value) {
+      return new Token(Type.OPERATOR, value);
+    }
 
-  /**
-   * Factory method for creating punctuation.
-   */
-  public static Token punctuation(Type type) {
-    return new Token(type, type.toString());
-  }
+    @Override
+    public Token newError(char value) {
+      return new Token(Type.ERROR, Character.toString(value));
+    }
+
+    @Override
+    public Token newEof() {
+      return new Token(Type.EOF, null);
+    }
+
+    @Override
+    public Token newPunctuation(Type type) {
+      return new Token(type, type.toString());
+    }
+
+  };
 
   @Override
   public int hashCode() {

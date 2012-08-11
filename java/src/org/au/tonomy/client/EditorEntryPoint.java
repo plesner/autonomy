@@ -32,10 +32,10 @@ public class EditorEntryPoint implements EntryPoint {
     file.getContents().onResolved(new Callback<String>() {
       @Override
       public void onSuccess(String source) {
-        List<Token> tokens = Tokenizer.tokenize(source);
+        List<Token> tokens = Tokenizer.tokenize(source, Token.getFactory());
         Ast ast;
         try {
-          ast = Parser.parse(new MacroParser(), tokens);
+          ast = Parser.parse(new MacroParser(), Token.getFactory(), tokens);
         } catch (SyntaxError se) {
           throw Exceptions.propagate(se);
         }

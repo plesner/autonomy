@@ -17,7 +17,7 @@ import org.junit.Test;
 public class ParserTest extends TestCase {
 
   private Ast parse(MacroParser keywordParser, String str) throws SyntaxError {
-    return Parser.parse(keywordParser, Tokenizer.tokenize(str));
+    return Parser.parse(keywordParser, Token.getFactory(), Tokenizer.tokenize(str, Token.getFactory()));
   }
 
   private void runParserTest(String expected, String str) throws SyntaxError {

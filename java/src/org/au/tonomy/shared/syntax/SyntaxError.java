@@ -6,14 +6,14 @@ public class SyntaxError extends Exception {
 
   private static final long serialVersionUID = 4941633252289190356L;
 
-  private final Token token;
+  private final IToken token;
 
-  public SyntaxError(Token token) {
+  public SyntaxError(IToken token) {
     super(token.toString());
     this.token = token;
   }
 
-  public Token getToken() {
+  public IToken getToken() {
     return token;
   }
 

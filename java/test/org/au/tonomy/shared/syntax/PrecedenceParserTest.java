@@ -1,5 +1,6 @@
 package org.au.tonomy.shared.syntax;
 
+import static org.au.tonomy.testing.TestUtils.isOperator;
 import junit.framework.TestCase;
 
 import org.au.tonomy.shared.syntax.IOperatorRegistry.Precedence;
@@ -65,14 +66,6 @@ public class PrecedenceParserTest extends TestCase {
     } else {
       return Fix.INFIX;
     }
-  }
-
-  private static boolean isOperator(String str) {
-    for (char c : str.toCharArray()) {
-      if (!Character.isLetter(c) && !Character.isDigit(c))
-        return true;
-    }
-    return false;
   }
 
   private String parse(String... inputs) {

@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.au.tonomy.shared.runtime.AbstractValue;
-import org.au.tonomy.shared.runtime.HereValue;
 import org.au.tonomy.shared.runtime.IScope;
 import org.au.tonomy.shared.runtime.IValue;
 import org.au.tonomy.shared.runtime.LambdaValue;
@@ -26,13 +25,6 @@ public abstract class Ast implements AstOrArguments {
    * Executes this syntax in the given scope.
    */
   public abstract IValue run(ModuleValue module, IScope scope);
-
-  /**
-   * Converts this syntax tree to an ast node.
-   */
-  public AstNode toAstNode() {
-    return AstNode.text(Token.identifier("foo"));
-  }
 
   @Override
   public List<Ast> asArguments() {
@@ -114,20 +106,6 @@ public abstract class Ast implements AstOrArguments {
     @Override
     public String toString() {
       return "(;" + toString(children) + ")";
-    }
-
-  }
-
-  /**
-   * The 'here' expression.
-   */
-  public static class Here extends Ast {
-
-    public Here() { }
-
-    @Override
-    public IValue run(ModuleValue module, IScope scope) {
-      return new HereValue(module, scope);
     }
 
   }

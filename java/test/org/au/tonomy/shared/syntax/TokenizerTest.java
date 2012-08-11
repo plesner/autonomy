@@ -1,17 +1,10 @@
 package org.au.tonomy.shared.syntax;
 
-import static org.au.tonomy.shared.syntax.Token.ether;
-import static org.au.tonomy.shared.syntax.Token.identifier;
-import static org.au.tonomy.shared.syntax.Token.number;
-import static org.au.tonomy.shared.syntax.Token.operator;
-import static org.au.tonomy.shared.syntax.Token.punctuation;
-import static org.au.tonomy.shared.syntax.Token.word;
-
 import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.au.tonomy.shared.syntax.Token.Type;
+import org.au.tonomy.shared.syntax.IToken.Type;
 import org.au.tonomy.shared.util.Factory;
 import org.junit.Test;
 
@@ -36,7 +29,7 @@ public class TokenizerTest extends TestCase {
       }
       expected.add(token);
     }
-    List<Token> found = Tokenizer.tokenize(str);
+    List<Token> found = Tokenizer.tokenize(str, Token.getFactory());
     assertEquals(expected, found);
   }
 
@@ -52,6 +45,30 @@ public class TokenizerTest extends TestCase {
         punctuation(Type.SEMI), punctuation(Type.HASH), punctuation(Type.AT));
     runRawScanTest("## foo", ether("## foo"));
     runRawScanTest("## foo\n## bar", ether("## foo"), ether("\n"), ether("## bar"));
+  }
+
+  private Token punctuation(Type type) {
+    return Token.getFactory().newPunctuation(type);
+  }
+
+  private Token number(String string) {
+    return Token.getFactory().newNumber(string);
+  }
+
+  private Token operator(String string) {
+    return Token.getFactory().newOperator(string);
+  }
+
+  private Token identifier(String string) {
+    return Token.getFactory().newIdentifier(string);
+  }
+
+  private Token word(String string) {
+    return Token.getFactory().newWord(string);
+  }
+
+  private static Token ether(String string) {
+    return Token.getFactory().newEther(string);
   }
 
 }

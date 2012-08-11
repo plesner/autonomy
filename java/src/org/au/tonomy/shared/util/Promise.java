@@ -1,6 +1,5 @@
 package org.au.tonomy.shared.util;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

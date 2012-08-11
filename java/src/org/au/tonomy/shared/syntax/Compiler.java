@@ -11,9 +11,9 @@ import org.au.tonomy.shared.runtime.Executor;
 public class Compiler {
 
   public static Executor compile(Context context, String source) throws SyntaxError {
-    List<Token> tokens = Tokenizer.tokenize(source);
+    List<Token> tokens = Tokenizer.tokenize(source, Token.getFactory());
     MacroParser macros = new MacroParser();
-    Ast ast = Parser.parse(macros, tokens);
+    Ast ast = Parser.parse(macros, Token.getFactory(), tokens);
     return new Executor(context, ast);
   }
 

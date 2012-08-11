@@ -1,15 +1,12 @@
 package org.au.tonomy.shared.syntax;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.au.tonomy.shared.syntax.Ast.MacroCall;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Factory;
-
-
 
 /**
  * Utility for parsing keyword expressions.

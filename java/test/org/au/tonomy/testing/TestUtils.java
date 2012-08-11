@@ -2,6 +2,7 @@ package org.au.tonomy.testing;
 
 import junit.framework.Assert;
 
+import org.au.tonomy.shared.syntax.Tokenizer;
 import org.au.tonomy.shared.world.Hex;
 
 public class TestUtils extends Assert {
@@ -50,6 +51,28 @@ public class TestUtils extends Assert {
     assertEquals(2, found.length);
     assertClose(x, found[0]);
     assertClose(y, found[1]);
+  }
+
+  /**
+   * Is the given string an operator token?
+   */
+  public static boolean isOperator(String str) {
+    for (char c : str.toCharArray()) {
+      if (!Character.isLetter(c) && !Character.isDigit(c))
+        return true;
+    }
+    return false;
+  }
+
+  /**
+   * Is the given string a space token?
+   */
+  public static boolean isSpace(String str) {
+    for (char c : str.toCharArray()) {
+      if (!Tokenizer.isSpace(c))
+        return false;
+    }
+    return true;
   }
 
 }

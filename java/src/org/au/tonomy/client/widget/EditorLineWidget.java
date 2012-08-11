@@ -37,7 +37,7 @@ public class EditorLineWidget extends Composite {
 
   public void update(String line) {
     contents.setInnerText("");
-    for (Token token : Tokenizer.tokenize(line)) {
+    for (Token token : Tokenizer.tokenize(line, Token.getFactory())) {
       SpanElement span = Document.get().createSpanElement();
       span.setInnerText(token.getValue());
       span.setClassName(token.getCategory());

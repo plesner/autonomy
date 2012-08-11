@@ -2,23 +2,25 @@ package org.au.tonomy.shared.syntax;
 
 import java.util.List;
 
-import org.au.tonomy.shared.syntax.Token.Type;
+import org.au.tonomy.shared.syntax.IToken.IFactory;
+import org.au.tonomy.shared.syntax.IToken.Type;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Factory;
-
-
+import org.au.tonomy.shared.util.Internal;
 
 /**
  * Utility for chopping a string into tokens.
  */
-public class Tokenizer {
+public class Tokenizer<T extends IToken> {
 
   private final String source;
+  private final IFactory<T> tokenFactory;
   private int cursor;
   private char current;
 
-  private Tokenizer(String source) {
+  private Tokenizer(String source, IFactory<T> tokenFactory) {
     this.source = source;
+    this.tokenFactory = tokenFactory;
     this.cursor = -1;
     this.advance();
   }
@@ -106,7 +108,8 @@ public class Tokenizer {
   }
 
   @SuppressWarnings("deprecation")
-  private static boolean isSpace(char c) {
+  @Internal
+  public static boolean isSpace(char c) {
     // GWT doesn't support the non-deprecated character space predicates
     // so use this one.
     return Character.isSpace(c);
@@ -122,9 +125,9 @@ public class Tokenizer {
   /**
    * Advances over the next token, returning the token that was skipped.
    */
-  private Token scanNext() {
+  private T scanNext() {
     Assert.that(hasMore());
-    Token result;
+    T result;
     if (isSpace(getCurrent())) {
       result = scanEther();
     } else if (isWordStart(getCurrent())) {
@@ -139,35 +142,35 @@ public class Tokenizer {
         result = scanIdentifier();
         break;
       case '(':
-        result = Token.punctuation(Type.LPAREN);
+        result = tokenFactory.newPunctuation(Type.LPAREN);
         advance();
         break;
       case ')':
-        result = Token.punctuation(Type.RPAREN);
+        result = tokenFactory.newPunctuation(Type.RPAREN);
         advance();
         break;
       case '[':
-        result = Token.punctuation(Type.LBRACK);
+        result = tokenFactory.newPunctuation(Type.LBRACK);
         advance();
         break;
       case ']':
-        result = Token.punctuation(Type.RBRACK);
+        result = tokenFactory.newPunctuation(Type.RBRACK);
         advance();
         break;
       case '{':
-        result = Token.punctuation(Type.LBRACE);
+        result = tokenFactory.newPunctuation(Type.LBRACE);
         advance();
         break;
       case '}':
-        result = Token.punctuation(Type.RBRACE);
+        result = tokenFactory.newPunctuation(Type.RBRACE);
         advance();
         break;
       case ';':
-        result = Token.punctuation(Type.SEMI);
+        result = tokenFactory.newPunctuation(Type.SEMI);
         advance();
         break;
       case ',':
-        result = Token.punctuation(Type.COMMA);
+        result = tokenFactory.newPunctuation(Type.COMMA);
         advance();
         break;
       case '#':
@@ -180,7 +183,7 @@ public class Tokenizer {
           result = scanBlockComment(cursor - 1);
           break;
         default:
-          result = Token.punctuation(Type.HASH);
+          result = tokenFactory.newPunctuation(Type.HASH);
           break;
         }
         break;
@@ -188,20 +191,20 @@ public class Tokenizer {
         advance();
         switch (getCurrent()) {
         case '=':
-          result = Token.punctuation(Type.ASSIGN);
+          result = tokenFactory.newPunctuation(Type.ASSIGN);
           advance();
           break;
         default:
-          result = Token.punctuation(Type.COLON);
+          result = tokenFactory.newPunctuation(Type.COLON);
           break;
         }
         break;
       case '@':
-        result = Token.punctuation(Type.AT);
+        result = tokenFactory.newPunctuation(Type.AT);
         advance();
         break;
       default:
-        result = Token.error(getCurrent());
+        result = tokenFactory.newError(getCurrent());
         advance();
         break;
       }
@@ -209,22 +212,22 @@ public class Tokenizer {
     return result;
   }
 
-  private Token scanEther() {
+  private T scanEther() {
     int start = cursor;
     while (hasMore() && isSpace(getCurrent()))
       advance();
     String value = source.substring(start, cursor);
-    return Token.ether(value);
+    return tokenFactory.newEther(value);
   }
 
-  private Token scanEndOfLineComment(int start) {
+  private T scanEndOfLineComment(int start) {
     while (hasMore() && !isNewline(getCurrent()))
       advance();
     String value = source.substring(start, cursor);
-    return Token.ether(value);
+    return tokenFactory.newEther(value);
   }
 
-  private Token scanBlockComment(int start) {
+  private T scanBlockComment(int start) {
     while (atDifferentPair('}', '#'))
       advance();
     // If we reached the end we're at the final '#' so we advance past
@@ -232,57 +235,57 @@ public class Tokenizer {
     if (hasMore())
       advance();
     String value = source.substring(start, cursor);
-    return Token.ether(value);
+    return tokenFactory.newEther(value);
   }
 
   /**
    * Advances over the current word token.
    */
-  private Token scanWord() {
+  private T scanWord() {
     int start = cursor;
     while (hasMore() && isWordPart(getCurrent()))
       advance();
     String value = source.substring(start, cursor);
-    return Token.word(value);
+    return tokenFactory.newWord(value);
   }
 
-  private Token scanIdentifier() {
+  private T scanIdentifier() {
     int start = cursor;
     advance();
     while (hasMore() && isWordPart(getCurrent()))
       advance();
     String value = source.substring(start, cursor);
-    return Token.identifier(value);
+    return tokenFactory.newIdentifier(value);
   }
 
   /**
    * Advances over the current number.
    */
-  private Token scanNumber() {
+  private T scanNumber() {
     int start = cursor;
     while (hasMore() && isNumberPart(getCurrent()))
       advance();
     String value = source.substring(start, cursor);
-    return Token.number(value);
+    return tokenFactory.newNumber(value);
   }
 
   /**
    * Advances over the current operator;
    * @return
    */
-  private Token scanOperator() {
+  private T scanOperator() {
     int start = cursor;
     while (hasMore() && isOperatorPart(getCurrent()))
       advance();
     String value = source.substring(start, cursor);
-    return Token.operator(value);
+    return tokenFactory.newOperator(value);
   }
 
   /**
    * Returns the tokens of the string held by this tokenizer.
    */
-  private List<Token> tokenize() {
-    List<Token> tokens = Factory.newArrayList();
+  private List<T> tokenize() {
+    List<T> tokens = Factory.newArrayList();
     while (hasMore()) {
       tokens.add(scanNext());
     }
@@ -292,8 +295,8 @@ public class Tokenizer {
   /**
    * Returns the tokens of the given input string.
    */
-  public static List<Token> tokenize(String source) {
-    return new Tokenizer(source).tokenize();
+  public static <T extends IToken> List<T> tokenize(String source, IFactory<T> tokenFactory) {
+    return new Tokenizer<T>(source, tokenFactory).tokenize();
   }
 
 }
