@@ -1,18 +1,9 @@
 package org.au.tonomy.client;
 
-import java.util.List;
-
 import org.au.tonomy.client.filesystem.LocalFile;
 import org.au.tonomy.client.presentation.CodeEditorPresenter;
 import org.au.tonomy.client.util.Callback;
 import org.au.tonomy.client.widget.EditorWidget;
-import org.au.tonomy.shared.syntax.Ast;
-import org.au.tonomy.shared.syntax.MacroParser;
-import org.au.tonomy.shared.syntax.Parser;
-import org.au.tonomy.shared.syntax.SyntaxError;
-import org.au.tonomy.shared.syntax.Token;
-import org.au.tonomy.shared.syntax.Tokenizer;
-import org.au.tonomy.shared.util.Exceptions;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.ui.Panel;
@@ -32,14 +23,7 @@ public class EditorEntryPoint implements EntryPoint {
     file.getContents().onResolved(new Callback<String>() {
       @Override
       public void onSuccess(String source) {
-        List<Token> tokens = Tokenizer.tokenize(source, Token.getFactory());
-        Ast ast;
-        try {
-          ast = Parser.parse(new MacroParser(), Token.getFactory(), tokens);
-        } catch (SyntaxError se) {
-          throw Exceptions.propagate(se);
-        }
-        presenter.getSourceManager().setSource(ast);
+        presenter.initialize("foo bar $baz 123 quux");
       }
     });
   }

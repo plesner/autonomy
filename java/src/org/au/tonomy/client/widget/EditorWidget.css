@@ -1,17 +1,24 @@
 .root {
-  position: relative;
+  position: absolute;
   width: 300px;
-  height: 200px;
-  top: 30px;
-  left: 30px;
+  top: 5px;
+  left: 5px;
+  bottom: 5px;
+  background: #EEEEEE;
 }
 
 .display {
-  width: 300px;
-  height: 200px;
-  border: 1px dashed silver;
+  left: 3px;
+  right: 3px;
+  top: 3px;
+  bottom: 3px;
   font-family: monospace;
   font-size: 10pt;
+  position: absolute;
+}
+
+.source {
+  background: white;
 }
 
 .cursor {
@@ -19,19 +26,12 @@
   background: black;
   height: 1em;
   width: 1px;
-  margin-top: 1px;
-  margin-left: 1px;
+  margin-top: 3px;
+  margin-left: 3px;
 }
 
 .overlay {
-  position: absolute;
-  display: block;
-  float: left;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
   opacity: 0;
-  z-index: 1;
+  z-index: 2;
   resizeable: false;
 }

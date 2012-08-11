@@ -1,11 +1,13 @@
 package org.au.tonomy.client.widget;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.au.tonomy.client.Console;
-import org.au.tonomy.shared.syntax.Token;
-import org.au.tonomy.shared.syntax.Tokenizer;
+import org.au.tonomy.shared.util.Factory;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
@@ -19,6 +21,7 @@ public class EditorLineWidget extends Composite {
   private static IEditorLineWidgetUiBinder BINDER = GWT .create(IEditorLineWidgetUiBinder.class);
   interface IEditorLineWidgetUiBinder extends UiBinder<Widget, EditorLineWidget> { }
 
+  private final LinkedList<EditorToken> tokens = Factory.newLinkedList();
   @UiField SpanElement contents;
 
   public EditorLineWidget() {
@@ -35,16 +38,6 @@ public class EditorLineWidget extends Composite {
     }, MouseDownEvent.getType());
   }
 
-  public void update(String line) {
-    contents.setInnerText("");
-    for (Token token : Tokenizer.tokenize(line, Token.getFactory())) {
-      SpanElement span = Document.get().createSpanElement();
-      span.setInnerText(token.getValue());
-      span.setClassName(token.getCategory());
-      contents.appendChild(span);
-    }
-  }
-
   public int getContentTop() {
     return contents.getOffsetTop();
   }
@@ -52,6 +45,24 @@ public class EditorLineWidget extends Composite {
   public int getCharacterWidth() {
     int charCount = contents.getInnerText().length();
     return charCount == 0 ? 0 : contents.getOffsetWidth() / charCount;
+  }
+
+  public void insert(int tokenIndex, List<EditorToken> tokens) {
+    Node prev;
+    if (tokenIndex == 0) {
+      prev = null;
+    } else {
+      prev = tokens.get(tokenIndex).getElement();
+    }
+    for (EditorToken token : tokens) {
+      Node next = token.getElement();
+      if (prev == null) {
+        contents.insertFirst(next);
+      } else {
+        contents.insertAfter(next, prev);
+      }
+    }
+    this.tokens.addAll(tokenIndex, tokens);
   }
 
 }

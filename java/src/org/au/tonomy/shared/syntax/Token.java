@@ -1,6 +1,7 @@
 package org.au.tonomy.shared.syntax;
 
 
+
 /**
  * A single token within some source code.
  */
@@ -34,55 +35,75 @@ public class Token implements IToken {
   }
 
   /**
+   * Supertype for token factories that return the same type of token
+   * for all calls, just with different arguments.
+   */
+  protected static abstract class AbstractFactory<T extends Token> implements IFactory<T> {
+
+    /**
+     * Subclasses can implement this to define how a token is constructed
+     * independent of its type.
+     */
+    protected abstract T newToken(Type type, String value);
+
+    @Override
+    public T newEther(String value) {
+      return newToken(Type.ETHER, value);
+    }
+
+    @Override
+    public T newWord(String value) {
+      return newToken(Type.WORD, value);
+    }
+
+    @Override
+    public T newIdentifier(String value) {
+      return newToken(Type.IDENTIFIER, value);
+    }
+
+    @Override
+    public T newNumber(String value) {
+      return newToken(Type.NUMBER, value);
+    }
+
+    @Override
+    public T newOperator(String value) {
+      return newToken(Type.OPERATOR, value);
+    }
+
+    @Override
+    public T newError(char value) {
+      return newToken(Type.ERROR, Character.toString(value));
+    }
+
+    @Override
+    public T newEof() {
+      return newToken(Type.EOF, null);
+    }
+
+    @Override
+    public T newPunctuation(Type type) {
+      return newToken(type, type.toString());
+    }
+
+  };
+
+  /**
+   * Singleton token factory.
+   */
+  private static final IFactory<Token> FACTORY = new AbstractFactory<Token>() {
+    @Override
+    protected Token newToken(Type type, String value) {
+      return new Token(type, value);
+    }
+  };
+
+  /**
    * Returns the singleton token factory.
    */
   public static IFactory<Token> getFactory() {
     return FACTORY;
   }
-
-  private static final IFactory<Token> FACTORY = new IFactory<Token>() {
-
-    @Override
-    public Token newEther(String value) {
-      return new Token(Type.ETHER, value);
-    }
-
-    @Override
-    public Token newWord(String value) {
-      return new Token(Type.WORD, value);
-    }
-
-    @Override
-    public Token newIdentifier(String value) {
-      return new Token(Type.IDENTIFIER, value);
-    }
-
-    @Override
-    public Token newNumber(String value) {
-      return new Token(Type.NUMBER, value);
-    }
-
-    @Override
-    public Token newOperator(String value) {
-      return new Token(Type.OPERATOR, value);
-    }
-
-    @Override
-    public Token newError(char value) {
-      return new Token(Type.ERROR, Character.toString(value));
-    }
-
-    @Override
-    public Token newEof() {
-      return new Token(Type.EOF, null);
-    }
-
-    @Override
-    public Token newPunctuation(Type type) {
-      return new Token(type, type.toString());
-    }
-
-  };
 
   @Override
   public int hashCode() {

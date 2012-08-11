@@ -3,8 +3,10 @@ package org.au.tonomy.client.widget;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.au.tonomy.client.presentation.SourceManager;
+import org.au.tonomy.client.presentation.LineManager;
+import org.au.tonomy.client.presentation.LineManager.Cursor;
 import org.au.tonomy.shared.util.Assert;
+import org.au.tonomy.shared.util.Factory;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
@@ -25,7 +27,7 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * HTML based source code editor.
  */
-public class EditorWidget extends Composite implements SourceManager.IListener {
+public class EditorWidget extends Composite {
 
   private static IEditorWidgetUiBinder BINDER = GWT .create(IEditorWidgetUiBinder.class);
   interface IEditorWidgetUiBinder extends UiBinder<Widget, EditorWidget> { }
@@ -52,8 +54,8 @@ public class EditorWidget extends Composite implements SourceManager.IListener {
   @UiField TextArea overlay;
   private IListener listener = null;
 
-  private final LinkedList<EditorLineWidget> lines = new LinkedList<EditorLineWidget>();
   private final SpanElement cursor;
+  private final LinkedList<EditorLineWidget> lines = Factory.newLinkedList();
 
   public EditorWidget() {
     initWidget(BINDER.createAndBindUi(this));
@@ -98,39 +100,37 @@ public class EditorWidget extends Composite implements SourceManager.IListener {
     getListener().onKeyDown(event);
   }
 
-  @Override
-  public void resetContent(List<String> lines) {
-    display.clear();
-    for (String line : lines)
-      appendLine(line);
+  public LineManager.IListener<EditorToken> getLineListener() {
+    return lineListener;
   }
 
-  @Override
-  public void onLineChanged(int row, String line) {
-    Assert.that(row < lines.size());
-    lines.get(row).update(line);
-  }
+  private final LineManager.IListener<EditorToken> lineListener = new LineManager.IListener<EditorToken>() {
 
-  @Override
-  public void onLineAppended(String value) {
-    appendLine(value);
-  }
+    @Override
+    public void onCursorMoved(Cursor point) {
+      Assert.that(point.getRow() < lines.size());
+      EditorLineWidget line = lines.get(point.getRow());
+      cursor.getStyle().setTop(line.getContentTop(), Unit.PX);
+      int charWidth = line.getCharacterWidth();
+      cursor.getStyle().setLeft(charWidth * point.getColumn(), Unit.PX);
+    }
 
-  private void appendLine(String value) {
-    EditorLineWidget span = new EditorLineWidget();
-    lines.add(span);
-    display.add(span);
-    onLineChanged(lines.size() - 1, value);
-  }
+    @Override
+    public void onNewlineAdded(int row) {
+      EditorLineWidget line = new EditorLineWidget();
+      lines.add(row, line);
+      display.insert(line, row);
+    }
 
-  @Override
-  public void setCursor(int row, int column) {
-    Assert.that(row < lines.size());
-    EditorLineWidget lineSpan = lines.get(row);
-    cursor.getStyle().setTop(lineSpan.getContentTop(), Unit.PX);
-    int charWidth = lineSpan.getCharacterWidth();
-    cursor.getStyle().setLeft(charWidth * column, Unit.PX);
-  }
+    @Override
+    public void onTokensInserted(int row, int tokenIndex,
+        List<EditorToken> tokens) {
+      Assert.that(row < lines.size());
+      EditorLineWidget line = lines.get(row);
+      line.insert(tokenIndex, tokens);
+    }
+
+  };
 
   /**
    * Bindings for the world widget css.
@@ -144,6 +144,8 @@ public class EditorWidget extends Composite implements SourceManager.IListener {
     public String cursor();
 
     public String overlay();
+
+    public String source();
 
   }
 

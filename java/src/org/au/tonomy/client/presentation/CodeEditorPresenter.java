@@ -2,6 +2,8 @@ package org.au.tonomy.client.presentation;
 
 import org.au.tonomy.client.widget.EditorWidget;
 import org.au.tonomy.client.widget.EditorWidget.IKeyEvent;
+import org.au.tonomy.client.widget.EditorToken;
+import org.au.tonomy.shared.syntax.DumbTokenFilter;
 
 import com.google.gwt.event.dom.client.KeyCodes;
 
@@ -13,28 +15,30 @@ import com.google.gwt.event.dom.client.KeyCodes;
  */
 public class CodeEditorPresenter implements EditorWidget.IListener {
 
-  private final EditorWidget editor;
-  private final SourceManager manager = new SourceManager();
+  private final LineManager<EditorToken> manager;
+  private final IEditorListener listener;
 
   public CodeEditorPresenter(EditorWidget editor) {
-    this.editor = editor;
+    this.manager = new LineManager<EditorToken>(
+        new DumbTokenFilter<EditorToken>(
+            EditorToken.getWidgetFactory()));
+    this.listener = manager.getEditorListener();
     editor.attachListener(this);
-    manager.attachListener(editor);
-    manager.resetListener();
+    manager.attachListener(editor.getLineListener());
   }
 
-  public SourceManager getSourceManager() {
-    return manager;
+  public void initialize(String source) {
+    this.manager.initialize(source);
   }
 
   @Override
   public void onKeyPress(char key) {
     switch (key) {
     case '\r': case '\n':
-      manager.insertNewline();
+      listener.insertNewline();
       break;
     default:
-      manager.appendChar((char) key);
+      listener.insertChar((char) key);
       break;
     }
   }
@@ -43,19 +47,19 @@ public class CodeEditorPresenter implements EditorWidget.IListener {
   public void onKeyDown(IKeyEvent event) {
     switch (event.getKeyCode()) {
     case KeyCodes.KEY_BACKSPACE:
-      manager.deleteBackwards();
+      listener.deleteBackwards();
       break;
     case KeyCodes.KEY_UP:
-      manager.moveCursor(0, -1);
+      listener.moveCursor(0, -1);
       break;
     case KeyCodes.KEY_DOWN:
-      manager.moveCursor(0, 1);
+      listener.moveCursor(0, 1);
       break;
     case KeyCodes.KEY_LEFT:
-      manager.moveCursor(-1, 0);
+      listener.moveCursor(-1, 0);
       break;
     case KeyCodes.KEY_RIGHT:
-      manager.moveCursor(1, 0);
+      listener.moveCursor(1, 0);
       break;
     }
   }

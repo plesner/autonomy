@@ -3,14 +3,14 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui"
 	xmlns:t="urn:import:org.au.tonomy.client.widget">
   <ui:style src="MainWidget.css"></ui:style>
-  <g:HorizontalPanel>
+  <g:FlowPanel>
     <t:EditorWidget
         ui:field="editor"
-        styleName="{style.editor}">
+        addStyleNames="{style.editor}">
     </t:EditorWidget>
     <t:WorldWidget
         ui:field="world"
-        styleName="{style.world}">
+        addStyleNames="{style.world}">
     </t:WorldWidget>
-  </g:HorizontalPanel>
+  </g:FlowPanel>
 </ui:UiBinder> 

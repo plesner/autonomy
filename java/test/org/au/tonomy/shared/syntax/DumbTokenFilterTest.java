@@ -158,7 +158,7 @@ public class DumbTokenFilterTest extends TestCase {
   @Test
   public void testInsert() {
     EventChecker checker = new EventChecker();
-    DumbTokenFilter filter = new DumbTokenFilter();
+    DumbTokenFilter<Token> filter = new DumbTokenFilter<Token>(Token.getFactory());
     filter.addListener(checker);
 
     checker.expectInsert(0, "foo", " ", "baz");

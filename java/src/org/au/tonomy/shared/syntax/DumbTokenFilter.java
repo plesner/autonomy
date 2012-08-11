@@ -2,6 +2,7 @@ package org.au.tonomy.shared.syntax;
 
 import java.util.List;
 
+import org.au.tonomy.shared.syntax.IToken.IFactory;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.Internal;
@@ -11,14 +12,19 @@ import org.au.tonomy.shared.util.Internal;
  * whole before and after input and calculates the differences from
  * there.
  */
-public class DumbTokenFilter implements ITokenFilter<Token> {
+public class DumbTokenFilter<T extends IToken> implements ITokenFilter<T> {
 
-  private List<Token> currentTokens = Factory.newArrayList();
+  private List<T> currentTokens = Factory.newArrayList();
   private String source = "";
-  private final List<ITokenListener<Token>> listeners = Factory.newArrayList();
+  private final List<ITokenListener<T>> listeners = Factory.newArrayList();
+  private final IFactory<T> tokenFactory;
+
+  public DumbTokenFilter(IFactory<T> tokenFactory) {
+    this.tokenFactory = tokenFactory;
+  }
 
   @Override
-  public void addListener(ITokenListener<Token> listener) {
+  public void addListener(ITokenListener<T> listener) {
     listeners.add(listener);
   }
 
@@ -57,7 +63,7 @@ public class DumbTokenFilter implements ITokenFilter<Token> {
   }
 
   private void fireEvents() {
-    List<Token> newTokens = Tokenizer.tokenize(source, Token.getFactory());
+    List<T> newTokens = Tokenizer.tokenize(source, tokenFactory);
     int firstDifference = findFirstDifference(currentTokens, newTokens);
     int lastDifference = findLastDifference(currentTokens, newTokens, firstDifference);
     // Find the range within the current string that's affected.
@@ -68,8 +74,8 @@ public class DumbTokenFilter implements ITokenFilter<Token> {
     int newFirstOffset = firstDifference;
     int newLastOffset = newTokens.size() - lastDifference;
     Assert.that(newFirstOffset <= newLastOffset);
-    List<Token> removed = currentTokens.subList(currentFirstOffset, currentLastOffset);
-    List<Token> inserted = newTokens.subList(newFirstOffset, newLastOffset);
+    List<T> removed = currentTokens.subList(currentFirstOffset, currentLastOffset);
+    List<T> inserted = newTokens.subList(newFirstOffset, newLastOffset);
     if (removed.isEmpty()) {
       if (inserted.isEmpty()) {
         // No changes -- nothing to do.
@@ -87,21 +93,20 @@ public class DumbTokenFilter implements ITokenFilter<Token> {
     Assert.equals(newTokens, currentTokens);
   }
 
-  private void insertAndNotify(int offset, List<Token> inserted) {
-    for (ITokenListener<Token> listener : listeners)
+  private void insertAndNotify(int offset, List<T> inserted) {
+    for (ITokenListener<T> listener : listeners)
       listener.onInsert(offset, inserted);
     currentTokens.addAll(offset, inserted);
   }
 
-  private void removeAndNotify(int offset, List<Token> removed) {
-    for (ITokenListener<Token> listener : listeners)
+  private void removeAndNotify(int offset, List<T> removed) {
+    for (ITokenListener<T> listener : listeners)
       listener.onRemove(offset, removed);
     currentTokens.subList(offset, offset + removed.size()).clear();
   }
 
-  private void replaceAndNotify(int offset, List<Token> removed,
-      List<Token> inserted) {
-    for (ITokenListener<Token> listener : listeners)
+  private void replaceAndNotify(int offset, List<T> removed, List<T> inserted) {
+    for (ITokenListener<T> listener : listeners)
       listener.onReplace(offset, removed, inserted);
     currentTokens.subList(offset, offset + removed.size()).clear();
     currentTokens.addAll(offset, inserted);
@@ -114,7 +119,7 @@ public class DumbTokenFilter implements ITokenFilter<Token> {
    * wouldn't be equal).
    */
   @Internal
-  public static int findFirstDifference(List<Token> before, List<Token> after) {
+  public static <T> int findFirstDifference(List<T> before, List<T> after) {
     int offset = 0;
     while (offset < before.size() && offset < after.size()) {
       if (before.get(offset).equals(after.get(offset))) {
@@ -131,7 +136,7 @@ public class DumbTokenFilter implements ITokenFilter<Token> {
    * before and after lists. If the lists are equal it returns 0.
    */
   @Internal
-  public static int findLastDifference(List<Token> before, List<Token> after,
+  public static <T> int findLastDifference(List<T> before, List<T> after,
       int firstDifference) {
     int reverseOffset = 0;
     while (reverseOffset < before.size() && reverseOffset < after.size()) {
