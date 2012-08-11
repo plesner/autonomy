@@ -5,8 +5,7 @@
   <ui:with field="res" type="org.au.tonomy.client.widget.WorldWidget.Resources"/>
   <g:FlowPanel>
     <g:FlowPanel styleName="{res.css.world}">
-      <w:CanvasPlus
-          ui:field="canvasWrapper">
+      <w:CanvasPlus ui:field="canvasWrapper">
       </w:CanvasPlus>
     </g:FlowPanel>
   </g:FlowPanel>

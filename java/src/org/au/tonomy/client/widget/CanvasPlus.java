@@ -2,6 +2,8 @@ package org.au.tonomy.client.widget;
 
 import java.util.List;
 
+import org.au.tonomy.client.Console;
+import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Factory;
 
 import com.google.gwt.canvas.client.Canvas;
@@ -11,6 +13,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
@@ -49,34 +52,60 @@ public class CanvasPlus extends Composite {
   private int currentWidth = 0;
   private int currentHeight = 0;
   private final List<IResizeListener> listeners = Factory.newArrayList();
-
+  private HandlerRegistration resizeHandlerRegistration;
 
   public CanvasPlus() {
     initWidget(BINDER.createAndBindUi(this));
-    configureEvents();
-    scheduleFirstRefresh();
   }
 
-  private void configureEvents() {
-    Window.addResizeHandler(new ResizeHandler() {
-      @Override
-      public void onResize(ResizeEvent event) {
-        refreshLayout();
-      }
-    });
+  @Override
+  protected void onLoad() {
+    super.onLoad();
+    registerResizeHandler();
+    scheduleRefresh();
   }
 
-  public void addResizeListener(IResizeListener listener) {
-    this.listeners.add(listener);
+  @Override
+  protected void onUnload() {
+    unregisterResizeHandler();
+    super.onUnload();
   }
 
-  private void scheduleFirstRefresh() {
+  private void scheduleRefresh() {
     Scheduler.get().scheduleDeferred(new ScheduledCommand() {
       @Override
       public void execute() {
         refreshLayout();
       }
     });
+  }
+
+  /**
+   * Registers a resize listener which will take care of resizing the
+   * canvas when the window is resized.
+   */
+  private void registerResizeHandler() {
+    Assert.isNull(resizeHandlerRegistration);
+    resizeHandlerRegistration = Window.addResizeHandler(new ResizeHandler() {
+      @Override
+      public void onResize(ResizeEvent event) {
+        scheduleRefresh();
+      }
+    });
+  }
+
+  /**
+   * Unregisters any registered handlers.
+   */
+  private void unregisterResizeHandler() {
+    if (resizeHandlerRegistration != null) {
+      resizeHandlerRegistration.removeHandler();
+      resizeHandlerRegistration = null;
+    }
+  }
+
+  public void addResizeListener(IResizeListener listener) {
+    this.listeners.add(listener);
   }
 
   public Canvas getCanvas() {
@@ -91,6 +120,7 @@ public class CanvasPlus extends Composite {
   private void refreshLayout() {
     int newWidth = container.getOffsetWidth();
     int newHeight = container.getOffsetHeight();
+    Console.log(newWidth + ", " + newHeight);
     if (newWidth == currentWidth && newHeight == currentHeight)
       return;
     for (IResizeListener listener : listeners)
