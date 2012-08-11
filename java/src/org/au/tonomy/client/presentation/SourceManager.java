@@ -5,9 +5,15 @@ import java.util.List;
 
 import org.au.tonomy.shared.syntax.Ast;
 import org.au.tonomy.shared.util.Assert;
-
+/**
+ * A utility that keeps track of a line-by-line representation of
+ * source code and maps between it an a token stream.
+ */
 public class SourceManager {
 
+  /**
+   * A listener for source events.
+   */
   public interface IListener {
 
     public void resetContent(List<String> lines);

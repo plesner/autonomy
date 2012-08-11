@@ -5,6 +5,11 @@ import java.util.List;
 /**
  * A filter that can be given raw string events and transform them into
  * token events on the stream of tokens corresponding to the input.
+ *
+ * The tokens produced by this filter should be stable in the sense
+ * that once a token has been inserted it will not be substituted,
+ * not even by an identical other token. It will be the same object
+ * as long as it's part of the input, until it is replaced or removed.
  */
 public interface ITokenFilter<T extends IToken> {
 

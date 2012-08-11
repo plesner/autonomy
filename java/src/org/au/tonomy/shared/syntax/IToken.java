@@ -1,9 +1,7 @@
 package org.au.tonomy.shared.syntax;
 
-
-
 /**
- * A factory type for producing token objects.
+ * Abstract interface for source tokens.
  */
 public interface IToken {
 
@@ -53,6 +51,9 @@ public interface IToken {
 
   /**
    * Factory interface for producing the different kinds of tokens.
+   * Producing a token should be side-effect free -- essentially it
+   * should be impossible to detect if a token is produced and then
+   * discarded immediately.
    */
   public interface IFactory<T extends IToken> {
 

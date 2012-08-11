@@ -75,19 +75,36 @@ public class DumbTokenFilter implements ITokenFilter<Token> {
         // No changes -- nothing to do.
         Assert.that(currentTokens.equals(newTokens));
       } else {
-        for (ITokenListener<Token> listener : listeners)
-          listener.onInsert(firstDifference, inserted);
+        insertAndNotify(firstDifference, inserted);
       }
     } else {
       if (inserted.isEmpty()) {
-        for (ITokenListener<Token> listener : listeners)
-          listener.onRemove(firstDifference, removed);
+        removeAndNotify(firstDifference, removed);
       } else {
-        for (ITokenListener<Token> listener : listeners)
-          listener.onReplace(firstDifference, removed, inserted);
+        replaceAndNotify(firstDifference, removed, inserted);
       }
     }
-    currentTokens = newTokens;
+    Assert.equals(newTokens, currentTokens);
+  }
+
+  private void insertAndNotify(int offset, List<Token> inserted) {
+    for (ITokenListener<Token> listener : listeners)
+      listener.onInsert(offset, inserted);
+    currentTokens.addAll(offset, inserted);
+  }
+
+  private void removeAndNotify(int offset, List<Token> removed) {
+    for (ITokenListener<Token> listener : listeners)
+      listener.onRemove(offset, removed);
+    currentTokens.subList(offset, offset + removed.size()).clear();
+  }
+
+  private void replaceAndNotify(int offset, List<Token> removed,
+      List<Token> inserted) {
+    for (ITokenListener<Token> listener : listeners)
+      listener.onReplace(offset, removed, inserted);
+    currentTokens.subList(offset, offset + removed.size()).clear();
+    currentTokens.addAll(offset, inserted);
   }
 
   /**

@@ -9,7 +9,7 @@ public class Token implements IToken {
   private final Type type;
   private final String value;
 
-  private Token(Type type, String value) {
+  protected Token(Type type, String value) {
     this.type = type;
     this.value = value;
   }
