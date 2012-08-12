@@ -1,8 +1,8 @@
 package org.au.tonomy.client.presentation;
 
+import org.au.tonomy.client.widget.EditorToken;
 import org.au.tonomy.client.widget.EditorWidget;
 import org.au.tonomy.client.widget.EditorWidget.IKeyEvent;
-import org.au.tonomy.client.widget.EditorToken;
 import org.au.tonomy.shared.syntax.DumbTokenFilter;
 
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -50,16 +50,16 @@ public class CodeEditorPresenter implements EditorWidget.IListener {
       listener.deleteBackwards();
       break;
     case KeyCodes.KEY_UP:
-      listener.moveCursor(0, -1);
-      break;
-    case KeyCodes.KEY_DOWN:
-      listener.moveCursor(0, 1);
-      break;
-    case KeyCodes.KEY_LEFT:
       listener.moveCursor(-1, 0);
       break;
-    case KeyCodes.KEY_RIGHT:
+    case KeyCodes.KEY_DOWN:
       listener.moveCursor(1, 0);
+      break;
+    case KeyCodes.KEY_LEFT:
+      listener.moveCursor(0, -1);
+      break;
+    case KeyCodes.KEY_RIGHT:
+      listener.moveCursor(0, 1);
       break;
     }
   }

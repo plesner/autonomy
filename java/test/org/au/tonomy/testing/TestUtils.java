@@ -1,8 +1,12 @@
 package org.au.tonomy.testing;
 
+import java.util.List;
+
 import junit.framework.Assert;
 
+import org.au.tonomy.shared.syntax.Token;
 import org.au.tonomy.shared.syntax.Tokenizer;
+import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.world.Hex;
 
 public class TestUtils extends Assert {
@@ -74,5 +78,23 @@ public class TestUtils extends Assert {
     }
     return true;
   }
+
+  /**
+   * Converts a list of strings into tokens, taking the token type
+   * from the characters in the string -- so pure alphabetical strings
+   * become words, pure spaces become ether, etc.
+   */
+  public static List<Token> tokens(String... values) {
+    List<Token> tokens = Factory.newArrayList();
+    for (String value : values) {
+      if (TestUtils.isSpace(value)) {
+        tokens.add(Token.getFactory().newSpace(value));
+      } else {
+        tokens.add(Token.getFactory().newWord(value));
+      }
+    }
+    return tokens;
+  }
+
 
 }

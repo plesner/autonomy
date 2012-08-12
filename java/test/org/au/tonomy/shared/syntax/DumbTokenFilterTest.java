@@ -1,28 +1,16 @@
 package org.au.tonomy.shared.syntax;
 
-import java.util.LinkedList;
+import static org.au.tonomy.testing.TestUtils.tokens;
+
 import java.util.List;
 
 import junit.framework.TestCase;
 
 import org.au.tonomy.shared.syntax.ITokenFilter.ITokenListener;
-import org.au.tonomy.shared.util.Factory;
-import org.au.tonomy.testing.TestUtils;
+import org.au.tonomy.testing.AbstractEventChecker;
 import org.junit.Test;
 
 public class DumbTokenFilterTest extends TestCase {
-
-  private static List<Token> tokens(String... values) {
-    List<Token> tokens = Factory.newArrayList();
-    for (String value : values) {
-      if (TestUtils.isSpace(value)) {
-        tokens.add(Token.getFactory().newEther(value));
-      } else {
-        tokens.add(Token.getFactory().newWord(value));
-      }
-    }
-    return tokens;
-  }
 
   @Test
   public void testFirstDifference() {
@@ -65,7 +53,7 @@ public class DumbTokenFilterTest extends TestCase {
   /**
    * Listener that fails all events.
    */
-  private class FailingListener implements ITokenListener<Token> {
+  private class AbstractListener implements ITokenListener<Token> {
 
     @Override
     public void onInsert(int offset, List<Token> inserted) {
@@ -88,69 +76,67 @@ public class DumbTokenFilterTest extends TestCase {
    * A utility class the can be loaded with event expectations and will
    * check any events fired on it against those expectations.
    */
-  private class EventChecker implements ITokenListener<Token> {
-
-    /**
-     * The expected events, in the form of listeners that will throw
-     * if they're called in the wrong way. New are added at the end.
-     */
-    private final LinkedList<ITokenListener<Token>> expected = Factory.newLinkedList();
-
-    public void expectInsert(final int expectedOffset, final String... expectedTokens) {
-      expected.addLast(new FailingListener() {
-        @Override
-        public void onInsert(int offset, List<Token> inserted) {
-          assertEquals(expectedOffset, offset);
-          assertEquals(tokens(expectedTokens), inserted);
-        }
-      });
-    }
+  private class EventChecker extends AbstractEventChecker<ITokenListener<Token>>
+      implements ITokenListener<Token> {
 
     @Override
     public void onInsert(int offset, List<Token> inserted) {
-      getNextEvent().onInsert(offset, inserted);
-    }
-
-    public void expectRemove(final int expectedOffset, final String... expectedTokens) {
-      expected.addLast(new FailingListener() {
-        @Override
-        public void onRemove(int offset, List<Token> removed) {
-          assertEquals(expectedOffset, offset);
-          assertEquals(tokens(expectedTokens), removed);
-        }
-      });
+      getNextExpected().onInsert(offset, inserted);
     }
 
     @Override
     public void onRemove(int offset, List<Token> removed) {
-      getNextEvent().onRemove(offset, removed);
-    }
-
-    public void expectReplace(final int expectedOffset,
-        final List<Token> expectedRemoved, final List<Token> expectedInserted) {
-      expected.addLast(new FailingListener() {
-        @Override
-        public void onReplace(int offset, List<Token> removed,
-            List<Token> inserted) {
-          assertEquals(expectedOffset, offset);
-          assertEquals(expectedRemoved, removed);
-          assertEquals(expectedInserted, inserted);
-        }
-      });
+      getNextExpected().onRemove(offset, removed);
     }
 
     @Override
     public void onReplace(int offset, List<Token> removed, List<Token> inserted) {
-      getNextEvent().onReplace(offset, removed, inserted);
+      getNextExpected().onReplace(offset, removed, inserted);
     }
 
-    private ITokenListener<Token> getNextEvent() {
-      assertTrue(expectsMoreEvents());
-      return expected.removeFirst();
+    @Override
+    protected ITokenListener<Token> newRecorder() {
+      return new Recorder();
     }
 
-    public boolean expectsMoreEvents() {
-      return !expected.isEmpty();
+    private class Recorder implements ITokenListener<Token> {
+
+      @Override
+      public void onInsert(final int eOffset, final List<Token> eInserted) {
+        addExpectation(new AbstractListener() {
+          @Override
+          public void onInsert(int offset, List<Token> inserted) {
+            assertEquals(eOffset, offset);
+            assertEquals(eInserted, inserted);
+          }
+        });
+      }
+
+      @Override
+      public void onRemove(final int eOffset, final List<Token> eRemoved) {
+        addExpectation(new AbstractListener() {
+          @Override
+          public void onRemove(int offset, List<Token> removed) {
+            assertEquals(eOffset, offset);
+            assertEquals(eRemoved, removed);
+          }
+        });
+      }
+
+      @Override
+      public void onReplace(final int eOffset, final List<Token> eRemoved,
+          final List<Token> eInserted) {
+        addExpectation(new AbstractListener() {
+          @Override
+          public void onReplace(int offset, List<Token> removed,
+              List<Token> inserted) {
+            assertEquals(eOffset, offset);
+            assertEquals(eRemoved, removed);
+            assertEquals(eInserted, inserted);
+          }
+        });
+      }
+
     }
 
   }
@@ -161,19 +147,19 @@ public class DumbTokenFilterTest extends TestCase {
     DumbTokenFilter<Token> filter = new DumbTokenFilter<Token>(Token.getFactory());
     filter.addListener(checker);
 
-    checker.expectInsert(0, "foo", " ", "baz");
+    checker.getRecorder().onInsert(0, tokens("foo", " ", "baz"));
     filter.append("foo baz");
     assertEquals("foo baz", filter.getSource());
 
-    checker.expectInsert(2, "bar", " ");
+    checker.getRecorder().onInsert(2, tokens("bar", " "));
     filter.insert(4, "bar ");
     assertEquals("foo bar baz", filter.getSource());
 
-    checker.expectRemove(2, "bar", " ");
+    checker.getRecorder().onRemove(2, tokens("bar", " "));
     filter.delete(4, 4);
     assertEquals("foo baz", filter.getSource());
 
-    checker.expectReplace(2, tokens("baz"), tokens("bar"));
+    checker.getRecorder().onReplace(2, tokens("baz"), tokens("bar"));
     filter.replace(4, 3, "bar");
     assertEquals("foo bar", filter.getSource());
 
@@ -182,7 +168,7 @@ public class DumbTokenFilterTest extends TestCase {
     assertEquals("foo bar", filter.getSource());
 
     // Check that "replacing" the empty string works just like inserting.
-    checker.expectInsert(2, "blah", " ");
+    checker.getRecorder().onInsert(2, tokens("blah", " "));
     filter.replace(4, 0, "blah ");
     assertEquals("foo blah bar", filter.getSource());
 

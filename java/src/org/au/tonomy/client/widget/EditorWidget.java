@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.au.tonomy.client.presentation.LineManager;
-import org.au.tonomy.client.presentation.LineManager.Cursor;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Factory;
 
@@ -107,16 +106,16 @@ public class EditorWidget extends Composite {
   private final LineManager.IListener<EditorToken> lineListener = new LineManager.IListener<EditorToken>() {
 
     @Override
-    public void onCursorMoved(Cursor point) {
-      Assert.that(point.getRow() < lines.size());
-      EditorLineWidget line = lines.get(point.getRow());
+    public void onCursorMoved(int row, int column) {
+      Assert.that(row < lines.size());
+      EditorLineWidget line = lines.get(row);
       cursor.getStyle().setTop(line.getContentTop(), Unit.PX);
       int charWidth = line.getCharacterWidth();
-      cursor.getStyle().setLeft(charWidth * point.getColumn(), Unit.PX);
+      cursor.getStyle().setLeft(charWidth * column, Unit.PX);
     }
 
     @Override
-    public void onNewlineAdded(int row) {
+    public void onNewLine(int row) {
       EditorLineWidget line = new EditorLineWidget();
       lines.add(row, line);
       display.insert(line, row);

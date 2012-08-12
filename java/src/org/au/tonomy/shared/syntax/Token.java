@@ -1,5 +1,7 @@
 package org.au.tonomy.shared.syntax;
 
+import org.au.tonomy.shared.util.Assert;
+
 
 
 /**
@@ -11,6 +13,7 @@ public class Token implements IToken {
   private final String value;
 
   protected Token(Type type, String value) {
+    Assert.that(value == null || value.length() > 0);
     this.type = type;
     this.value = value;
   }
@@ -22,6 +25,11 @@ public class Token implements IToken {
   @Override
   public boolean is(Type type) {
     return this.type == type;
+  }
+
+  @Override
+  public boolean is(Flavor flavor) {
+    return this.type.getFlavor() == flavor;
   }
 
   @Override
@@ -46,9 +54,32 @@ public class Token implements IToken {
      */
     protected abstract T newToken(Type type, String value);
 
+    /**
+     * Returns true if the given string has more than one newline.
+     */
+    private static boolean hasNewlines(String str) {
+      for (int i = 0; i < str.length(); i++) {
+        if (Tokenizer.isNewline(str.charAt(i)))
+          return true;
+      }
+      return false;
+    }
+
     @Override
-    public T newEther(String value) {
-      return newToken(Type.ETHER, value);
+    public T newSpace(String value) {
+      Assert.that(!hasNewlines(value));
+      return newToken(Type.SPACE, value);
+    }
+
+    @Override
+    public T newNewline(char value) {
+      Assert.that(Tokenizer.isNewline(value));
+      return newToken(Type.NEWLINE, Character.toString(value));
+    }
+
+    @Override
+    public T newComment(String value) {
+      return newToken(Type.COMMENT, value);
     }
 
     @Override
@@ -83,6 +114,7 @@ public class Token implements IToken {
 
     @Override
     public T newPunctuation(Type type) {
+      Assert.that(type.isPunctuation());
       return newToken(type, type.toString());
     }
 

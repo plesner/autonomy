@@ -25,7 +25,7 @@ public class TokenizerTest extends TestCase {
     for (Token token : tokens) {
       if (insertEther) {
         if (first) first = false;
-        else expected.add(ether(" "));
+        else expected.add(space(" "));
       }
       expected.add(token);
     }
@@ -43,8 +43,13 @@ public class TokenizerTest extends TestCase {
     runScanTest("( ) { } ; # @", punctuation(Type.LPAREN), punctuation(Type.RPAREN),
         punctuation(Type.LBRACE), punctuation(Type.RBRACE),
         punctuation(Type.SEMI), punctuation(Type.HASH), punctuation(Type.AT));
-    runRawScanTest("## foo", ether("## foo"));
-    runRawScanTest("## foo\n## bar", ether("## foo"), ether("\n"), ether("## bar"));
+    runRawScanTest("## foo", space("## foo"));
+    runRawScanTest("## foo\n## bar", space("## foo"), newline('\n'), space("## bar"));
+    runRawScanTest("## foo\n## bar", space("## foo"), newline('\n'), space("## bar"));
+    runRawScanTest(" \n\n ", space(" "), newline('\n'), newline('\n'), space(" "));
+    runRawScanTest("#{ foo }#", comment("#{ foo }#"));
+    runRawScanTest("#{ \n }#", comment("#{ "), newline('\n'), comment(" }#"));
+    runRawScanTest("#{ \n\n }#", comment("#{ "), newline('\n'), newline('\n'), comment(" }#"));
   }
 
   private Token punctuation(Type type) {
@@ -67,8 +72,16 @@ public class TokenizerTest extends TestCase {
     return Token.getFactory().newWord(string);
   }
 
-  private static Token ether(String string) {
-    return Token.getFactory().newEther(string);
+  private static Token space(String string) {
+    return Token.getFactory().newSpace(string);
+  }
+
+  private static Token newline(char value) {
+    return Token.getFactory().newNewline(value);
+  }
+
+  private static Token comment(String value) {
+    return Token.getFactory().newComment(value);
   }
 
 }

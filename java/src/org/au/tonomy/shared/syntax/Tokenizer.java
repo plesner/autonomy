@@ -116,20 +116,31 @@ public class Tokenizer<T extends IToken> {
   }
 
   /**
+   * Is this a whitespace but not a newline?
+   */
+  public static boolean isSpaceNotNewline(char c) {
+    return isSpace(c) && !isNewline(c);
+  }
+
+  /**
    * Does this character terminate end-of-line comments?
    */
-  private static boolean isNewline(char c) {
+  public static boolean isNewline(char c) {
     return (c == '\n') || (c == '\r') || (c == '\f');
   }
 
   /**
-   * Advances over the next token, returning the token that was skipped.
+   * Advances over the next token or tokens, adding them to the given
+   * list.
    */
-  private T scanNext() {
+  private void addNext(List<T> out) {
     Assert.that(hasMore());
     T result;
-    if (isSpace(getCurrent())) {
-      result = scanEther();
+    if (isNewline(getCurrent())) {
+      result = tokenFactory.newNewline(getCurrent());
+      advance();
+    } else if (isSpace(getCurrent())) {
+      result = scanSpace();
     } else if (isWordStart(getCurrent())) {
       result = scanWord();
     } else if (isNumberStart(getCurrent())) {
@@ -180,8 +191,8 @@ public class Tokenizer<T extends IToken> {
           result = scanEndOfLineComment(cursor - 1);
           break;
         case '{':
-          result = scanBlockComment(cursor - 1);
-          break;
+          addBlockComment(cursor - 1, out);
+          return;
         default:
           result = tokenFactory.newPunctuation(Type.HASH);
           break;
@@ -209,33 +220,45 @@ public class Tokenizer<T extends IToken> {
         break;
       }
     }
-    return result;
+    out.add(result);
   }
 
-  private T scanEther() {
+  private T scanSpace() {
     int start = cursor;
-    while (hasMore() && isSpace(getCurrent()))
+    while (hasMore() && isSpaceNotNewline(getCurrent()))
       advance();
     String value = source.substring(start, cursor);
-    return tokenFactory.newEther(value);
+    return tokenFactory.newSpace(value);
   }
 
   private T scanEndOfLineComment(int start) {
     while (hasMore() && !isNewline(getCurrent()))
       advance();
     String value = source.substring(start, cursor);
-    return tokenFactory.newEther(value);
+    return tokenFactory.newSpace(value);
   }
 
-  private T scanBlockComment(int start) {
-    while (atDifferentPair('}', '#'))
+  private void addBlockComment(int start, List<T> out) {
+    // We always want newlines to be in a separate token so we scan
+    // the whole block comment in one go, yielding multiple tokens.
+    int lineStart = start;
+    while (atDifferentPair('}', '#')) {
+      if (isNewline(getCurrent())) {
+        if (lineStart != cursor) {
+          String value = source.substring(lineStart, cursor);
+          out.add(tokenFactory.newComment(value));
+        }
+        out.add(tokenFactory.newNewline(getCurrent()));
+        lineStart = cursor + 1;
+      }
       advance();
+    }
     // If we reached the end we're at the final '#' so we advance past
     // it.
     if (hasMore())
       advance();
-    String value = source.substring(start, cursor);
-    return tokenFactory.newEther(value);
+    String value = source.substring(lineStart, cursor);
+    out.add(tokenFactory.newComment(value));
   }
 
   /**
@@ -287,7 +310,7 @@ public class Tokenizer<T extends IToken> {
   private List<T> tokenize() {
     List<T> tokens = Factory.newArrayList();
     while (hasMore()) {
-      tokens.add(scanNext());
+      addNext(tokens);
     }
     return tokens;
   }

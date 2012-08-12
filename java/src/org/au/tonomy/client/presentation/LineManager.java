@@ -25,12 +25,12 @@ public class LineManager<T extends IToken> {
     /**
      * The cursor has moved.
      */
-    public void onCursorMoved(Cursor cursor);
+    public void onCursorMoved(int row, int column);
 
     /**
-     * A new line has been inserted at the given row.
+     * A new empty line has been inserted at the given row.
      */
-    public void onNewlineAdded(int row);
+    public void onNewLine(int row);
 
     /**
      * A sequence of tokens has been inserted at the given row, at
@@ -43,7 +43,7 @@ public class LineManager<T extends IToken> {
   /**
    * A collection of data associated with an editor cursor.
    */
-  public static class Cursor {
+  private static class Cursor {
 
     private int row = 0;
     private int column = 0;
@@ -64,6 +64,7 @@ public class LineManager<T extends IToken> {
   private static class LineInfo<T extends IToken> {
 
     private final LinkedList<T> tokens = Factory.newLinkedList();
+    private int charCountCache = -1;
 
     /**
      * Returns the raw list of tokens in this line.
@@ -77,6 +78,19 @@ public class LineManager<T extends IToken> {
      */
     public void insert(int offset, List<T> tokens) {
       this.tokens.addAll(offset, tokens);
+      charCountCache = -1;
+    }
+
+    /**
+     * Returns the number of characters in this line.
+     */
+    public int getCharCount() {
+      if (charCountCache == -1) {
+        charCountCache = 0;
+        for (T token : tokens)
+          charCountCache += token.getValue().length();
+      }
+      return charCountCache;
     }
 
   }
@@ -91,12 +105,16 @@ public class LineManager<T extends IToken> {
     this.tokenFilter.addListener(tokenListener);
   }
 
+  public int getLineCount() {
+    return lines.size();
+  }
+
   /**
    * Sets the initial source code.
    */
   public void initialize(String source) {
     tokenFilter.append(source);
-    getListener().onCursorMoved(cursor);
+    getListener().onCursorMoved(cursor.getRow(), cursor.getColumn());
   }
 
   /**
@@ -122,10 +140,14 @@ public class LineManager<T extends IToken> {
   private final IEditorListener editorListener = new IEditorListener() {
 
     @Override
-    public void moveCursor(int deltaColumn, int deltaRow) {
-      cursor.row += deltaRow;
+    public void moveCursor(int deltaRow, int deltaColumn) {
+      LineInfo<T> currentRow = lines.get(cursor.row);
       cursor.column += deltaColumn;
-      getListener().onCursorMoved(cursor);
+      if (cursor.column > currentRow.getCharCount()) {
+        cursor.column = currentRow.getCharCount();
+      }
+      cursor.row += deltaRow;
+      getListener().onCursorMoved(cursor.getRow(), cursor.getColumn());
     }
 
     @Override
@@ -151,7 +173,7 @@ public class LineManager<T extends IToken> {
   private void addNewlineAndNotify(int row) {
     LineInfo<T> line = new LineInfo<T>();
     lines.add(row, line);
-    getListener().onNewlineAdded(row);
+    getListener().onNewLine(row);
   }
 
   private void insertTokensAndNotify(int row, int tokenIndex, List<T> tokens) {

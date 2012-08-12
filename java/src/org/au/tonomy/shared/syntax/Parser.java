@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.au.tonomy.shared.runtime.IntegerValue;
+import org.au.tonomy.shared.syntax.IToken.Flavor;
 import org.au.tonomy.shared.syntax.IToken.IFactory;
 import org.au.tonomy.shared.syntax.IToken.Type;
 import org.au.tonomy.shared.syntax.MacroParser.Component;
@@ -54,7 +55,7 @@ public class Parser {
 
   private void skipEther() {
     prev = current;
-    while (hasMore() && tokens.get(cursor).is(Type.ETHER))
+    while (hasMore() && tokens.get(cursor).is(Flavor.ETHER))
       cursor++;
     if (hasMore())
       current = tokens.get(cursor);
