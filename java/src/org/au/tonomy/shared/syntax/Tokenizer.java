@@ -235,7 +235,7 @@ public class Tokenizer<T extends IToken> {
     while (hasMore() && !isNewline(getCurrent()))
       advance();
     String value = source.substring(start, cursor);
-    return tokenFactory.newSpace(value);
+    return tokenFactory.newComment(value);
   }
 
   private void addBlockComment(int start, List<T> out) {

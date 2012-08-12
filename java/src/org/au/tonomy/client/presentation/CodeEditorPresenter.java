@@ -33,14 +33,7 @@ public class CodeEditorPresenter implements EditorWidget.IListener {
 
   @Override
   public void onKeyPress(char key) {
-    switch (key) {
-    case '\r': case '\n':
-      listener.insertNewline();
-      break;
-    default:
-      listener.insertChar((char) key);
-      break;
-    }
+    listener.insertChar((char) key);
   }
 
   @Override

@@ -7,7 +7,7 @@
   white-space: pre;
 }
 
-@external .word, .number, .error, .ident, .operation;
+@external .word, .number, .error, .identifier, .operation, .space, .comment;
 
 span.word {
   font-weight: bold;
@@ -17,7 +17,7 @@ span.number {
   font-style: italic;
 }
 
-span.ident {
+span.identifier {
   color: #444444;
 }
 
@@ -27,4 +27,13 @@ span.operation {
 
 span.error {
   color: red;
+}
+
+span.space {
+  border: 1px solid #F7F7F7;
+}
+
+span.comment {
+  font-style: italic;
+  color: silver;
 }

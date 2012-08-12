@@ -23,7 +23,7 @@ public class EditorEntryPoint implements EntryPoint {
     file.getContents().onResolved(new Callback<String>() {
       @Override
       public void onSuccess(String source) {
-        presenter.initialize("foo bar $baz 123 quux");
+        presenter.initialize(source);
       }
     });
   }

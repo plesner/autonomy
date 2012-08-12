@@ -1,6 +1,7 @@
 package org.au.tonomy.client.widget;
 
 import org.au.tonomy.shared.syntax.Token;
+import org.au.tonomy.shared.util.Assert;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Node;
@@ -31,7 +32,19 @@ public class EditorToken extends Token {
     }
   };
 
+  /**
+   * Returns this token's element, which must already have been
+   * created.
+   */
   public Node getElement() {
+    return Assert.notNull(span);
+  }
+
+  /**
+   * Returns this token's element, creating it if it doesn't already
+   * exist.
+   */
+  public Node getOrCreateElement() {
     if (span == null) {
       span = Document.get().createSpanElement();
       span.setInnerText(getValue());

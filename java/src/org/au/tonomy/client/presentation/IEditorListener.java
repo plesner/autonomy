@@ -14,6 +14,4 @@ public interface IEditorListener {
 
   public void insertChar(char key);
 
-  public void insertNewline();
-
 }

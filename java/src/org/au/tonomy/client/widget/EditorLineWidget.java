@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.au.tonomy.client.Console;
+import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Factory;
 
 import com.google.gwt.core.client.GWT;
@@ -47,22 +48,32 @@ public class EditorLineWidget extends Composite {
     return charCount == 0 ? 0 : contents.getOffsetWidth() / charCount;
   }
 
-  public void insert(int tokenIndex, List<EditorToken> tokens) {
+  public void insert(int tokenIndex, List<EditorToken> inserted) {
     Node prev;
-    if (tokenIndex == 0) {
+    if (tokenIndex < 1) {
       prev = null;
     } else {
-      prev = tokens.get(tokenIndex).getElement();
+      prev = tokens.get(tokenIndex - 1).getElement();
     }
-    for (EditorToken token : tokens) {
-      Node next = token.getElement();
+    for (EditorToken token : inserted) {
+      Node next = token.getOrCreateElement();
       if (prev == null) {
         contents.insertFirst(next);
       } else {
         contents.insertAfter(next, prev);
       }
+      prev = next;
     }
-    this.tokens.addAll(tokenIndex, tokens);
+    this.tokens.addAll(tokenIndex, inserted);
+  }
+
+  public void remove(int tokenIndex, List<EditorToken> removed) {
+    for (int i = 0; i < removed.size(); i++) {
+      EditorToken token = removed.get(i);
+      Assert.that(tokens.get(tokenIndex) == token);
+      tokens.remove(tokenIndex);
+      contents.removeChild(token.getElement());
+    }
   }
 
 }

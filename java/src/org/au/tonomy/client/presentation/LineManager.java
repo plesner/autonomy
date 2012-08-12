@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.au.tonomy.shared.syntax.IToken;
+import org.au.tonomy.shared.syntax.IToken.Type;
 import org.au.tonomy.shared.syntax.ITokenFilter;
 import org.au.tonomy.shared.syntax.ITokenFilter.ITokenListener;
 import org.au.tonomy.shared.util.Assert;
@@ -37,6 +38,11 @@ public class LineManager<T extends IToken> {
      * the given token index.
      */
     public void onTokensInserted(int row, int tokenIndex, List<T> tokens);
+
+    /**
+     * A sequence of tokens has been removed at the given point.
+     */
+    public void onTokensRemoved(int row, int tokenIndex, List<T> tokens);
 
   }
 
@@ -82,6 +88,16 @@ public class LineManager<T extends IToken> {
     }
 
     /**
+     * Removes the given tokens from this manager.
+     */
+    public void remove(int offset, List<T> tokens) {
+      List<T> toRemove = this.tokens.subList(offset, offset + tokens.size());
+      Assert.equals(toRemove, tokens);
+      toRemove.clear();
+      charCountCache = -1;
+    }
+
+    /**
      * Returns the number of characters in this line.
      */
     public int getCharCount() {
@@ -103,6 +119,7 @@ public class LineManager<T extends IToken> {
   public LineManager(ITokenFilter<T> tokenFilter) {
     this.tokenFilter = tokenFilter;
     this.tokenFilter.addListener(tokenListener);
+    this.lines.add(new LineInfo<T>());
   }
 
   public int getLineCount() {
@@ -141,12 +158,18 @@ public class LineManager<T extends IToken> {
 
     @Override
     public void moveCursor(int deltaRow, int deltaColumn) {
+      setCursor(cursor.row + deltaRow, cursor.column + deltaColumn);
+    }
+
+    private void setCursor(int newRow, int newColumn) {
       LineInfo<T> currentRow = lines.get(cursor.row);
-      cursor.column += deltaColumn;
-      if (cursor.column > currentRow.getCharCount()) {
-        cursor.column = currentRow.getCharCount();
+      if (newColumn > currentRow.getCharCount()) {
+        newColumn = currentRow.getCharCount();
+      } else if (newColumn < 0) {
+        newColumn = 0;
       }
-      cursor.row += deltaRow;
+      cursor.column = newColumn;
+      cursor.row += newRow;
       getListener().onCursorMoved(cursor.getRow(), cursor.getColumn());
     }
 
@@ -157,15 +180,23 @@ public class LineManager<T extends IToken> {
 
     @Override
     public void insertChar(char key) {
-
-    }
-
-    @Override
-    public void insertNewline() {
-      addNewlineAndNotify(lines.size());
+      int charOffset = getLineCharOffset(cursor.row);
+      tokenFilter.insert(charOffset + cursor.column, Character.toString(key));
     }
 
   };
+
+  /**
+   * Returns the character offset of the beginning of the given row.
+   * @param row
+   * @return
+   */
+  private int getLineCharOffset(int row) {
+    int offset = 0;
+    for (int i = 0; i < row; i++)
+      offset += lines.get(i).getCharCount();
+    return offset;
+  }
 
   /**
    * Inserts a new line and notifies the listener.
@@ -182,6 +213,12 @@ public class LineManager<T extends IToken> {
     getListener().onTokensInserted(row, tokenIndex, tokens);
   }
 
+  private void removeTokensAndNotify(int row, int column, List<T> tokens) {
+    LineInfo<T> lineInfo = lines.get(row);
+    lineInfo.remove(column, tokens);
+    getListener().onTokensRemoved(row, column, tokens);
+  }
+
   /**
    * Returns the index of the line that contains the token with the
    * given index and the index of the token within the line.
@@ -191,36 +228,81 @@ public class LineManager<T extends IToken> {
     int lineIndex = 0;
     for (LineInfo<T> line : lines) {
       int nextOffset = currentOffset + line.getTokens().size();
-      if (currentOffset <= tokenOffset && tokenOffset < nextOffset)
+      if (currentOffset <= tokenOffset && tokenOffset <= nextOffset)
         return Pair.of(lineIndex, tokenOffset - currentOffset);
       lineIndex++;
+      currentOffset = nextOffset;
     }
     Assert.equals(tokenOffset, currentOffset);
     return Pair.of(lines.size(), 0);
+  }
+
+  /**
+   * Returns the index of the next newline token in the given list.
+   */
+  private int getNextNewline(List<T> tokens) {
+    for (int i = 0; i < tokens.size(); i++) {
+      if (tokens.get(i).is(Type.NEWLINE))
+        return i;
+    }
+    return -1;
+  }
+
+  private List<List<T>> splitLines(List<T> tokens) {
+    List<List<T>> lines = Factory.newArrayList();
+    List<T> current = tokens;
+    while (!current.isEmpty()) {
+      int newline = getNextNewline(current);
+      if (newline == -1) {
+        lines.add(current);
+        break;
+      } else {
+        List<T> head = current.subList(0, newline + 1);
+        List<T> tail = current.subList(newline + 1, current.size());
+        lines.add(head);
+        current = tail;
+      }
+    }
+    return lines;
   }
 
   private final ITokenListener<T> tokenListener = new ITokenListener<T>() {
 
     @Override
     public void onInsert(int tokenOffset, List<T> inserted) {
+      List<List<T>> lines = splitLines(inserted);
+      // First locate the current line where we'll insert these tokens.
+      // The first line is special because it's the only one where we'll
+      // insert in the middle of a line.
       Pair<Integer, Integer> position = getLineForOffset(tokenOffset);
       int lineIndex = position.getFirst();
       int tokenIndex = position.getSecond();
-      if (lineIndex == lines.size())
-        addNewlineAndNotify(lineIndex);
-      insertTokensAndNotify(lineIndex, tokenIndex, inserted);
+      // Then loop around, adding lines one at a time.
+      for (int i = 0; i < lines.size(); i++) {
+        if (i > 0)
+          addNewlineAndNotify(lineIndex);
+        insertTokensAndNotify(lineIndex, tokenIndex, lines.get(i));
+        lineIndex++;
+        tokenIndex = 0;
+      }
     }
 
     @Override
-    public void onRemove(int offset, List<T> removed) {
-      // TODO Auto-generated method stub
-
+    public void onRemove(int tokenOffset, List<T> removed) {
+      List<List<T>> lines = splitLines(removed);
+      Pair<Integer, Integer> position = getLineForOffset(tokenOffset);
+      int lineIndex = position.getFirst();
+      int tokenIndex = position.getSecond();
+      for (int i = 0; i < lines.size(); i++) {
+        removeTokensAndNotify(lineIndex, tokenIndex, lines.get(i));
+        tokenIndex = 0;
+      }
     }
 
     @Override
-    public void onReplace(int offset, List<T> removed, List<T> inserted) {
-      // TODO Auto-generated method stub
-
+    public void onReplace(int tokenOffset, List<T> removed, List<T> inserted) {
+      onRemove(tokenOffset, removed);
+      onInsert(tokenOffset, inserted);
     }
 
   };

@@ -87,7 +87,9 @@ public class TestUtils extends Assert {
   public static List<Token> tokens(String... values) {
     List<Token> tokens = Factory.newArrayList();
     for (String value : values) {
-      if (TestUtils.isSpace(value)) {
+      if (value.length() == 1 && Tokenizer.isNewline(value.charAt(0))) {
+        tokens.add(Token.getFactory().newNewline(value.charAt(0)));
+      } else if (isSpace(value)) {
         tokens.add(Token.getFactory().newSpace(value));
       } else {
         tokens.add(Token.getFactory().newWord(value));

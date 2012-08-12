@@ -63,6 +63,7 @@ public class EditorWidget extends Composite {
     cursor.setClassName(RESOURCES.css().cursor());
     root.getElement().appendChild(cursor);
     overlay.getElement().setAttribute("contentEditable", "true");
+    lineListener.onNewLine(0);
   }
 
   public void attachListener(IListener listener) {
@@ -127,6 +128,13 @@ public class EditorWidget extends Composite {
       Assert.that(row < lines.size());
       EditorLineWidget line = lines.get(row);
       line.insert(tokenIndex, tokens);
+    }
+
+    @Override
+    public void onTokensRemoved(int row, int tokenIndex, List<EditorToken> tokens) {
+      Assert.that(row < lines.size());
+      EditorLineWidget line = lines.get(row);
+      line.remove(tokenIndex, tokens);
     }
 
   };

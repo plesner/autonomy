@@ -43,9 +43,9 @@ public class TokenizerTest extends TestCase {
     runScanTest("( ) { } ; # @", punctuation(Type.LPAREN), punctuation(Type.RPAREN),
         punctuation(Type.LBRACE), punctuation(Type.RBRACE),
         punctuation(Type.SEMI), punctuation(Type.HASH), punctuation(Type.AT));
-    runRawScanTest("## foo", space("## foo"));
-    runRawScanTest("## foo\n## bar", space("## foo"), newline('\n'), space("## bar"));
-    runRawScanTest("## foo\n## bar", space("## foo"), newline('\n'), space("## bar"));
+    runRawScanTest("## foo", comment("## foo"));
+    runRawScanTest("## foo\n## bar", comment("## foo"), newline('\n'), comment("## bar"));
+    runRawScanTest("## foo\n## bar", comment("## foo"), newline('\n'), comment("## bar"));
     runRawScanTest(" \n\n ", space(" "), newline('\n'), newline('\n'), space(" "));
     runRawScanTest("#{ foo }#", comment("#{ foo }#"));
     runRawScanTest("#{ \n }#", comment("#{ "), newline('\n'), comment(" }#"));
