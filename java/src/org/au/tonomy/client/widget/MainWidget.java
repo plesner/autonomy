@@ -1,7 +1,5 @@
 package org.au.tonomy.client.widget;
 
-import org.au.tonomy.client.presentation.CodeEditorPresenter;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -19,7 +17,6 @@ public class MainWidget extends Composite {
   public MainWidget(WorldWidget world) {
     this.world = world;
     initWidget(uiBinder.createAndBindUi(this));
-    new CodeEditorPresenter(editor);
   }
 
 }

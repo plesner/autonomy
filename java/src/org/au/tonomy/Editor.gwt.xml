@@ -9,4 +9,6 @@
   <entry-point class="org.au.tonomy.client.EditorEntryPoint" />
   <script src="webgl-utils.js"></script>
   <script src="gl-matrix-1.3.7-min.js"></script>
+  <script src="codemirror.js"></script>
+  <stylesheet src="codemirror.css"></stylesheet>
 </module>

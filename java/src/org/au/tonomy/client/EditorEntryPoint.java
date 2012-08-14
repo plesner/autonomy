@@ -1,7 +1,6 @@
 package org.au.tonomy.client;
 
 import org.au.tonomy.client.filesystem.LocalFile;
-import org.au.tonomy.client.presentation.CodeEditorPresenter;
 import org.au.tonomy.client.util.Callback;
 import org.au.tonomy.client.widget.EditorWidget;
 
@@ -16,14 +15,13 @@ public class EditorEntryPoint implements EntryPoint {
   @Override
   public void onModuleLoad() {
     Panel root = RootPanel.get();
-    EditorWidget widget = new EditorWidget();
+    final EditorWidget widget = new EditorWidget();
     root.add(widget);
-    final CodeEditorPresenter presenter = new CodeEditorPresenter(widget);
     LocalFile file = LocalFile.forPath(FILE);
     file.getContents().onResolved(new Callback<String>() {
       @Override
       public void onSuccess(String source) {
-        presenter.initialize(source);
+        widget.setContents(source);
       }
     });
   }
