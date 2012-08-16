@@ -111,4 +111,39 @@ public class Promise<T> {
     });
   }
 
+  /**
+   * Returns a new promise that is the result of applying the given
+   * filter to the value of this promise. Errors are passed through
+   * unchanged.
+   */
+  public <S> Promise<S> then(final IFunction<? super T, ? extends S> filter) {
+    final Promise<S> result = newEmpty();
+    onResolved(new ICallback<T>() {
+      @Override
+      public void onSuccess(T value) {
+        result.fulfill(filter.call(value));
+      }
+      @Override
+      public void onFailure(Throwable error) {
+        result.fail(error);
+      }
+    });
+    return result;
+  }
+
+  public <S> Promise<S> lazyThen(final IFunction<? super T, ? extends Promise<? extends S>> filter) {
+    final Promise<S> result = newEmpty();
+    onResolved(new ICallback<T>() {
+      @Override
+      public void onSuccess(T value) {
+        filter.call(value).forwardTo(result);
+      }
+      @Override
+      public void onFailure(Throwable error) {
+        result.fail(error);
+      }
+    });
+    return result;
+  }
+
 }

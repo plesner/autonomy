@@ -58,12 +58,14 @@ _INDEX_SCRIPT = """\
 
 _INDEX_PAGE = "<html><head><script>%s</script></head><body></body></html>" % _INDEX_SCRIPT
 
+def escape_string(str):
+  return str.replace("\n", "\\n")
 
 # Encodes a python object as a JSON string.
 def encode_json(obj):
   t = type(obj)
   if (t == str) or (t == unicode):
-    return "\"%s\"" % obj
+    return "\"%s\"" % escape_string(obj)
   elif t == list:
     return "[%s]" % ",".join(map(encode_json, obj))
   elif t == dict:
@@ -135,7 +137,8 @@ class FileHandle(object):
 
 class Proxy(object):
 
-  def __init__(self):
+  def __init__(self, flags):
+    self.flags = flags
     self.httpd = None
     self.handler_map = None
     self.handler_list = None
@@ -178,10 +181,15 @@ class Proxy(object):
       result.append(self.get_file_handle(filename))
     return result
 
+  def handle_read_file(self, params):
+    id = int(params.get("id")[0])
+    path = self.handle_map[id].name
+    return open(path, "rt").read()
+
   def handle_start_session(self, params):
     print "Connected to %s." % params["href"][0]
     self.handle_map.clear()
-    return self.get_file_handle(".")
+    return self.get_file_handle(self.flags.root)
 
   def get_file_handle(self, path):
     old_handle = self.handle_map.get(path, None)
@@ -200,18 +208,20 @@ class Proxy(object):
     self.httpd.serve_forever()
 
 
-_PROXY = Proxy()
+_PROXY = None
 
 
 def new_option_parser():
   parser = optparse.OptionParser()
   parser.add_option("--port", action="store", default="8040")
+  parser.add_option("--root", action="store", default=".")
   return parser
 
 def main():
   parser = new_option_parser()
-  (args, flags) = parser.parse_args()
-  proxy = Proxy()
+  (flags, args) = parser.parse_args()
+  global _PROXY
+  proxy = _PROXY = Proxy(flags)
   try:
     proxy.start()
   except KeyboardInterrupt:

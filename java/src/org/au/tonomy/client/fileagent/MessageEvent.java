@@ -11,7 +11,7 @@ public class MessageEvent extends JavaScriptObject {
   /**
    * Returns the parsed data payload of this message.
    */
-  public final native JavaScriptObject getData() /*-{
+  public final native Object getData() /*-{
     return JSON.parse(this.data);
   }-*/;
 

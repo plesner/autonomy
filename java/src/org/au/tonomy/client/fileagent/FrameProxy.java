@@ -53,8 +53,8 @@ public abstract class FrameProxy {
    * Dispatches an incoming event object to a method call on this object.
    */
   private void dispatchIncoming(MessageEvent event) {
-    JavaScriptObject message = event.getData();
-    JsArrayMixed array = message.<JsArrayMixed>cast();
+    Object message = event.getData();
+    JsArrayMixed array = ((JavaScriptObject) message).<JsArrayMixed>cast();
     Integer index = DISPATCH.get(array.getString(0));
     if (index == null) {
       // forward to the subclass
@@ -104,14 +104,14 @@ public abstract class FrameProxy {
     private final JsArrayMixed message = JavaScriptObject.createArray().<JsArrayMixed>cast();
     private final JsArrayMixed options = JavaScriptObject.createArray().<JsArrayMixed>cast();
     private int id = -1;
-    private Promise<? super JavaScriptObject> result;
+    private Promise<Object> result;
 
     private MessageBuilder(String method) {
       this.message.push(method);
       this.message.push(this.options);
     }
 
-    private MessageBuilder setResult(Promise<? super JavaScriptObject> result) {
+    private MessageBuilder setResult(Promise<Object> result) {
       Assert.isNull(this.result);
       this.result = result;
       return this;
@@ -138,10 +138,10 @@ public abstract class FrameProxy {
     /**
      * Sends this message, returning a promise for the result.
      */
-    public Promise<JavaScriptObject> send() {
+    public Promise<Object> send() {
       Assert.isNull(result);
       this.id = nextMessageId++;
-      Promise<JavaScriptObject> result = Promise.newEmpty();
+      Promise<Object> result = Promise.newEmpty();
       this.result = result;
       pendingMessages.put(id, this);
       sendAsync();
