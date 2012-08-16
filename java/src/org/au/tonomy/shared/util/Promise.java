@@ -16,7 +16,7 @@ public class Promise<T> {
   private State state = State.EMPTY;
   private T value;
   private Throwable error;
-  private List<ICallback<T>> callbacks;
+  private List<ICallback<? super T>> callbacks;
 
   /**
    * Sets the value of this promise. If it has already been resolved
@@ -54,7 +54,7 @@ public class Promise<T> {
    * is resolved. If it has already been resolved the callback is
    * called immediately.
    */
-  public void onResolved(ICallback<T> callback) {
+  public void onResolved(ICallback<? super T> callback) {
     if (isResolved()) {
       fireCallback(callback);
     } else {
@@ -71,16 +71,16 @@ public class Promise<T> {
     Assert.that(isResolved());
     if (callbacks == null)
       return;
-    List<ICallback<T>> pending = callbacks;
+    List<ICallback<? super T>> pending = callbacks;
     callbacks = null;
-    for (ICallback<T> callback : pending)
+    for (ICallback<? super T> callback : pending)
       fireCallback(callback);
   }
 
   /**
    * Fires a single callback.
    */
-  private void fireCallback(ICallback<T> callback) {
+  private void fireCallback(ICallback<? super T> callback) {
     if (state == State.SUCCEEDED) {
       callback.onSuccess(value);
     } else {
@@ -93,6 +93,22 @@ public class Promise<T> {
    */
   public static <T> Promise<T> newEmpty() {
     return new Promise<T>();
+  }
+
+  /**
+   * Resolve the given promise when this one is resolved.
+   */
+  public void forwardTo(final Promise<? super T> target) {
+    this.onResolved(new ICallback<T>() {
+      @Override
+      public void onSuccess(T value) {
+        target.fulfill(value);
+      }
+      @Override
+      public void onFailure(Throwable error) {
+        target.fail(error);
+      }
+    });
   }
 
 }

@@ -1,27 +1,31 @@
 package org.au.tonomy.client;
 
-import org.au.tonomy.client.filesystem.LocalFile;
+import org.au.tonomy.client.fileagent.FileAgent;
 import org.au.tonomy.client.util.Callback;
 import org.au.tonomy.client.widget.EditorWidget;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 
 public class EditorEntryPoint implements EntryPoint {
 
-  private static final String FILE = "/Users/plesner/Documents/autonomy/java/test/org/au/tonomy/shared/syntax/testdata/lambdas.aut";
-
   @Override
   public void onModuleLoad() {
     Panel root = RootPanel.get();
-    final EditorWidget widget = new EditorWidget();
+    EditorWidget widget = new EditorWidget();
     root.add(widget);
-    LocalFile file = LocalFile.forPath(FILE);
-    file.getContents().onResolved(new Callback<String>() {
+    final FileAgent agent = new FileAgent("http://localhost:8000");
+    agent.attach().onResolved(new Callback<Object>() {
       @Override
-      public void onSuccess(String source) {
-        widget.setContents(source);
+      public void onSuccess(Object value) {
+        agent.getRoot().getFileList().onResolved(new Callback<JavaScriptObject>() {
+          @Override
+          public void onSuccess(JavaScriptObject value) {
+            Console.log(value);
+          }
+        });
       }
     });
   }

@@ -2,6 +2,7 @@ package org.au.tonomy.client.util;
 
 import org.au.tonomy.shared.util.Promise;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
@@ -25,5 +26,12 @@ public class PromiseUtil {
       }
     };
   }
+
+  /**
+   * Wrapper around JSON.parse.
+   */
+  public static native JavaScriptObject parseJson(String str) /*-{
+    return JSON.parse(str);
+  }-*/;
 
 }
