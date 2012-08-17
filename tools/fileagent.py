@@ -32,21 +32,25 @@ _INDEX_SCRIPT = """\
   function forwardRequest(event) {
     var data = JSON.parse(event.data);
     var method = data[0];
+    // Only forward messages that we know the agent will understand.
     if (!methods[method])
       return;
     var id = data[2];
     var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-      if ((xhr.readyState == 4) && (id != -1)) {
-        postMessage("respond", xhr.responseText, id);
-      }
-    };
+    if (id != -1) {
+      // We only care about the response if the message is sync.
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+          postMessage("respond", xhr.responseText, id);
+        }
+      };
+    }
     var params = data[1];
     var paramString = params
         .map(function (pair) { return pair[0] + "=" + encodeURIComponent(pair[1]); })
         .join("&");
     var paramSuffix = paramString.length == 0 ? "" : "?" + paramString;
-    xhr.open("GET", "proxy/" + method + paramSuffix, true);
+    xhr.open("GET", "agent/" + method + paramSuffix, true);
     xhr.send(null);
   }
 
@@ -58,19 +62,35 @@ _INDEX_SCRIPT = """\
 
 _INDEX_PAGE = "<html><head><script>%s</script></head><body></body></html>" % _INDEX_SCRIPT
 
-def escape_string(str):
-  return str.replace("\n", "\\n")
+
+# Escapes that have a special syntax.
+_SPECIAL_ESCAPES = {'"': '\\"', '\\': '\\\\', '\b': '\\b', '\f': '\\f',
+  '\n': '\\n', '\r': '\\r', '\t': '\\t'}
+
+# Replaces all non-ascii characters with character escapes in a string.
+def json_escape_string(s):
+  result = []
+  for c in s:
+    escapee = _SPECIAL_ESCAPES.get(c, None)
+    if escapee:
+      result.append(escapee)
+    elif c < ' ':
+      result.append("\\u%.4X" % ord(c))
+    else:
+      result.append(c)
+  return "".join(result)
 
 # Encodes a python object as a JSON string.
 def encode_json(obj):
   t = type(obj)
   if (t == str) or (t == unicode):
-    return "\"%s\"" % escape_string(obj)
+    return "\"%s\"" % json_escape_string(obj)
   elif t == list:
     return "[%s]" % ",".join(map(encode_json, obj))
   elif t == dict:
-    return "{%s}" % ",".join(["%s:%s" % (encode_json(k), encode_json(v)) for (k, v) in obj.items()])
-  elif t == int:
+    entries = ["%s:%s" % (encode_json(k), encode_json(v)) for (k, v) in obj.items()]
+    return "{%s}" % ",".join(entries)
+  elif (t == int) or (t == float):
     return str(obj)
   elif t == bool:
     if obj:
@@ -165,7 +185,7 @@ class Proxy(object):
     for method in methods:
       if method.startswith("handle_"):
         op = method[7:]
-        path = "/proxy/%s" % op
+        path = "/agent/%s" % op
         self.handler_map[path] = methods[method]
         self.handler_list.append(op)
     self.handler_list.sort()

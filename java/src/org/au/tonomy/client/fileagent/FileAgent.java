@@ -5,7 +5,6 @@ import org.au.tonomy.shared.util.IFunction;
 import org.au.tonomy.shared.util.Promise;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.user.client.Window.Location;
 
 /**
  * A frame proxy for communicating with a local file proxy.
@@ -39,7 +38,7 @@ public class FileAgent extends FrameProxy {
    */
   private Promise<?> startSession() {
     return newMessage("start_session")
-        .setOption("href", Location.getHref())
+        .setOption("href", getEncodedOrigin())
         .send()
         .then(new IFunction<Object, Object>() {
           @Override
