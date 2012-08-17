@@ -46,7 +46,7 @@ public class Token implements IToken {
    * Supertype for token factories that return the same type of token
    * for all calls, just with different arguments.
    */
-  protected static abstract class AbstractFactory<T extends Token> implements IFactory<T> {
+  protected static abstract class AbstractFactory<T extends Token> implements ITokenFactory<T> {
 
     /**
      * Subclasses can implement this to define how a token is constructed
@@ -54,20 +54,8 @@ public class Token implements IToken {
      */
     protected abstract T newToken(Type type, String value);
 
-    /**
-     * Returns true if the given string has more than one newline.
-     */
-    private static boolean hasNewlines(String str) {
-      for (int i = 0; i < str.length(); i++) {
-        if (Tokenizer.isNewline(str.charAt(i)))
-          return true;
-      }
-      return false;
-    }
-
     @Override
     public T newSpace(String value) {
-      Assert.that(!hasNewlines(value));
       return newToken(Type.SPACE, value);
     }
 
@@ -123,7 +111,7 @@ public class Token implements IToken {
   /**
    * Singleton token factory.
    */
-  private static final IFactory<Token> FACTORY = new AbstractFactory<Token>() {
+  private static final ITokenFactory<Token> FACTORY = new AbstractFactory<Token>() {
     @Override
     protected Token newToken(Type type, String value) {
       return new Token(type, value);
@@ -133,7 +121,7 @@ public class Token implements IToken {
   /**
    * Returns the singleton token factory.
    */
-  public static IFactory<Token> getFactory() {
+  public static ITokenFactory<Token> getFactory() {
     return FACTORY;
   }
 

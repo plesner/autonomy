@@ -2,7 +2,6 @@ package org.au.tonomy.shared.syntax;
 
 import java.util.List;
 
-import org.au.tonomy.shared.syntax.IToken.IFactory;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.Internal;
@@ -17,9 +16,9 @@ public class DumbTokenFilter<T extends IToken> implements ITokenFilter<T> {
   private List<T> currentTokens = Factory.newArrayList();
   private String source = "";
   private final List<ITokenListener<T>> listeners = Factory.newArrayList();
-  private final IFactory<T> tokenFactory;
+  private final ITokenFactory<T> tokenFactory;
 
-  public DumbTokenFilter(IFactory<T> tokenFactory) {
+  public DumbTokenFilter(ITokenFactory<T> tokenFactory) {
     this.tokenFactory = tokenFactory;
   }
 

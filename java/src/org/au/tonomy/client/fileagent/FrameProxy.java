@@ -180,7 +180,7 @@ public abstract class FrameProxy {
     Document document = Document.get();
     IFrameElement frame = document.createIFrameElement();
     frame.getStyle().setDisplay(Display.NONE);
-    frame.setSrc(root + "?target_origin=" + getEncodedOrigin());
+    frame.setSrc(root + "?target_origin=" + URL.encodeQueryString(getOrigin()));
     document.getBody().appendChild(frame);
     return whenConnected(attachPromise);
   }
@@ -189,13 +189,13 @@ public abstract class FrameProxy {
    * Returns the origin of this frame which the proxy frame will use
    * to ensure that only this frame gets messages.
    */
-  protected static String getEncodedOrigin() {
+  protected static String getOrigin() {
     String protocol = Location.getProtocol();
     // Firefox doesn't allow file origins.
     String origin = "file:".equals(protocol)
       ? "*"
       : protocol + "//" + Location.getHost() + Location.getPath();
-    return URL.encodeQueryString(origin);
+    return origin;
   }
 
 }

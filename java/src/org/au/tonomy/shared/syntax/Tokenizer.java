@@ -2,7 +2,6 @@ package org.au.tonomy.shared.syntax;
 
 import java.util.List;
 
-import org.au.tonomy.shared.syntax.IToken.IFactory;
 import org.au.tonomy.shared.syntax.IToken.Type;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Factory;
@@ -11,32 +10,39 @@ import org.au.tonomy.shared.util.Internal;
 /**
  * Utility for chopping a string into tokens.
  */
-public class Tokenizer<T extends IToken> {
+public class Tokenizer<T> {
 
-  private final String source;
-  private final IFactory<T> tokenFactory;
-  private int cursor;
-  private char current;
+  private final ICharStream source;
+  private final ITokenFactory<T> tokenFactory;
 
-  private Tokenizer(String source, IFactory<T> tokenFactory) {
+  public Tokenizer(ICharStream source, ITokenFactory<T> tokenFactory) {
     this.source = source;
     this.tokenFactory = tokenFactory;
-    this.cursor = -1;
-    this.advance();
   }
 
   /**
    * Is there more input?
    */
   private boolean hasMore() {
-    return cursor < source.length();
+    return source.hasMore();
   }
 
   /**
    * Returns the current character.
    */
   private char getCurrent() {
-    return current;
+    return source.getCurrent();
+  }
+
+  /**
+   * Returns the current input cursor.
+   */
+  private int getCursor() {
+    return source.getCursor();
+  }
+
+  private void advance() {
+    source.advance();
   }
 
   /**
@@ -45,18 +51,7 @@ public class Tokenizer<T extends IToken> {
    * from the specified values.
    */
   private boolean atDifferentPair(char first, char second) {
-    boolean isInsideSource = hasMore() && (cursor > 0);
-    return isInsideSource
-        && ((source.charAt(cursor - 1) != first)
-            || getCurrent() != second);
-  }
-
-  /**
-   * Advances to the next character.
-   */
-  private void advance() {
-    this.cursor++;
-    this.current = hasMore() ? source.charAt(this.cursor) : '\0';
+    return hasMore() && ((getCurrent() != first) || (source.getNext() != second));
   }
 
   /**
@@ -133,7 +128,7 @@ public class Tokenizer<T extends IToken> {
    * Advances over the next token or tokens, adding them to the given
    * list.
    */
-  private void addNext(List<T> out) {
+  public T scanNext() {
     Assert.that(hasMore());
     T result;
     if (isNewline(getCurrent())) {
@@ -188,11 +183,11 @@ public class Tokenizer<T extends IToken> {
         advance();
         switch (getCurrent()) {
         case '#': case '@': case '-':
-          result = scanEndOfLineComment(cursor - 1);
+          result = scanEndOfLineComment(getCursor() - 1);
           break;
         case '{':
-          addBlockComment(cursor - 1, out);
-          return;
+          result = scanBlockComment(getCursor() - 1);
+          break;
         default:
           result = tokenFactory.newPunctuation(Type.HASH);
           break;
@@ -220,76 +215,61 @@ public class Tokenizer<T extends IToken> {
         break;
       }
     }
-    out.add(result);
+    return result;
   }
 
   private T scanSpace() {
-    int start = cursor;
+    int start = getCursor();
     while (hasMore() && isSpaceNotNewline(getCurrent()))
       advance();
-    String value = source.substring(start, cursor);
-    return tokenFactory.newSpace(value);
+    return tokenFactory.newSpace(source.substring(start, getCursor()));
   }
 
   private T scanEndOfLineComment(int start) {
     while (hasMore() && !isNewline(getCurrent()))
       advance();
-    String value = source.substring(start, cursor);
-    return tokenFactory.newComment(value);
+    return tokenFactory.newComment(source.substring(start, getCursor()));
   }
 
-  private void addBlockComment(int start, List<T> out) {
-    // We always want newlines to be in a separate token so we scan
-    // the whole block comment in one go, yielding multiple tokens.
+  private T scanBlockComment(int start) {
     int lineStart = start;
-    while (atDifferentPair('}', '#')) {
-      if (isNewline(getCurrent())) {
-        if (lineStart != cursor) {
-          String value = source.substring(lineStart, cursor);
-          out.add(tokenFactory.newComment(value));
-        }
-        out.add(tokenFactory.newNewline(getCurrent()));
-        lineStart = cursor + 1;
-      }
+    while (atDifferentPair('}', '#'))
       advance();
-    }
     // If we reached the end we're at the final '#' so we advance past
     // it.
     if (hasMore())
       advance();
-    String value = source.substring(lineStart, cursor);
-    out.add(tokenFactory.newComment(value));
+    if (hasMore())
+      advance();
+    return tokenFactory.newComment(source.substring(lineStart, getCursor()));
   }
 
   /**
    * Advances over the current word token.
    */
   private T scanWord() {
-    int start = cursor;
+    int start = getCursor();
     while (hasMore() && isWordPart(getCurrent()))
       advance();
-    String value = source.substring(start, cursor);
-    return tokenFactory.newWord(value);
+    return tokenFactory.newWord(source.substring(start, getCursor()));
   }
 
   private T scanIdentifier() {
-    int start = cursor;
+    int start = getCursor();
     advance();
     while (hasMore() && isWordPart(getCurrent()))
       advance();
-    String value = source.substring(start, cursor);
-    return tokenFactory.newIdentifier(value);
+    return tokenFactory.newIdentifier(source.substring(start, getCursor()));
   }
 
   /**
    * Advances over the current number.
    */
   private T scanNumber() {
-    int start = cursor;
+    int start = getCursor();
     while (hasMore() && isNumberPart(getCurrent()))
       advance();
-    String value = source.substring(start, cursor);
-    return tokenFactory.newNumber(value);
+    return tokenFactory.newNumber(source.substring(start, getCursor()));
   }
 
   /**
@@ -297,11 +277,10 @@ public class Tokenizer<T extends IToken> {
    * @return
    */
   private T scanOperator() {
-    int start = cursor;
+    int start = getCursor();
     while (hasMore() && isOperatorPart(getCurrent()))
       advance();
-    String value = source.substring(start, cursor);
-    return tokenFactory.newOperator(value);
+    return tokenFactory.newOperator(source.substring(start, getCursor()));
   }
 
   /**
@@ -309,17 +288,16 @@ public class Tokenizer<T extends IToken> {
    */
   private List<T> tokenize() {
     List<T> tokens = Factory.newArrayList();
-    while (hasMore()) {
-      addNext(tokens);
-    }
+    while (hasMore())
+      tokens.add(scanNext());
     return tokens;
   }
 
   /**
    * Returns the tokens of the given input string.
    */
-  public static <T extends IToken> List<T> tokenize(String source, IFactory<T> tokenFactory) {
-    return new Tokenizer<T>(source, tokenFactory).tokenize();
+  public static <T extends IToken> List<T> tokenize(String source, ITokenFactory<T> tokenFactory) {
+    return new Tokenizer<T>(new StringCharStream(source), tokenFactory).tokenize();
   }
 
 }

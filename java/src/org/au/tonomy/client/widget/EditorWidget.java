@@ -1,5 +1,6 @@
 package org.au.tonomy.client.widget;
 
+import org.au.tonomy.client.codemirror.AutonomyMode;
 import org.au.tonomy.client.codemirror.CodeMirror;
 import org.au.tonomy.shared.util.Assert;
 
@@ -16,7 +17,7 @@ public class EditorWidget extends Composite {
   interface EditorWidgetUiBinder extends UiBinder<Widget, EditorWidget> { }
 
   static {
-    // CodeMirror.defineMode(new AutonomyMode());
+    CodeMirror.defineMode(new AutonomyMode());
   }
 
   @UiField DivElement container;
@@ -26,8 +27,8 @@ public class EditorWidget extends Composite {
   public EditorWidget() {
     this.builder = CodeMirror
         .builder()
-        .setLineNumbers(true);
-//        .setMode("autonomy");
+        .setLineNumbers(true)
+        .setMode("autonomy");
     initWidget(BINDER.createAndBindUi(this));
   }
 

@@ -48,8 +48,8 @@ public class TokenizerTest extends TestCase {
     runRawScanTest("## foo\n## bar", comment("## foo"), newline('\n'), comment("## bar"));
     runRawScanTest(" \n\n ", space(" "), newline('\n'), newline('\n'), space(" "));
     runRawScanTest("#{ foo }#", comment("#{ foo }#"));
-    runRawScanTest("#{ \n }#", comment("#{ "), newline('\n'), comment(" }#"));
-    runRawScanTest("#{ \n\n }#", comment("#{ "), newline('\n'), newline('\n'), comment(" }#"));
+    runRawScanTest("#{ \n }#", comment("#{ \n }#"));
+    runRawScanTest("#{ \n\n }#", comment("#{ \n\n }#"));
   }
 
   private Token punctuation(Type type) {
@@ -80,8 +80,8 @@ public class TokenizerTest extends TestCase {
     return Token.getFactory().newNewline(value);
   }
 
-  private static Token comment(String value) {
-    return Token.getFactory().newComment(value);
+  private static Token comment(String string) {
+    return Token.getFactory().newComment(string);
   }
 
 }

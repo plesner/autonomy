@@ -38,7 +38,7 @@ public class FileAgent extends FrameProxy {
    */
   private Promise<?> startSession() {
     return newMessage("start_session")
-        .setOption("href", getEncodedOrigin())
+        .setOption("href", getOrigin())
         .send()
         .then(new IFunction<Object, Object>() {
           @Override

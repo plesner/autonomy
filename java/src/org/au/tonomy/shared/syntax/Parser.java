@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.au.tonomy.shared.runtime.IntegerValue;
 import org.au.tonomy.shared.syntax.IToken.Flavor;
-import org.au.tonomy.shared.syntax.IToken.IFactory;
 import org.au.tonomy.shared.syntax.IToken.Type;
 import org.au.tonomy.shared.syntax.MacroParser.Component;
 import org.au.tonomy.shared.syntax.MacroParser.Placeholder;
@@ -29,7 +28,7 @@ public class Parser {
   private static final String FN = "fn";
 
   private MacroParser macroParser;
-  private final IFactory<?> tokenFactory;
+  private final ITokenFactory<? extends IToken> tokenFactory;
   private final List<? extends IToken> tokens;
   private final OperatorRegistry operators = new OperatorRegistry();
 
@@ -37,7 +36,8 @@ public class Parser {
   private IToken prev;
   private IToken current;
 
-  private Parser(MacroParser macroParser, IFactory<?> tokenFactory, List<? extends IToken> tokens) {
+  private Parser(MacroParser macroParser, ITokenFactory<? extends IToken> tokenFactory,
+      List<? extends IToken> tokens) {
     this.macroParser = macroParser;
     this.tokenFactory = tokenFactory;
     this.tokens = tokens;
@@ -425,7 +425,7 @@ public class Parser {
     }
   }
 
-  public static Ast parse(MacroParser keywordParser, IFactory<?> tokenFactory,
+  public static Ast parse(MacroParser keywordParser, ITokenFactory<? extends IToken> tokenFactory,
       List<? extends IToken> tokens) throws SyntaxError {
     return new Parser(keywordParser, tokenFactory, tokens).parseBlockBody(NestingLevel.TOPLEVEL, Type.EOF);
   }
