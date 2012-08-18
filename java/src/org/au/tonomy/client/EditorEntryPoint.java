@@ -2,11 +2,14 @@ package org.au.tonomy.client;
 
 import java.util.Map;
 
+import org.au.tonomy.client.bus.Bus;
+import org.au.tonomy.client.bus.DefaultBus;
+import org.au.tonomy.client.bus.Message;
 import org.au.tonomy.client.fileagent.FileAgent;
 import org.au.tonomy.client.fileagent.FileHandle;
 import org.au.tonomy.client.util.Callback;
 import org.au.tonomy.client.widget.EditorWidget;
-import org.au.tonomy.client.widget.MessagesWidget;
+import org.au.tonomy.client.widget.MessageListWidget;
 import org.au.tonomy.client.widget.workspace.WorkspaceWidget;
 import org.au.tonomy.shared.util.IFunction;
 import org.au.tonomy.shared.util.Promise;
@@ -24,7 +27,7 @@ public class EditorEntryPoint implements EntryPoint {
     WorkspaceWidget workspace = new WorkspaceWidget();
     this.editor = new EditorWidget();
     workspace.setBackground(editor);
-    MessagesWidget messages = new MessagesWidget();
+    MessageListWidget messages = new MessageListWidget();
     workspace.addPanel(messages);
     return workspace;
   }
@@ -42,7 +45,8 @@ public class EditorEntryPoint implements EntryPoint {
       }
     });
     final String agentUrl = "localhost:8040";
-    bus.setStatus("Connecting to " + agentUrl);
+    final Message message = new Message("Connecting to " + agentUrl);
+    bus.addMessage(message);
     // Fetch the files.
     final FileAgent agent = new FileAgent("http://" + agentUrl);
     Promise<String> source = agent
@@ -50,7 +54,8 @@ public class EditorEntryPoint implements EntryPoint {
         .lazyThen(new IFunction<Object, Promise<Map<String, FileHandle>>>() {
           @Override
           public Promise<Map<String, FileHandle>> call(Object arg) {
-            bus.setStatus("Connected to file agent");
+            message.setText("Connected to file agent");
+            message.setExpiration(1000);
             return agent.getRoot().listEntries();
           }
         })

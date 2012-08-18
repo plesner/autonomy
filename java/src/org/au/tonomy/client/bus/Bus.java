@@ -1,4 +1,6 @@
-package org.au.tonomy.client;
+package org.au.tonomy.client.bus;
+
+import java.util.Collection;
 
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.IThunk;
@@ -25,6 +27,21 @@ public abstract class Bus {
    * Adds a callback to invoke when the status changes.
    */
   public abstract IUndo addStatusListener(IThunk<String> listener);
+
+  /**
+   * Returns the current set of active messages.
+   */
+  public abstract Collection<Message> getMessages();
+
+  /**
+   * Adds a new message to the set maintained by this bus.
+   */
+  public abstract void addMessage(Message message);
+
+  /**
+   * Adds a callback to invoke when new messages are added.
+   */
+  public abstract IUndo addMessageAddedListener(IThunk<Message> listener);
 
   /**
    * Returns the singleton bus instance.

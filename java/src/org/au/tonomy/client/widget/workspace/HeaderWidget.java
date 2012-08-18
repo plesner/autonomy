@@ -1,6 +1,6 @@
 package org.au.tonomy.client.widget.workspace;
 
-import org.au.tonomy.client.Bus;
+import org.au.tonomy.client.bus.Bus;
 import org.au.tonomy.shared.util.IThunk;
 import org.au.tonomy.shared.util.IUndo;
 

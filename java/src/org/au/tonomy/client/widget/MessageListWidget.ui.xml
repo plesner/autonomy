@@ -2,11 +2,8 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
 <ui:style>
-.panel {
-  border: 1px solid #F2F6FF;
-  background: #FCFCFF;
-}
+.panel { }
 </ui:style>
-  <g:HTMLPanel stylePrimaryName="{style.panel}">
-  </g:HTMLPanel>
+  <g:FlowPanel ui:field="panel" stylePrimaryName="{style.panel}">
+  </g:FlowPanel>
 </ui:UiBinder> 

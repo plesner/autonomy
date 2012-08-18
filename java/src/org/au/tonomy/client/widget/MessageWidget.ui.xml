@@ -1,0 +1,8 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:style src="MessageWidget.css"></ui:style>
+  <g:FlowPanel ui:field="message" stylePrimaryName="{style.message}">
+    <g:Label ui:field="text" stylePrimaryName="{style.text}"></g:Label>
+  </g:FlowPanel>
+</ui:UiBinder>
