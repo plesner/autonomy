@@ -5,10 +5,10 @@ import org.au.tonomy.client.codemirror.CodeMirror;
 import org.au.tonomy.shared.util.Assert;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class EditorWidget extends Composite {
@@ -20,7 +20,7 @@ public class EditorWidget extends Composite {
     CodeMirror.defineMode(new AutonomyMode());
   }
 
-  @UiField DivElement container;
+  @UiField HTMLPanel container;
   private CodeMirror.Builder builder;
   private CodeMirror mirror;
 
@@ -36,7 +36,7 @@ public class EditorWidget extends Composite {
   protected void onLoad() {
     super.onLoad();
     if (this.builder != null) {
-      this.mirror = builder.build(container);
+      this.mirror = builder.build(container.getElement());
       this.builder = null;
     }
   }

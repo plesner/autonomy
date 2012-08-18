@@ -1,0 +1,13 @@
+.main {
+  height: 22pt;
+  background: #C8C8FF;
+}
+
+.title {
+  font-size: 16pt;
+  font-family: sans-serif;
+  font-weight: bold;
+  padding-top: 2pt;
+  padding-left: 4pt;
+  color: #98AEF5;
+}

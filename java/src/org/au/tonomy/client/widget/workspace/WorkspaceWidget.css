@@ -1,0 +1,33 @@
+.wholePage {
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+}
+
+.workspace {
+  border-top: 1px solid #9DA0E7;
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 22pt;
+  bottom: 0px;
+}
+
+.background {
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+}
+
+.panel {
+  position: absolute;
+  left: auto;
+  right: 50px;
+  top: 50px;
+  bottom: 50px;
+  width: 30%;
+}

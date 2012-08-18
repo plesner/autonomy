@@ -1,5 +1,6 @@
 package org.au.tonomy.client.fileagent;
 
+import org.au.tonomy.shared.source.ISourceTree;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.IFunction;
 import org.au.tonomy.shared.util.Promise;
@@ -9,7 +10,7 @@ import com.google.gwt.core.client.JavaScriptObject;
 /**
  * A frame proxy for communicating with a local file proxy.
  */
-public class FileAgent extends FrameProxy {
+public class FileAgent extends FrameProxy implements ISourceTree {
 
   private FileHandle root;
 
@@ -17,6 +18,7 @@ public class FileAgent extends FrameProxy {
     super(root);
   }
 
+  @Override
   public FileHandle getRoot() {
     return Assert.notNull(root);
   }

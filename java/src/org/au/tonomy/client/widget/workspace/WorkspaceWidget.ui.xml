@@ -1,0 +1,10 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:w="urn:import:org.au.tonomy.client.widget.workspace">
+  <ui:with field="res" type="org.au.tonomy.client.widget.workspace.WorkspaceWidget.Resources"/>
+  <g:FlowPanel stylePrimaryName="{res.css.wholePage}">
+    <w:HeaderWidget ui:field="header"></w:HeaderWidget>
+    <g:FlowPanel ui:field="workspace" stylePrimaryName="{res.css.workspace}">
+    </g:FlowPanel>
+  </g:FlowPanel>
+</ui:UiBinder>

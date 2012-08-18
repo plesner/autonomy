@@ -134,7 +134,11 @@ class HttpHandler(BaseHTTPRequestHandler):
   # Invokes a method on the handler and takes care of sending back the
   # result.
   def call_method(self, method, params):
-    result = method(self.proxy, params)
+    try:
+      value = method(self.proxy, params)
+      result = {"value": value}
+    except Exception, e:
+      result = {"error": str(e)}
     self.send_response(200)
     self.send_header("Content-Type", "application/json")
     self.end_headers()
@@ -147,12 +151,22 @@ class HttpHandler(BaseHTTPRequestHandler):
 
 class FileHandle(object):
 
-  def __init__(self, name, handle):
-    self.handle = handle
+  def __init__(self, name, path, id):
+    self.id = id
     self.name = name
+    self.path = path
 
   def to_json(self):
-    return {"name": self.name, "handle": self.handle}
+    if os.path.isdir(self.name):
+      type = "dir"
+    else:
+      type = "file"
+    return {
+        "name": self.name,
+        "path": self.path,
+        "id": self.id,
+        "type": type
+    }
 
 
 class Proxy(object):
@@ -193,38 +207,39 @@ class Proxy(object):
   def handle_get_file_list(self, params):
     result = []
     id = int(params.get("handle")[0])
-    path = self.handle_map[id].name
-    for name in os.listdir(path):
+    root = self.handle_map[id].name
+    for name in os.listdir(root):
       if name.startswith("."):
         continue
-      filename = os.path.join(path, name)
-      result.append(self.get_file_handle(filename))
+      path = os.path.join(root, name)
+      result.append(self.get_file_handle(name, path))
     return result
 
   def handle_read_file(self, params):
     id = int(params.get("id")[0])
-    path = self.handle_map[id].name
+    path = self.handle_map[id].path
     return open(path, "rt").read()
 
   def handle_start_session(self, params):
     print "Connected to %s." % params["href"][0]
     self.handle_map.clear()
-    return self.get_file_handle(self.flags.root)
+    return self.get_file_handle(self.flags.root, self.flags.root)
 
-  def get_file_handle(self, path):
+  def get_file_handle(self, name, path):
     old_handle = self.handle_map.get(path, None)
     if old_handle:
       return old_handle
     else:
       id = self.next_id
       self.next_id += 1
-      new_handle = FileHandle(path, id)
+      new_handle = FileHandle(name, path, id)
       self.handle_map[id] = new_handle
       return new_handle
 
   def start(self):
-    addr = ('', 8000)
+    addr = ('', int(self.flags.port))
     self.httpd = HTTPServer(addr, HttpHandler)
+    print "Running agent on localhost:%s" % self.flags.port
     self.httpd.serve_forever()
 
 

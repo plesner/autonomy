@@ -86,7 +86,12 @@ public abstract class FrameProxy {
    */
   private void handleRespond(String response, int id) {
     MessageBuilder pending = pendingMessages.remove(id);
-    pending.result.fulfill(PromiseUtil.parseJson(response));
+    Response result = Response.create((JavaScriptObject) PromiseUtil.parseJson(response));
+    if (result.hasFailed()) {
+      pending.result.fail(new RuntimeException(result.getError()));
+    } else {
+      pending.result.fulfill(result.getValue());
+    }
   }
 
   /**
@@ -196,6 +201,43 @@ public abstract class FrameProxy {
       ? "*"
       : protocol + "//" + Location.getHost() + Location.getPath();
     return origin;
+  }
+
+  /**
+   * A wrapper around a response from the frame.
+   */
+  private static class Response extends JavaScriptObject {
+
+    protected Response() { }
+
+    /**
+     * Is this a failure response?
+     */
+    public final native boolean hasFailed() /*-{
+      return !!this.error;
+    }-*/;
+
+    /**
+     * Returns this response's error message.
+     */
+    public final native String getError() /*-{
+      return this.error;
+    }-*/;
+
+    /**
+     * Returns this response's value.
+     */
+    public final native Object getValue() /*-{
+      return this.value;
+    }-*/;
+
+    /**
+     * Wraps a response around a plain object.
+     */
+    public static native Response create(JavaScriptObject obj) /*-{
+      return obj;
+    }-*/;
+
   }
 
 }

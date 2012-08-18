@@ -1,44 +1,64 @@
 package org.au.tonomy.client;
 
-import java.util.List;
+import java.util.Map;
 
 import org.au.tonomy.client.fileagent.FileAgent;
 import org.au.tonomy.client.fileagent.FileHandle;
 import org.au.tonomy.client.util.Callback;
 import org.au.tonomy.client.widget.EditorWidget;
+import org.au.tonomy.client.widget.MessagesWidget;
+import org.au.tonomy.client.widget.workspace.WorkspaceWidget;
 import org.au.tonomy.shared.util.IFunction;
 import org.au.tonomy.shared.util.Promise;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.ui.RootPanel;
 
 public class EditorEntryPoint implements EntryPoint {
 
+  private EditorWidget editor;
+
+  private WorkspaceWidget buildWorkspace() {
+    WorkspaceWidget workspace = new WorkspaceWidget();
+    this.editor = new EditorWidget();
+    workspace.setBackground(editor);
+    MessagesWidget messages = new MessagesWidget();
+    workspace.addPanel(messages);
+    return workspace;
+  }
+
   @Override
   public void onModuleLoad() {
-    Panel root = RootPanel.get();
-    final EditorWidget widget = new EditorWidget();
-    root.add(widget);
-    final FileAgent agent = new FileAgent("http://localhost:8000");
+    // Build the workspace.
+    final WorkspaceWidget workspace = buildWorkspace();
+    Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+      @Override
+      public void execute() {
+        RootPanel.get().add(workspace);
+      }
+    });
+    // Fetch the files.
+    final FileAgent agent = new FileAgent("http://localhost:8040");
     Promise<String> source = agent
         .attach()
-        .lazyThen(new IFunction<Object, Promise<List<FileHandle>>>() {
+        .lazyThen(new IFunction<Object, Promise<Map<String, FileHandle>>>() {
           @Override
-          public Promise<List<FileHandle>> call(Object arg) {
-            return agent.getRoot().getFileList();
+          public Promise<Map<String, FileHandle>> call(Object arg) {
+            return agent.getRoot().listEntries();
           }
         })
-        .lazyThen(new IFunction<List<FileHandle>, Promise<String>>() {
+        .lazyThen(new IFunction<Map<String, FileHandle>, Promise<String>>() {
           @Override
-          public Promise<String> call(List<FileHandle> handles) {
-            return handles.get(0).read();
+          public Promise<String> call(Map<String, FileHandle> files) {
+            return files.get("lambdas.aut").readFile();
           }
         });
     source.onResolved(new Callback<String>() {
       @Override
       public void onSuccess(String value) {
-        widget.setContents(value);
+        editor.setContents(value);
       }
     });
   }
