@@ -4,5 +4,6 @@
   <ui:style src="HeaderWidget.css"></ui:style>
   <g:FlowPanel stylePrimaryName="{style.main}">
     <g:Label stylePrimaryName="{style.title}">Autonomy</g:Label>
+    <g:Label ui:field="status" stylePrimaryName="{style.status}"></g:Label>
   </g:FlowPanel>
 </ui:UiBinder> 

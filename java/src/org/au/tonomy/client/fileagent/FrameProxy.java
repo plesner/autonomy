@@ -6,10 +6,13 @@ import java.util.Map;
 import org.au.tonomy.client.util.PromiseUtil;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Factory;
+import org.au.tonomy.shared.util.ICallback;
 import org.au.tonomy.shared.util.Promise;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayMixed;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.IFrameElement;
 import com.google.gwt.dom.client.Style.Display;
@@ -37,6 +40,12 @@ public abstract class FrameProxy {
 
   public FrameProxy(String root) {
     this.root = root;
+    MessageEvent.addMessageHandler(new MessageHandler() {
+      @Override
+      public void onMessage(MessageEvent event) {
+        dispatchIncoming(event);
+      }
+    });
   }
 
   /**
@@ -61,7 +70,7 @@ public abstract class FrameProxy {
     } else {
       switch (index) {
       case FRAME_CONNECT:
-        handleFrameConnect(event);
+        handleFrameConnect(event, (int) array.getNumber(2));
         break;
       case RESPOND:
         handleRespond(array.getString(1), (int) array.getNumber(2));
@@ -74,10 +83,11 @@ public abstract class FrameProxy {
    * Sets the source window of the iframe this file proxy is connected
    * through.
    */
-  private void handleFrameConnect(MessageEvent source) {
-    Assert.isNull(this.source);
+  private void handleFrameConnect(MessageEvent source, int attempt) {
+    if (this.source != null)
+      return;
     this.source = source;
-    MessageBuilder pending = pendingMessages.remove(0);
+    MessageBuilder pending = pendingMessages.remove(attempt);
     pending.result.fulfill(null);
   }
 
@@ -174,20 +184,57 @@ public abstract class FrameProxy {
    * that resolves to true once a connection is established.
    */
   public Promise<Object> attach() {
-    Promise<Object> attachPromise = Promise.newEmpty();
-    pendingMessages.put(0, newMessage("").setResult(attachPromise));
-    MessageEvent.addMessageHandler(new MessageHandler() {
+    Promise<Object> result = Promise.newEmpty();
+    keepAttaching(result, 5000);
+    return result;
+  }
+
+  /**
+   * Keep trying to create a connection. As soon as one attempt fails
+   * we try again.
+   */
+  private void keepAttaching(final Promise<Object> result, final int timeoutMs) {
+    startAttempt(nextMessageId++, timeoutMs).onResolved(new ICallback<Object>() {
       @Override
-      public void onMessage(MessageEvent event) {
-        dispatchIncoming(event);
+      public void onSuccess(Object value) {
+        result.fulfill(value);
+      }
+      @Override
+      public void onFailure(Throwable error) {
+        keepAttaching(result, timeoutMs);
       }
     });
-    Document document = Document.get();
-    IFrameElement frame = document.createIFrameElement();
+  }
+
+  /**
+   * Makes an attempt to connect with the frame.
+   */
+  private Promise<Object> startAttempt(final int attempt, int timeoutMs) {
+    // Try to attach a hidden frame from the agent.
+    final Promise<Object> attemptPromise = Promise.newEmpty();
+    pendingMessages.put(attempt, newMessage("").setResult(attemptPromise));
+    final Document document = Document.get();
+    final IFrameElement frame = document.createIFrameElement();
     frame.getStyle().setDisplay(Display.NONE);
-    frame.setSrc(root + "?target_origin=" + URL.encodeQueryString(getOrigin()));
+    String query = "?attempt=" + attempt +
+        "&target_origin=" + URL.encodeQueryString(getOrigin());
+    frame.setSrc(root + query);
     document.getBody().appendChild(frame);
-    return whenConnected(attachPromise);
+    // After the given timeout we check on the state of this attempt
+    // and if it's failed we cancel it.
+    Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+      @Override
+      public boolean execute() {
+        if (attemptPromise.isResolved())
+          return false;
+        pendingMessages.remove(attempt);
+        document.getBody().removeChild(frame);
+        attemptPromise.fail(new RuntimeException("Attempt timed out."));
+        return false;
+      }
+    }, timeoutMs);
+    // Set up the connection hook.
+    return whenConnected(attemptPromise);
   }
 
   /**

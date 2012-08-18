@@ -15,12 +15,15 @@ _INDEX_SCRIPT = """\
   // Set of all the methods understood by this proxy.
   var methods = %(methods)s;
 
+  // Id of the connection attempt that caused this file to be served.
+  var connectId = %(connect_id)s;
+
   // Establishes a connection with the host page.
   function connectToHost() {
     window.addEventListener("message", function (event) {
       forwardRequest(event);
     });
-    postMessage("frameConnect", [], 0);
+    postMessage("frameConnect", [], connectId);
   }
 
   // Posts a message to the parent frame.
@@ -128,7 +131,8 @@ class HttpHandler(BaseHTTPRequestHandler):
     handlers = self.proxy.get_handler_list()
     self.wfile.write(_INDEX_PAGE % {
       "target_origin": params.get("target_origin", ["null"])[0],
-      "methods": "{%s}" % ",".join(["%s: true" % k for k in handlers])
+      "methods": "{%s}" % ",".join(["%s: true" % k for k in handlers]),
+      "connect_id": params.get("attempt", ["0"])[0]
     })
 
   # Invokes a method on the handler and takes care of sending back the
@@ -206,7 +210,7 @@ class Proxy(object):
 
   def handle_get_file_list(self, params):
     result = []
-    id = int(params.get("handle")[0])
+    id = int(params.get("id")[0])
     root = self.handle_map[id].name
     for name in os.listdir(root):
       if name.startswith("."):
@@ -225,6 +229,8 @@ class Proxy(object):
     self.handle_map.clear()
     return self.get_file_handle(self.flags.root, self.flags.root)
 
+  # Returns a handle if this file has already been used in this session,
+  # and otherwise creates a new handle.
   def get_file_handle(self, name, path):
     old_handle = self.handle_map.get(path, None)
     if old_handle:
@@ -236,6 +242,7 @@ class Proxy(object):
       self.handle_map[id] = new_handle
       return new_handle
 
+  # Runs the http server.
   def start(self):
     addr = ('', int(self.flags.port))
     self.httpd = HTTPServer(addr, HttpHandler)
@@ -243,6 +250,7 @@ class Proxy(object):
     self.httpd.serve_forever()
 
 
+# The global variable that holds the singleton proxy object.
 _PROXY = None
 
 

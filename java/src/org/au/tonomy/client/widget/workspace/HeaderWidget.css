@@ -10,4 +10,14 @@
   padding-top: 2pt;
   padding-left: 4pt;
   color: #98AEF5;
+  float: left;
+}
+
+.status {
+  float: right;
+  margin-top: 6pt;
+  margin-right: 6pt;
+  font-family: sans-serif;
+  font-size: 10pt;
+  color: gray;
 }

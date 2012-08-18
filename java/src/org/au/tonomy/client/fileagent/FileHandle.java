@@ -22,21 +22,33 @@ public class FileHandle implements ISourceEntry {
     this.agent = agent;
   }
 
+  /**
+   * Returns this file's handle id.
+   */
   private final native int getId() /*-{
     var data = this.@org.au.tonomy.client.fileagent.FileHandle::data;
     return data.id;
   }-*/;
 
+  /**
+   * Returns a string identifying the type of this file.
+   */
   private native int getType() /*-{
     var data = this.@org.au.tonomy.client.fileagent.FileHandle::data;
     return data.type;
   }-*/;
 
+  /**
+   * Returns the full path of this file.
+   */
   public final native String getFullPath() /*-{
     var data = this.@org.au.tonomy.client.fileagent.FileHandle::data;
     return data.path;
   }-*/;
 
+  /**
+   * Returns the short name of this file.
+   */
   public final native String getShortName() /*-{
     var data = this.@org.au.tonomy.client.fileagent.FileHandle::data;
     return data.name;
@@ -50,7 +62,7 @@ public class FileHandle implements ISourceEntry {
   @Override
   public Promise<Map<String, FileHandle>> listEntries() {
     return agent.newMessage("get_file_list")
-      .setOption("handle", getId())
+      .setOption("id", getId())
       .send()
       .then(new IFunction<Object, Map<String, FileHandle>>() {
         @Override

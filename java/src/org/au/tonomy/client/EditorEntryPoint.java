@@ -31,6 +31,8 @@ public class EditorEntryPoint implements EntryPoint {
 
   @Override
   public void onModuleLoad() {
+    final Bus bus = new DefaultBus();
+    Bus.set(bus);
     // Build the workspace.
     final WorkspaceWidget workspace = buildWorkspace();
     Scheduler.get().scheduleDeferred(new ScheduledCommand() {
@@ -39,13 +41,16 @@ public class EditorEntryPoint implements EntryPoint {
         RootPanel.get().add(workspace);
       }
     });
+    final String agentUrl = "localhost:8040";
+    bus.setStatus("Connecting to " + agentUrl);
     // Fetch the files.
-    final FileAgent agent = new FileAgent("http://localhost:8040");
+    final FileAgent agent = new FileAgent("http://" + agentUrl);
     Promise<String> source = agent
         .attach()
         .lazyThen(new IFunction<Object, Promise<Map<String, FileHandle>>>() {
           @Override
           public Promise<Map<String, FileHandle>> call(Object arg) {
+            bus.setStatus("Connected to file agent");
             return agent.getRoot().listEntries();
           }
         })
