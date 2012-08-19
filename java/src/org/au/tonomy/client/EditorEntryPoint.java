@@ -54,7 +54,7 @@ public class EditorEntryPoint implements EntryPoint {
         .lazyThen(new IFunction<Object, Promise<Map<String, FileHandle>>>() {
           @Override
           public Promise<Map<String, FileHandle>> call(Object arg) {
-            message.setText("Connected to file agent");
+            message.setText("Connected to file agent on " + agentUrl);
             message.setExpiration(1000);
             return agent.getRoot().listEntries();
           }

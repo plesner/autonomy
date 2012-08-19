@@ -26,8 +26,7 @@
 .panel {
   position: absolute;
   left: auto;
-  right: 50px;
-  top: 50px;
-  bottom: 50px;
+  right: 20px;
+  top: 10px;
   width: 30%;
 }

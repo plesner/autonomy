@@ -6,6 +6,7 @@ import org.au.tonomy.shared.util.IThunk;
 import org.au.tonomy.shared.util.IUndo;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Visibility;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -19,9 +20,11 @@ public class MessageListWidget extends Composite {
 
   @UiField FlowPanel panel;
   private IUndo undoMessageListener;
+  private int messageCount = 0;
 
   public MessageListWidget() {
     initWidget(BINDER.createAndBindUi(this));
+    updateMessageCount(0);
   }
 
   @Override
@@ -46,7 +49,7 @@ public class MessageListWidget extends Composite {
     message.addListener(new Message.IListener() {
       @Override
       public void onDeleted(Message message) {
-        panel.remove(widget);
+        removeMessage(widget);
       }
       @Override
       public void onChanged(Message message) {
@@ -54,6 +57,21 @@ public class MessageListWidget extends Composite {
         widget.setWeight(message.getWeight());
       }
     });
+    updateMessageCount(1);
+  }
+
+  private void removeMessage(MessageWidget widget) {
+    panel.remove(widget);
+    updateMessageCount(-1);
+  }
+
+  private void updateMessageCount(int delta) {
+    messageCount += delta;
+    if (messageCount == 0) {
+      panel.getElement().getStyle().setVisibility(Visibility.HIDDEN);
+    } else if (messageCount == 1) {
+      panel.getElement().getStyle().setVisibility(Visibility.VISIBLE);
+    }
   }
 
   @Override

@@ -1,11 +1,11 @@
 .message {
   font-family: sans-serif;
-  border: 1px solid #F2F6FF;
-  background: #FCFCFF;
+  border: 1px solid #FFF085;
+  background: #FFFDEC;
   padding: 3px;
   margin: 3px;
 }
 
 .text {
-
+  font-size: 10pt;
 }
