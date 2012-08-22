@@ -229,6 +229,7 @@ public abstract class Operation {
     private final String text;
 
     public Delete(String text) {
+      Assert.that(!text.isEmpty());
       this.text = text;
     }
 
@@ -314,7 +315,7 @@ public abstract class Operation {
 
     @Override
     public void xformFlush(OperationOutputStream source, OperationOutputStream target) {
-      target.delete(text);
+      source.delete(text);
     }
 
     @Override
@@ -456,8 +457,7 @@ public abstract class Operation {
       OperationOutputStream insertOut) {
     // If text has been inserted in the part we're skipping we have
     // to skip the new text too.
-    skipOut.skip(insert.text.length() + skip.count);
-    skipIn.advance();
+    skipOut.skip(insert.text.length());
     insertOut.insert(insert.text);
     insertIn.advance();
   }
@@ -465,12 +465,22 @@ public abstract class Operation {
   private static void xformSkipDelete(Skip skip, Delete delete,
       OperationInputStream skipIn, OperationOutputStream skipOut,
       OperationInputStream deleteIn, OperationOutputStream deleteOut) {
-    // If text has been delete in the part we're skipping we have
-    // to not skip that part.
-    skipOut.skip(skip.count - delete.text.length());
-    skipIn.advance();
-    deleteOut.delete(delete.text);
-    deleteIn.advance();
+    if (skip.count > delete.text.length()) {
+      // We're skipping more than is being deleted. Consume the deleted
+      // part of the skip and just execute the deletion.
+      skipIn.setCurrent(new Skip(skip.count - delete.text.length()));
+      deleteOut.delete(delete.text);
+      deleteIn.advance();
+    } else {
+      // We're the same or less than is being deleted so the skip gets
+      skipIn.advance();
+      deleteOut.delete(delete.text.substring(0, skip.count));
+      if (skip.count < delete.text.length()) {
+        deleteIn.setCurrent(new Delete(delete.text.substring(skip.count)));
+      } else {
+        deleteIn.advance();
+      }
+    }
   }
 
   private static void xformDeleteInsert(Delete delete, Insert insert,

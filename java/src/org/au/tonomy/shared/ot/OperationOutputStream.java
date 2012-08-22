@@ -2,6 +2,8 @@ package org.au.tonomy.shared.ot;
 
 import java.util.List;
 
+import org.au.tonomy.shared.util.Assert;
+
 import com.google.gwt.thirdparty.guava.common.collect.Lists;
 
 /**
@@ -121,6 +123,7 @@ public class OperationOutputStream {
   }
 
   public void skip(int count) {
+    Assert.that(count >= 0);
     if (count > 0) {
       builder = builder.skip(count);
     }

@@ -83,6 +83,20 @@ public class ComposerTest extends TestCase {
         "",
         trans(del("abc")),
         trans(del("def")));
+    checkXform(
+        "abdef",
+        trans(skp(2), ins("c"), skp(3)),
+        trans(del("ab"), skp(3)),
+        "cdef",
+        trans(ins("c"), skp(3)),
+        trans(del("ab"), skp(4)));
+    checkXform(
+        "abdef",
+        trans(skp(2), ins("c"), skp(3)),
+        trans(skp(1), del("b"), skp(3)),
+        "acdef",
+        trans(skp(1), ins("c"), skp(3)),
+        trans(skp(1), del("b"), skp(4)));
   }
 
   public void testComposeDeleteInsert() {
@@ -93,6 +107,23 @@ public class ComposerTest extends TestCase {
         "blao",
         trans(ins("bla"), skp(1)),
         trans(skp(3), del("fo"), skp(1)));
+  }
+
+  public void testRandomizedRegression() {
+    checkXform(
+        "abcdefghi",
+        trans(skp(3), ins("jklmno"), skp(6)),
+        trans(skp(1), del("bcdefgh"), skp(1)),
+        "ajklmnoi",
+        trans(skp(1), ins("jklmno"), skp(1)),
+        trans(skp(1), del("bc"), skp(6), del("defgh"), skp(1)));
+    checkXform(
+        "abcdefghijklmnopqrstu",
+        trans(skp(5), ins("vwxyz0"), skp(6), ins("123456"), skp(10)),
+        trans(skp(2), del("c"), skp(7), del("klmnopqrst"), skp(1)),
+        "abdevwxyz0fghij123456u",
+        trans(skp(4), ins("vwxyz0"), skp(5), ins("123456"), skp(1)),
+        trans(skp(2), del("c"), skp(13), del("k"), skp(6), del("lmnopqrst"), skp(1)));
   }
 
   @Test
@@ -117,7 +148,7 @@ public class ComposerTest extends TestCase {
    * Generate a random transformation that can be applied to the given
    * input.
    */
-  private Transform randomTransform(String input) {
+  private Transform getRandomTransform(String input) {
     OperationOutputStream out = new OperationOutputStream();
     // First build a list of split points where we'll transform the
     // string.
@@ -134,7 +165,7 @@ public class ComposerTest extends TestCase {
       out.skip(start - cursor);
       switch (random.nextInt(2)) {
       case 0:
-        out.insert(getRandomString(6));
+        out.insert(getRandomString(random.nextInt(3) + 4));
         out.skip(end - start);
         break;
       case 1:
@@ -152,23 +183,17 @@ public class ComposerTest extends TestCase {
   @Test
   public void testRandomized() {
     this.random = new Random(19124);
-    String currentStr = getRandomString(100);
-    for (int i = 0; i < 200; i++) {
-      Transform currentTrans = randomTransform(currentStr);
-      String nextStr = currentTrans.call(currentStr);
-      assertEquals(currentStr, currentTrans.getInverse().call(nextStr));
-      currentStr = nextStr;
+    for (int i = 0; i < 1000; i++) {
+      String input = getRandomString(100);
+      Transform a = getRandomTransform(input);
+      Transform b = getRandomTransform(input);
+      String aStr = a.call(input);
+      String bStr = b.call(input);
+      Pair<Transform, Transform> prime = Composer.compose(a, b);
+      String aFound = prime.getSecond().call(aStr);
+      String bFound = prime.getFirst().call(bStr);
+      assertEquals(aFound, bFound);
     }
-    String result = "eacegcfaecbbabedcabagegbccaggdbeeacaceccgdaeeg" +
-        "gefagffaeffbgaecacdcebagaaaeaecaagfbfddadabddcdfcagbedfbde" +
-        "gdccbecefcddbcegbbgfcceeccaaeagafgbbcecadagdeeggbfgedggecb" +
-        "dcdffgegdaecgafgfgcdbggeaafacfegccfafgbdegbaaaeaagfaadeggf" +
-        "cggfbfgfccdgaddadgbbgfabcafgdbedbddebafacgcffbgcbgcddfeffb" +
-        "dafaabcbcaffgcgffeafafbaafbgfbeffgbbgggfccfgfdeagceabfebea" +
-        "afbbaecefdggadgafgefceadfcfcacebbaabeageddebbcgdacdecaagcg" +
-        "cafddceabgdbgfgeaafbdfcfgaaffbcdfegfgdageaacdbecddgfcgfcdg" +
-        "dabeccaeaagfegbbcgaebacccgf";
-    assertEquals(result, currentStr);
   }
 
   private static Transform trans(Operation... ops) {
