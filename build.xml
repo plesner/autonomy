@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<project name="Autonomy" default="build" basedir=".">
+<project name="Autonomy" default="presubmit" basedir=".">
 
   <!-- Arguments to gwtc and devmode targets -->
   <property name="gwt.args" value="" />
@@ -12,16 +12,16 @@
 
   <path id="project.class.path">
     <pathelement location="${war}/WEB-INF/classes"/>
-    <pathelement location="${gwt.sdk}/gwt-user.jar"/>
-    <fileset dir="${gwt.sdk}" includes="gwt-dev*.jar"/>
+    <pathelement location="${gwt.sdk.path}/gwt-user.jar"/>
+    <fileset dir="${gwt.sdk.path}" includes="gwt-dev*.jar"/>
     <!-- Add any additional non-server libs (such as JUnit) -->
     <fileset dir="${war}/WEB-INF/lib" includes="**/*.jar"/>
   </path>
 
   <target name="libs" description="Copy libs to WEB-INF/lib">
     <mkdir dir="${war}/WEB-INF/lib" />
-    <copy todir="${war}/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet.jar" />
-    <copy todir="${war}/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet-deps.jar" />
+    <copy todir="${war}/WEB-INF/lib" file="${gwt.sdk.path}/gwt-servlet.jar" />
+    <copy todir="${war}/WEB-INF/lib" file="${gwt.sdk.path}/gwt-servlet-deps.jar" />
     <!-- Add any additional server libs that need to be copied -->
   </target>
 
@@ -50,8 +50,8 @@
       <classpath>
         <pathelement location="java/src"/>
         <path refid="project.class.path"/>
-        <pathelement location="${gwt.sdk}/validation-api-1.0.0.GA.jar" />
-        <pathelement location="${gwt.sdk}/validation-api-1.0.0.GA-sources.jar" />
+        <pathelement location="${gwt.sdk.path}/validation-api-1.0.0.GA.jar" />
+        <pathelement location="${gwt.sdk.path}/validation-api-1.0.0.GA-sources.jar" />
       </classpath>
       <!-- add jvmarg -Xss16M or similar if you see a StackOverflowError -->
       <jvmarg value="-Xmx256M"/>
@@ -68,8 +68,8 @@
       <classpath>
         <pathelement location="java/src"/>
         <path refid="project.class.path"/>
-        <pathelement location="${gwt.sdk}/validation-api-1.0.0.GA.jar" />
-        <pathelement location="${gwt.sdk}/validation-api-1.0.0.GA-sources.jar" />
+        <pathelement location="${gwt.sdk.path}/validation-api-1.0.0.GA.jar" />
+        <pathelement location="${gwt.sdk.path}/validation-api-1.0.0.GA-sources.jar" />
       </classpath>
       <jvmarg value="-Xmx256M"/>
       <arg value="-startupUrl"/>
@@ -89,7 +89,7 @@
       source="1.5" target="1.5" nowarn="true"
       destdir="${war}/WEB-INF/classes"
       debug="true" debuglevel="lines,vars,source">
-      <classpath location="${junit.path}/junit.jar"/>
+      <classpath location="${junit.jar.path}"/>
       <classpath refid="project.class.path"/>
     </javac>
   </target>
@@ -104,9 +104,9 @@
         <pathelement location="java/src" />
         <pathelement location="java/test" />
         <path refid="project.class.path" />
-        <pathelement location="${gwt.sdk}/validation-api-1.0.0.GA.jar" />
-        <pathelement location="${gwt.sdk}/validation-api-1.0.0.GA-sources.jar" />
-        <pathelement location="${junit.path}/junit.jar" />
+        <pathelement location="${gwt.sdk.path}/validation-api-1.0.0.GA.jar" />
+        <pathelement location="${gwt.sdk.path}/validation-api-1.0.0.GA-sources.jar" />
+        <pathelement location="${junit.jar.path}" />
       </classpath>
       <batchtest todir="${out.path}/reports/htmlunit.dev" >
         <fileset dir="java/test" >
@@ -128,9 +128,9 @@
         <pathelement location="java/src" />
         <pathelement location="java/test" />
         <path refid="project.class.path" />
-        <pathelement location="${gwt.sdk}/validation-api-1.0.0.GA.jar" />
-        <pathelement location="${gwt.sdk}/validation-api-1.0.0.GA-sources.jar" />
-        <pathelement location="${junit.path}/junit.jar" />
+        <pathelement location="${gwt.sdk.path}/validation-api-1.0.0.GA.jar" />
+        <pathelement location="${gwt.sdk.path}/validation-api-1.0.0.GA-sources.jar" />
+        <pathelement location="${junit.jar.path}" />
       </classpath>
       <batchtest todir="${out.path}/reports/htmlunit.prod" >
         <fileset dir="java/test" >
