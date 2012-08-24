@@ -6,6 +6,7 @@
 
   <property name="out.path" value="." />
   <property name="war" value="${out.path}/war" />
+  <property name="bin" value="${out.path}/bin" />
 
   <!-- Load the local build configuration -->
   <property file="config.properties" />
@@ -43,6 +44,16 @@
     <copy todir="${war}/WEB-INF/classes">
       <fileset dir="java/src" excludes="**/*.java"/>
     </copy>
+  </target>
+
+  <target name="agent" depends="javac" description="Build the agent JAR">
+    <mkdir dir="${bin}"/>
+    <jar
+      destfile="${bin}/agent.jar"
+      manifest="java/src/org/au/tonomy/agent/MANIFEST.MF"
+      basedir="${war}/WEB-INF/classes"
+      includes="org/au/tonomy/agent/** org/au/tonomy/shared/**">
+    </jar>
   </target>
 
   <target name="gwtc" depends="javac" description="GWT compile to JavaScript (production mode)">
