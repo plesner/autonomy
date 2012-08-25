@@ -51,8 +51,12 @@
     <jar
       destfile="${bin}/agent.jar"
       manifest="java/src/org/au/tonomy/agent/MANIFEST.MF"
-      basedir="${war}/WEB-INF/classes"
-      includes="org/au/tonomy/agent/** org/au/tonomy/shared/**">
+      basedir="${war}/WEB-INF/classes">
+      <fileset dir="${war}/WEB-INF/classes">
+        <include name="org/au/tonomy/agent/** org/au/tonomy/shared/**"/>
+      </fileset>
+      <zipfileset src="${jetty.jar.path}"/>
+      <zipfileset src="${servlet-api.jar.path}"/>
     </jar>
   </target>
 

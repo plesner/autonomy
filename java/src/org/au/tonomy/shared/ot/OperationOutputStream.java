@@ -3,8 +3,7 @@ package org.au.tonomy.shared.ot;
 import java.util.List;
 
 import org.au.tonomy.shared.util.Assert;
-
-import com.google.gwt.thirdparty.guava.common.collect.Lists;
+import org.au.tonomy.shared.util.Factory;
 
 /**
  * A stream of operations used to build a transform.
@@ -99,7 +98,7 @@ public class OperationOutputStream {
   }
 
   private IBuilder builder = new EmptyBuilder();
-  private final List<Operation> ops = Lists.newArrayList();
+  private final List<Operation> ops = Factory.newArrayList();
 
   public void push(Operation op) {
     ops.add(op);

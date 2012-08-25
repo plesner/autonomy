@@ -1,5 +1,7 @@
 package org.au.tonomy.client.codemirror;
 
+import org.au.tonomy.shared.util.IThunk;
+
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 /**
@@ -35,6 +37,16 @@ public class CodeMirror extends JavaScriptObject {
      */
     public native Builder setMode(String mode) /*-{
       this.@org.au.tonomy.client.codemirror.CodeMirror.Builder::config.mode = mode;
+      return this;
+    }-*/;
+
+    /**
+     * Sets the change listener that will be notified of editor changes.
+     */
+    public native Builder setChangeListener(IThunk<ChangeEvent> listener) /*-{
+      this.@org.au.tonomy.client.codemirror.CodeMirror.Builder::config.onChange = function (editor, event) {
+        listener.@org.au.tonomy.shared.util.IThunk::call(Ljava/lang/Object;)(event);
+      };
       return this;
     }-*/;
 

@@ -4,9 +4,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.au.tonomy.shared.util.Assert;
+import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.IFunction;
-
-import com.google.gwt.thirdparty.guava.common.collect.Lists;
 /**
  * A sequence of operations that transform a document.
  */
@@ -31,7 +30,7 @@ public class Transform implements IFunction<String, String>, Iterable<Operation>
    * transformation.
    */
   public Transform getInverse() {
-    List<Operation> invOps = Lists.newArrayList();
+    List<Operation> invOps = Factory.newArrayList();
     for (Operation op : this)
       invOps.add(op.getInverse());
     return new Transform(invOps);

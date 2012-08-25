@@ -1,63 +1,84 @@
 package org.au.tonomy.agent;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Set;
 
+import org.au.tonomy.agent.Json.JsonMap;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Exceptions;
-
+import org.au.tonomy.shared.util.Factory;
 
 /**
- * The main class for the file agent.
+ * Dispatches api requests.
  */
 public class Agent {
 
-  private static final String BRIDGE_TEMPLATE =
-      "<html><head><script>\n{connector}</script></head><body></body></html>";
-  private String bridgePageCache;
-
-  private Agent() { }
+  private int nextSessionId = 0;
 
   /**
-   * Returns the bridge page source code.
+   * Marker for methods that will be used to respond to api requests.
    */
-  private String getBridgePage() {
-    if (bridgePageCache == null)
-      bridgePageCache = BRIDGE_TEMPLATE.replace("{connector}", getConnectorSource());
-    return bridgePageCache;
+  @Retention(RetentionPolicy.RUNTIME)
+  private static @interface Handler {
+    public String value();
+  }
+
+  @Handler("startsession")
+  public Object handleStartSession(RequestInfo request) {
+    String href = request.getParameter("href", "(unknown client)");
+    System.out.println("Starting session with " + href + ".");
+    return new JsonMap() {{
+      put("session", genSessionId());
+    }};
+  }
+
+  private synchronized String genSessionId() {
+    return Integer.toHexString(nextSessionId++);
   }
 
   /**
-   * Reads the source of the connector script.
+   * Returns the names of the handlers understood by this agent api.
    */
-  private String getConnectorSource() {
-    String packageName = Agent.class.getPackage().getName();
-    String fileName = packageName.replace('.', '/') + "/connector.js";
-    try {
-      return readResource(fileName);
-    } catch (IOException ioe) {
-      throw Exceptions.propagate(ioe);
+  public static Set<String> getHandlerNames() {
+    return getHandlers().keySet();
+  }
+
+  private static Map<String, Method> handlersCache = null;
+  /**
+   * Returns a map from handler names to the associated methods.
+   */
+  private static Map<String, Method> getHandlers() {
+    if (handlersCache == null) {
+      Map<String, Method> handlers = Factory.newHashMap();
+      for (Method method : Agent.class.getDeclaredMethods()) {
+        Handler annot = method.getAnnotation(Handler.class);
+        if (annot != null)
+          handlers.put(annot.value(), method);
+      }
+      handlersCache = handlers;
     }
+    return handlersCache;
   }
 
   /**
-   * Reads a string resource into a string.
+   * Invokes the method with the given handler name, passing the given
+   * request info as an argument.
    */
-  private String readResource(String name) throws IOException {
-    ClassLoader loader = this.getClass().getClassLoader();
-    InputStream in = loader.getResourceAsStream(name);
-    Assert.notNull(in);
-    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-    StringBuilder buf = new StringBuilder();
-    while (reader.ready())
-      buf.append(reader.readLine()).append('\n');
-    return buf.toString();
-  }
-
-  public static void main(String[] args) {
-    System.out.println(new Agent().getBridgePage());
+  public Object dispatch(String handlerName, RequestInfo info) {
+    Method method = getHandlers().get(handlerName);
+    try {
+      return Assert.notNull(method).invoke(this, info);
+    } catch (IllegalArgumentException iae) {
+      throw Exceptions.propagate(iae);
+    } catch (IllegalAccessException iae) {
+      throw Exceptions.propagate(iae);
+    } catch (InvocationTargetException ite) {
+      throw Exceptions.propagate(ite);
+    }
   }
 
 }

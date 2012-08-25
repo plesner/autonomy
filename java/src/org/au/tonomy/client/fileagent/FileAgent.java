@@ -39,7 +39,7 @@ public class FileAgent extends FrameProxy implements ISourceTree {
    * Starts a session with the file agent.
    */
   private Promise<?> startSession() {
-    return newMessage("start_session")
+    return newMessage("startsession")
         .setOption("href", getOrigin())
         .send()
         .then(new IFunction<Object, Object>() {

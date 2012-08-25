@@ -1,8 +1,13 @@
 package org.au.tonomy.client.widget;
 
+import org.au.tonomy.client.Console;
 import org.au.tonomy.client.codemirror.AutonomyMode;
+import org.au.tonomy.client.codemirror.ChangeEvent;
 import org.au.tonomy.client.codemirror.CodeMirror;
+import org.au.tonomy.client.codemirror.Position;
+import org.au.tonomy.shared.source.SourceCoordinateMapper;
 import org.au.tonomy.shared.util.Assert;
+import org.au.tonomy.shared.util.IThunk;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -23,12 +28,14 @@ public class EditorWidget extends Composite {
   @UiField HTMLPanel container;
   private CodeMirror.Builder builder;
   private CodeMirror mirror;
+  private final SourceCoordinateMapper mapper = new SourceCoordinateMapper();
 
   public EditorWidget() {
     this.builder = CodeMirror
         .builder()
         .setLineNumbers(true)
-        .setMode("autonomy");
+        .setMode("autonomy")
+        .setChangeListener(changeListener);
     initWidget(BINDER.createAndBindUi(this));
   }
 
@@ -43,6 +50,28 @@ public class EditorWidget extends Composite {
 
   public void setContents(String value) {
     Assert.notNull(this.mirror).setValue(value);
+    this.mapper.resetSource(value);
   }
+
+  /**
+   * Processes an editor changed event.
+   */
+  private void onChanged(ChangeEvent event) {
+    Position fromPos = event.getFrom();
+    int fromOffset = mapper.getOffset(fromPos.getLine(), fromPos.getChar());
+    Position toPos = event.getTo();
+    int toOffset = mapper.getOffset(toPos.getLine(), toPos.getChar());
+    Console.log(fromOffset + " " + toOffset);
+  }
+
+  /**
+   * The singleton change event listener.
+   */
+  private final IThunk<ChangeEvent> changeListener = new IThunk<ChangeEvent>() {
+    @Override
+    public void call(ChangeEvent event) {
+      onChanged(event);
+    }
+  };
 
 }

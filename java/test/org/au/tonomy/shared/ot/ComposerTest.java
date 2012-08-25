@@ -16,7 +16,7 @@ public class ComposerTest extends TestCase {
   private void checkXform(String original, Transform a, Transform b,
       String expected, Transform aPrime, Transform bPrime) {
     // First check that we produced the right xformed transformations.
-    Pair<Transform, Transform> prime = Composer.compose(a, b);
+    Pair<Transform, Transform> prime = Composer.xform(a, b);
     assertEquals(aPrime, prime.getFirst());
     assertEquals(bPrime, prime.getSecond());
     // Then check that applying them has the expected effect.
@@ -34,7 +34,7 @@ public class ComposerTest extends TestCase {
   }
 
   @Test
-  public void testComposeInsert() {
+  public void testXformInsert() {
     checkXform(
         "",
         trans(ins("foo")),
@@ -58,7 +58,8 @@ public class ComposerTest extends TestCase {
         trans(skp(1), ins("b"), skp(1), ins("d"), skp(1), ins("f")));
   }
 
-  public void testComposeSkip() {
+  @Test
+  public void testXformSkip() {
     checkXform(
         "foo",
         trans(skp(2), ins("x"), skp(1)),
@@ -68,7 +69,8 @@ public class ComposerTest extends TestCase {
         trans(skp(1), ins("y"), skp(3)));
   }
 
-  public void testComposeDelete() {
+  @Test
+  public void testXformDelete() {
     checkXform(
         "foobar",
         trans(skp(2), del("ob"), skp(2)),
@@ -99,7 +101,8 @@ public class ComposerTest extends TestCase {
         trans(skp(1), del("b"), skp(4)));
   }
 
-  public void testComposeDeleteInsert() {
+  @Test
+  public void testXformDeleteInsert() {
     checkXform(
         "foo",
         trans(ins("bla"), skp(3)),
@@ -109,6 +112,7 @@ public class ComposerTest extends TestCase {
         trans(skp(3), del("fo"), skp(1)));
   }
 
+  @Test
   public void testRandomizedRegression() {
     checkXform(
         "abcdefghi",
@@ -124,6 +128,60 @@ public class ComposerTest extends TestCase {
         "abdevwxyz0fghij123456u",
         trans(skp(4), ins("vwxyz0"), skp(5), ins("123456"), skp(1)),
         trans(skp(2), del("c"), skp(13), del("k"), skp(6), del("lmnopqrst"), skp(1)));
+  }
+
+  private void checkCompose(String original, Transform a, Transform b,
+      Transform composed, String expected) {
+    assertEquals(expected, b.call(a.call(original)));
+    Transform found = Composer.compose(a, b);
+    assertEquals(composed, found);
+    assertEquals(expected, composed.call(original));
+  }
+
+  @Test
+  public void testCompose() {
+    checkCompose(
+        "",
+        trans(ins("abc")),
+        trans(skp(3), ins("def")),
+        trans(ins("abcdef")),
+        "abcdef");
+    checkCompose(
+        "abcdef",
+        trans(skp(3), ins("y"), skp(3)),
+        trans(skp(3), ins("x"), skp(1), ins("z"), skp(3)),
+        trans(skp(3), ins("xyz"), skp(3)),
+        "abcxyzdef");
+    checkCompose(
+        "abcdef",
+        trans(ins("("), skp(6), ins(")")),
+        trans(skp(4), ins("-"), skp(4)),
+        trans(ins("("), skp(3), ins("-"), skp(3), ins(")")),
+        "(abc-def)");
+    checkCompose(
+        "abcdef",
+        trans(skp(2), del("cd"), skp(2)),
+        trans(ins("("), skp(4), ins(")")),
+        trans(ins("("), skp(2), del("cd"), skp(2), ins(")")),
+        "(abef)");
+    checkCompose(
+        "abcdef",
+        trans(skp(3), ins("."), skp(3)),
+        trans(skp(2), del("c.d"), skp(2)),
+        trans(skp(2), del("cd"), skp(2)),
+        "abef");
+    checkCompose(
+        "abcdef",
+        trans(del("abc"), skp(3)),
+        trans(ins("xyz"), skp(3)),
+        trans(del("abc"), ins("xyz"), skp(3)),
+        "xyzdef");
+    checkCompose(
+        "abcdef",
+        trans(del("a"), skp(5)),
+        trans(del("b"), skp(4)),
+        trans(del("ab"), skp(4)),
+        "cdef");
   }
 
   @Test
@@ -181,7 +239,7 @@ public class ComposerTest extends TestCase {
   }
 
   @Test
-  public void testRandomized() {
+  public void testXformRandomized() {
     this.random = new Random(19124);
     for (int i = 0; i < 1000; i++) {
       String input = getRandomString(100);
@@ -189,10 +247,25 @@ public class ComposerTest extends TestCase {
       Transform b = getRandomTransform(input);
       String aStr = a.call(input);
       String bStr = b.call(input);
-      Pair<Transform, Transform> prime = Composer.compose(a, b);
+      Pair<Transform, Transform> prime = Composer.xform(a, b);
       String aFound = prime.getSecond().call(aStr);
       String bFound = prime.getFirst().call(bStr);
       assertEquals(aFound, bFound);
+    }
+  }
+
+  @Test
+  public void testComposeRandomized() {
+    this.random = new Random(42342);
+    for (int i = 0; i < 1000; i++) {
+      String first = getRandomString(100);
+      Transform a = getRandomTransform(first);
+      String second = a.call(first);
+      Transform b = getRandomTransform(second);
+      String expected = b.call(a.call(first));
+      Transform ab = Composer.compose(a, b);
+      String found = ab.call(first);
+      assertEquals(expected, found);
     }
   }
 

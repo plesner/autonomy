@@ -1,19 +1,19 @@
 (function () {
   // The URL of the page that is allowed to communicate with this proxy.
-  var targetOrigin = "%(target_origin)s";
+  var targetOrigin = "%1$s";
 
   // Set of all the methods understood by this proxy.
-  var methods = %(methods)s;
+  var methods = %2$s;
 
   // Id of the connection attempt that caused this file to be served.
-  var connectId = %(connect_id)s;
+  var connectAttempt = %3$s;
 
   // Establishes a connection with the host page.
   function connectToHost() {
     window.addEventListener("message", function (event) {
       forwardRequest(event);
     });
-    postMessage("frameConnect", [], connectId);
+    postMessage("frameConnect", [], connectAttempt);
   }
 
   // Posts a message to the parent frame.
@@ -26,8 +26,10 @@
     var data = JSON.parse(event.data);
     var method = data[0];
     // Only forward messages that we know the agent will understand.
-    if (!methods[method])
+    if (!methods[method]) {
+      console.log("Blocked unsupported message", data);
       return;
+    }
     var id = data[2];
     var xhr = new XMLHttpRequest();
     if (id != -1) {
@@ -43,7 +45,7 @@
         .map(function (pair) { return pair[0] + "=" + encodeURIComponent(pair[1]); })
         .join("&");
     var paramSuffix = paramString.length == 0 ? "" : "?" + paramString;
-    xhr.open("GET", "agent/" + method + paramSuffix, true);
+    xhr.open("GET", "json/" + method + paramSuffix, true);
     xhr.send(null);
   }
 

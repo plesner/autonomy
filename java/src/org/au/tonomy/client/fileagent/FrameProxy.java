@@ -217,7 +217,7 @@ public abstract class FrameProxy {
     final IFrameElement frame = document.createIFrameElement();
     frame.getStyle().setDisplay(Display.NONE);
     String query = "?attempt=" + attempt +
-        "&target_origin=" + URL.encodeQueryString(getOrigin());
+        "&origin=" + URL.encodeQueryString(getOrigin());
     frame.setSrc(root + query);
     document.getBody().appendChild(frame);
     // After the given timeout we check on the state of this attempt

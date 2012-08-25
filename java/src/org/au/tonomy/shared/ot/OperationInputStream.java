@@ -49,11 +49,15 @@ public class OperationInputStream {
 
   /**
    * Apply all remaining operations to the given output stream.
-   * @param out
    */
-  public void flush(OperationOutputStream source, OperationOutputStream target) {
+  public void xformFlush(OperationOutputStream source, OperationOutputStream target) {
     while (hasCurrent())
       advance().xformFlush(source, target);
+  }
+
+  public void composeFlush(OperationOutputStream out) {
+    while (hasCurrent())
+      advance().apply(out);
   }
 
 }
