@@ -81,6 +81,14 @@ public class EditorPresenterTest extends TestCase {
     fakeWidget.fireChangeEvent(change(1, 3, 1, 3, "", "quux"));
     assertEquals("ooz\nbaz\nquux", editor.getContents());
 
+    checker.getRecorder().onChange(trans(del("ooz\nbaz\nquux")));
+    fakeWidget.fireChangeEvent(change(0, 0, 2, 4, ""));
+    assertEquals("", editor.getContents());
+
+    checker.getRecorder().onChange(trans(ins("empty")));
+    fakeWidget.fireChangeEvent(change(0, 0, 0, 0, "empty"));
+    assertEquals("empty", editor.getContents());
+
     Assert.that(!checker.expectsMoreEvents());
   }
 
