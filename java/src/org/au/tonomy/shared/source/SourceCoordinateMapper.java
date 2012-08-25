@@ -30,6 +30,13 @@ public class SourceCoordinateMapper {
   }
 
   /**
+   * Returns the total number of characters of source code.
+   */
+  public int getLength() {
+    return this.text.length();
+  }
+
+  /**
    * Apply the given transformation to this mapper's source and
    * update its internal state to reflect the changes.
    */
@@ -66,5 +73,20 @@ public class SourceCoordinateMapper {
     Map.Entry<Integer, Integer> entry = negOffsetToRow.tailMap(-offset).entrySet().iterator().next();
     return new int[] { entry.getValue(), offset + entry.getKey() };
   }
+
+  /**
+   * Returns the specified substring of the source.
+   */
+  public String substring(int from, int to) {
+    return text.substring(from, to);
+  }
+
+  /**
+   * Returns the full source code store in this mapper.
+   */
+  public String getSource() {
+    return text;
+  }
+
 
 }

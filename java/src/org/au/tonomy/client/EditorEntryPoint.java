@@ -7,6 +7,7 @@ import org.au.tonomy.client.bus.DefaultBus;
 import org.au.tonomy.client.bus.Message;
 import org.au.tonomy.client.fileagent.FileAgent;
 import org.au.tonomy.client.fileagent.FileHandle;
+import org.au.tonomy.client.presentation.EditorPresenter;
 import org.au.tonomy.client.util.Callback;
 import org.au.tonomy.client.widget.EditorWidget;
 import org.au.tonomy.client.widget.MessageListWidget;
@@ -21,12 +22,13 @@ import com.google.gwt.user.client.ui.RootPanel;
 
 public class EditorEntryPoint implements EntryPoint {
 
-  private EditorWidget editor;
+  private EditorPresenter editor;
 
   private WorkspaceWidget buildWorkspace() {
     WorkspaceWidget workspace = new WorkspaceWidget();
-    this.editor = new EditorWidget();
-    workspace.setBackground(editor);
+    EditorWidget editorWidget = new EditorWidget();
+    workspace.setBackground(editorWidget);
+    this.editor = new EditorPresenter(editorWidget);
     MessageListWidget messages = new MessageListWidget();
     workspace.addPanel(messages);
     return workspace;

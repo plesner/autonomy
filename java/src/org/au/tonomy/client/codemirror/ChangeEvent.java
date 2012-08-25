@@ -1,24 +1,22 @@
 package org.au.tonomy.client.codemirror;
 
+import org.au.tonomy.client.presentation.IEditorWidget.IChangeEvent;
+
 import com.google.gwt.core.client.JavaScriptObject;
 /**
  * Contains all the relevant information about a change made in the
  * editor.
  */
-public class ChangeEvent extends JavaScriptObject {
+public class ChangeEvent extends JavaScriptObject implements IChangeEvent {
 
   protected ChangeEvent() { }
 
-  /**
-   * Returns the (pre-change) position where the change started.
-   */
+  @Override
   public final native Position getFrom() /*-{
     return this.from;
   }-*/;
 
-  /**
-   * Returns the (pre-change) position where the change ended.
-   */
+  @Override
   public final native Position getTo() /*-{
     return this.to;
   }-*/;
@@ -31,16 +29,12 @@ public class ChangeEvent extends JavaScriptObject {
     return this.next;
   }-*/;
 
-  /**
-   * Returns the number of lines replaced at the changed range.
-   */
+  @Override
   public final native int getTextLineCount() /*-{
     return this.text.length;
   }-*/;
 
-  /**
-   * Returns the index'th line replaced at the changed range.
-   */
+  @Override
   public final native String getTextLine(int index) /*-{
     return this.text[index];
   }-*/;

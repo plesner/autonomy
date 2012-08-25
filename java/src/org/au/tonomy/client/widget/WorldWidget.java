@@ -1,6 +1,5 @@
 package org.au.tonomy.client.widget;
 
-import org.au.tonomy.client.presentation.FrameRateMonitor;
 import org.au.tonomy.client.presentation.ICamera;
 import org.au.tonomy.client.presentation.IWorldWidget;
 import org.au.tonomy.client.presentation.Viewport;
@@ -37,7 +36,6 @@ public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
 
   private final WorldTrace trace;
   private final IWebGL webGlUtils;
-  private final FrameRateMonitor frameRate = new FrameRateMonitor(30);
   private final WorldRenderer renderer;
   private boolean keepRunning = false;
   private IListener listener = null;
@@ -137,10 +135,7 @@ public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
   }
 
   public void refresh(double time) {
-    long startMs = System.currentTimeMillis();
     renderer.paint(trace, time);
-    long durationMs = System.currentTimeMillis() - startMs;
-    frameRate.record(startMs, durationMs);
   }
 
   private static final IWorldWidgetUiBinder BINDER = GWT.create(IWorldWidgetUiBinder.class);

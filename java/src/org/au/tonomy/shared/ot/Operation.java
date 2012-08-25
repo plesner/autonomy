@@ -297,7 +297,7 @@ public abstract class Operation {
 
     @Override
     public String toString() {
-      return "(ins " + text + ")";
+      return "+\"" + text + "\"";
     }
 
   }
@@ -450,7 +450,7 @@ public abstract class Operation {
 
     @Override
     public String toString() {
-      return "(del " + text + ")";
+      return "-\"" + text + "\"";
     }
 
   }
@@ -622,7 +622,7 @@ public abstract class Operation {
 
     @Override
     public String toString() {
-      return "(skp " + count + ")";
+      return ">" + count;
     }
 
   }

@@ -1,9 +1,12 @@
 package org.au.tonomy.testing;
 
+import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.Assert;
 
+import org.au.tonomy.shared.ot.Operation;
+import org.au.tonomy.shared.ot.Transform;
 import org.au.tonomy.shared.syntax.Token;
 import org.au.tonomy.shared.syntax.Tokenizer;
 import org.au.tonomy.shared.util.Factory;
@@ -98,5 +101,32 @@ public class TestUtils extends Assert {
     return tokens;
   }
 
+  /**
+   * Helper function for creating a transformation.
+   */
+  public static Transform trans(Operation... ops) {
+    return new Transform(Arrays.asList(ops));
+  }
+
+  /**
+   * Helper function for creating an insert operation.
+   */
+  public static Operation ins(String str) {
+    return new Operation.Insert(str);
+  }
+
+  /**
+   * Helper function for creating a delete operation.
+   */
+  public static Operation del(String str) {
+    return new Operation.Delete(str);
+  }
+
+  /**
+   * Helper function for creating a skip operation.
+   */
+  public static Operation skp(int count) {
+    return new Operation.Skip(count);
+  }
 
 }

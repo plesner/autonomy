@@ -16,7 +16,6 @@ public class Transform implements IFunction<String, String>, Iterable<Operation>
   private int outputLengthCache = -1;
 
   public Transform(List<Operation> ops) {
-    Assert.that(!ops.isEmpty());
     if (Assert.enableExpensiveAssertions)
       Assert.that(isNormalized(ops));
     this.ops = ops;
@@ -87,7 +86,14 @@ public class Transform implements IFunction<String, String>, Iterable<Operation>
 
   @Override
   public String toString() {
-    return "<Transform: " + ops + ">";
+    StringBuilder buf = new StringBuilder().append("[");
+    boolean first = true;
+    for (Operation op : this) {
+      if (first) first = false;
+      else buf.append(' ');
+      buf.append(op);
+    }
+    return buf.append("]").toString();
   }
 
   @Override

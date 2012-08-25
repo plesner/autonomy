@@ -41,6 +41,15 @@ public class CodeMirror extends JavaScriptObject {
     }-*/;
 
     /**
+     * Sets the maximum number of undo levels that the editor stores.
+     * Defaults to 40.
+     */
+    public native Builder setUndoDepth(int depth) /*-{
+      this.@org.au.tonomy.client.codemirror.CodeMirror.Builder::config.undoDepth = depth;
+      return this;
+    }-*/;
+
+    /**
      * Sets the change listener that will be notified of editor changes.
      */
     public native Builder setChangeListener(IThunk<ChangeEvent> listener) /*-{

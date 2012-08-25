@@ -1,6 +1,10 @@
 package org.au.tonomy.shared.ot;
 
-import java.util.Arrays;
+import static org.au.tonomy.testing.TestUtils.del;
+import static org.au.tonomy.testing.TestUtils.ins;
+import static org.au.tonomy.testing.TestUtils.skp;
+import static org.au.tonomy.testing.TestUtils.trans;
+
 import java.util.Iterator;
 import java.util.Random;
 import java.util.TreeSet;
@@ -265,22 +269,6 @@ public class ComposerTest extends TestCase {
       String found = ab.call(first);
       assertEquals(expected, found);
     }
-  }
-
-  private static Transform trans(Operation... ops) {
-    return new Transform(Arrays.asList(ops));
-  }
-
-  private static Operation ins(String str) {
-    return new Operation.Insert(str);
-  }
-
-  private static Operation del(String str) {
-    return new Operation.Delete(str);
-  }
-
-  private static Operation skp(int count) {
-    return new Operation.Skip(count);
   }
 
 }
