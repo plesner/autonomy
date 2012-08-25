@@ -78,7 +78,7 @@ public class DumbTokenFilter<T extends IToken> implements ITokenFilter<T> {
     if (removed.isEmpty()) {
       if (inserted.isEmpty()) {
         // No changes -- nothing to do.
-        Assert.that(currentTokens.equals(newTokens));
+        Assert.equals(currentTokens, newTokens);
       } else {
         insertAndNotify(firstDifference, inserted);
       }

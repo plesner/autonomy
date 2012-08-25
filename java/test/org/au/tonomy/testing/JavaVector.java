@@ -8,7 +8,7 @@ public class JavaVector implements IVector {
   private final double[] values;
 
   private JavaVector(double[] values) {
-    Assert.that(values.length == 4);
+    Assert.equals(4, values.length);
     this.values = values;
   }
 

@@ -30,7 +30,7 @@ public abstract class LinkedProgram {
    */
   public void createAndLink(RenderingContext context, String vertexShaderSource,
       String fragmentShaderSource) throws ShaderSyntaxError {
-    Assert.that(program == null);
+    Assert.isNull(program);
 
     // Compile the shaders first since this might throw.
     Shader fragmentShader = context.compileShader(FRAGMENT_SHADER,
@@ -59,7 +59,7 @@ public abstract class LinkedProgram {
    * context.
    */
   public void beginUse(RenderingContext context) {
-    Assert.that(this.scopedContext == null);
+    Assert.isNull(this.scopedContext);
     this.scopedContext = context;
     context.useProgram(this.program);
     setCapabilities();

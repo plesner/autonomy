@@ -8,36 +8,55 @@ import org.au.tonomy.shared.util.Factory;
 /**
  * A stream of operations used to build a transform.
  */
-public class OperationOutputStream {
+public class TransformBuilder {
 
-  private interface IBuilder {
+  /**
+   * A builder specialized for consing up a particular kind of operation.
+   */
+  private interface IOperationBuilder {
 
-    public IBuilder skip(int count);
+    /**
+     * Skip count characters.
+     */
+    public IOperationBuilder skip(int count);
 
-    public IBuilder insert(String text);
+    /**
+     * Insert the specified text.
+     */
+    public IOperationBuilder insert(String text);
 
-    public IBuilder delete(String text);
+    /**
+     * Delete the specified text.
+     */
+    public IOperationBuilder delete(String text);
 
+    /**
+     * Flush this operation into the operation array.
+     */
     public void flush();
 
   }
 
-  private class EmptyBuilder implements IBuilder {
+  /**
+   * A builder with no state that delegates to a specialized builder
+   * on each operation.
+   */
+  private class EmptyBuilder implements IOperationBuilder {
 
     @Override
-    public IBuilder skip(int count) {
+    public IOperationBuilder skip(int count) {
       flush();
       return new SkipBuilder().skip(count);
     }
 
     @Override
-    public IBuilder insert(String text) {
+    public IOperationBuilder insert(String text) {
       flush();
       return new InsertBuilder().insert(text);
     }
 
     @Override
-    public IBuilder delete(String text) {
+    public IOperationBuilder delete(String text) {
       flush();
       return new DeleteBuilder().delete(text);
     }
@@ -46,12 +65,15 @@ public class OperationOutputStream {
 
   }
 
+  /**
+   * Builds insert operations.
+   */
   private class InsertBuilder extends EmptyBuilder {
 
     private final StringBuilder buf = new StringBuilder();
 
     @Override
-    public IBuilder insert(String text) {
+    public IOperationBuilder insert(String text) {
       buf.append(text);
       return this;
     }
@@ -63,12 +85,15 @@ public class OperationOutputStream {
 
   }
 
+  /**
+   * Builds delete operations.
+   */
   private class DeleteBuilder extends EmptyBuilder {
 
     private final StringBuilder buf = new StringBuilder();
 
     @Override
-    public IBuilder delete(String text) {
+    public IOperationBuilder delete(String text) {
       buf.append(text);
       return this;
     }
@@ -80,12 +105,15 @@ public class OperationOutputStream {
 
   }
 
+  /**
+   * Builds skip operations.
+   */
   private class SkipBuilder extends EmptyBuilder {
 
     private int count = 0;
 
     @Override
-    public IBuilder skip(int count) {
+    public IOperationBuilder skip(int count) {
       this.count += count;
       return this;
     }
@@ -97,15 +125,15 @@ public class OperationOutputStream {
 
   }
 
-  private IBuilder builder = new EmptyBuilder();
+  private IOperationBuilder builder = new EmptyBuilder();
   private final List<Operation> ops = Factory.newArrayList();
 
-  public void push(Operation op) {
-    ops.add(op);
-  }
-
+  /**
+   * Returns the completed transformation.
+   */
   public Transform flush() {
     builder.flush();
+    builder = null;
     return new Transform(ops);
   }
 

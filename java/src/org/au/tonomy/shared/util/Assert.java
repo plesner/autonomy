@@ -8,6 +8,11 @@ package org.au.tonomy.shared.util;
  */
 public class Assert {
 
+  /**
+   * Set this to false to disable the most expensive assertions.
+   */
+  public static final boolean enableExpensiveAssertions = true;
+
   public static void that(boolean value) {
     if (!value) {
       throw new AssertionError();

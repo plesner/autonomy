@@ -1,6 +1,7 @@
 package org.au.tonomy.shared.ot;
 
 
+import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Pair;
 
 
@@ -17,10 +18,11 @@ public class Composer {
    * as b in the case where a has already been applied.
    */
   public static Pair<Transform, Transform> xform(Transform a, Transform b) {
-    OperationInputStream aIn = new OperationInputStream(a);
-    OperationInputStream bIn = new OperationInputStream(b);
-    OperationOutputStream aOut = new OperationOutputStream();
-    OperationOutputStream bOut = new OperationOutputStream();
+    Assert.equals(a.getInputLength(), b.getInputLength());
+    OperationStream aIn = new OperationStream(a);
+    OperationStream bIn = new OperationStream(b);
+    TransformBuilder aOut = new TransformBuilder();
+    TransformBuilder bOut = new TransformBuilder();
     // First compose the operations in each tranformation.
     while (aIn.hasCurrent() && bIn.hasCurrent())
       bIn.getCurrent().xformDispatchSecond(aIn, aOut, bIn, bOut);
@@ -36,10 +38,11 @@ public class Composer {
    * a and then b.
    */
   public static Transform compose(Transform a, Transform b) {
-    OperationOutputStream out = new OperationOutputStream();
-    OperationInputStream aIn = new OperationInputStream(a);
-    OperationInputStream bIn = new OperationInputStream(b);
-    while (aIn.hasCurrent() && bIn.hasCurrent())
+    Assert.equals(b.getInputLength(), a.getOutputLength());
+    TransformBuilder out = new TransformBuilder();
+    OperationStream aIn = new OperationStream(a);
+    OperationStream bIn = new OperationStream(b);
+    while (aIn.hasCurrent())
       bIn.getCurrent().composeDispatchSecond(aIn, bIn, out);
     bIn.composeFlush(out);
     return out.flush();

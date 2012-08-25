@@ -96,7 +96,7 @@ public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
   }
 
   public void attachListener(IListener listener) {
-    Assert.that(this.listener == null);
+    Assert.isNull(this.listener);
     this.listener = listener;
   }
 

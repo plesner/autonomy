@@ -8,7 +8,7 @@ public class JavaMatrix implements IMatrix<JavaVector> {
   private final double[] entries;
 
   private JavaMatrix(double[] entries) {
-    Assert.that(entries.length == 16);
+    Assert.equals(16, entries.length);
     this.entries = entries;
   }
 

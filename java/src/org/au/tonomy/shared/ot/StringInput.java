@@ -28,7 +28,8 @@ public class StringInput {
   public void skip(String text) {
     int targetCursor = cursor + text.length();
     Assert.that(targetCursor <= str.length());
-    Assert.equals(text, str.substring(cursor, targetCursor));
+    if (Assert.enableExpensiveAssertions)
+      Assert.equals(text, str.substring(cursor, targetCursor));
     this.cursor = targetCursor;
   }
 

@@ -7,7 +7,6 @@ import java.util.TreeSet;
 
 import junit.framework.TestCase;
 
-import org.au.tonomy.shared.ot.Operation.Insert;
 import org.au.tonomy.shared.util.Pair;
 import org.junit.Test;
 
@@ -42,6 +41,13 @@ public class ComposerTest extends TestCase {
         "foobar",
         trans(skp(6)),
         trans(skp(3), ins("bar")));
+    checkXform(
+        "",
+        trans(ins("fooxar")),
+        trans(ins("foobar")),
+        "foobxar",
+        trans(skp(4), ins("x"), skp(2)),
+        trans(skp(3), ins("b"), skp(3)));
     checkXform(
         "",
         trans(ins("bar")),
@@ -184,14 +190,6 @@ public class ComposerTest extends TestCase {
         "cdef");
   }
 
-  @Test
-  public void testPrefixOffset() {
-    assertEquals(3, Insert.getPrefixOffset("foo", "foobar"));
-    assertEquals(3, Insert.getPrefixOffset("foo", "foo"));
-    assertEquals(0, Insert.getPrefixOffset("foo", ""));
-    assertEquals(0, Insert.getPrefixOffset("foo", "hix"));
-  }
-
   private Random random;
 
   private String getRandomString(int length) {
@@ -207,7 +205,7 @@ public class ComposerTest extends TestCase {
    * input.
    */
   private Transform getRandomTransform(String input) {
-    OperationOutputStream out = new OperationOutputStream();
+    TransformBuilder out = new TransformBuilder();
     // First build a list of split points where we'll transform the
     // string.
     TreeSet<Integer> splits = new TreeSet<Integer>();

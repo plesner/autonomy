@@ -237,7 +237,7 @@ public abstract class Ast implements AstOrArguments {
 
     @Override
     public Ast asAst() {
-      Assert.that(children.size() == 1);
+      Assert.equals(1, children.size());
       return children.get(0);
     }
 

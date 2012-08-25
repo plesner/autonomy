@@ -126,7 +126,7 @@ public class MacroParser {
       List<Component> components = statement.getComponents();
       if (index == components.size()) {
         // We're at the end of a sequence so this is an end state.
-        Assert.that(onEnd == null);
+        Assert.isNull(onEnd);
         onEnd = statement;
       } else {
         Component next = components.get(index);
@@ -139,7 +139,7 @@ public class MacroParser {
             suppressSemi = next.getPlaceholderType().suppressSemi;
           }
           onAst.addStatement(statement, index + 1);
-          Assert.that(suppressSemi == next.getPlaceholderType().suppressSemi);
+          Assert.equals(suppressSemi, next.getPlaceholderType().suppressSemi);
         } else {
           // This component is a keyword, add a state that follows if
           // we see that keyword.

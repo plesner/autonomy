@@ -17,7 +17,23 @@ public class Transform implements IFunction<String, String>, Iterable<Operation>
 
   public Transform(List<Operation> ops) {
     Assert.that(!ops.isEmpty());
+    if (Assert.enableExpensiveAssertions)
+      Assert.that(isNormalized(ops));
     this.ops = ops;
+  }
+
+  /**
+   * Returns true if the given operations constitute a normalized
+   * transformation, that is, one where
+   */
+  private static boolean isNormalized(List<Operation> ops) {
+    Operation.Type last = null;
+    for (Operation op : ops) {
+      if (op.getType() == last)
+        return false;
+      last = op.getType();
+    }
+    return true;
   }
 
   @Override

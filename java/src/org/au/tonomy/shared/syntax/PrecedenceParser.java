@@ -189,7 +189,7 @@ public class PrecedenceParser<T> {
         break;
       }
     }
-    Assert.that(rands.size() == 1);
+    Assert.equals(1, rands.size());
     return rands.peek();
   }
 

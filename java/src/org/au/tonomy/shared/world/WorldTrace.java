@@ -70,7 +70,7 @@ public class WorldTrace {
       return timeline.get(index);
     } else {
       WorldSnapshot result = calcSnapshot(index);
-      Assert.that(timeline.size() == index);
+      Assert.equals(timeline.size(), index);
       timeline.add(result);
       return result;
     }

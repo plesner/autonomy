@@ -7,12 +7,12 @@ import org.au.tonomy.shared.util.Assert;
 /**
  * A stream of operations read from a transform.
  */
-public class OperationInputStream {
+public class OperationStream {
 
   private final Iterator<Operation> ops;
   private Operation current;
 
-  public OperationInputStream(Transform transform) {
+  public OperationStream(Transform transform) {
     this.ops = transform.iterator();
     this.advance();
   }
@@ -50,12 +50,12 @@ public class OperationInputStream {
   /**
    * Apply all remaining operations to the given output stream.
    */
-  public void xformFlush(OperationOutputStream source, OperationOutputStream target) {
+  public void xformFlush(TransformBuilder source, TransformBuilder target) {
     while (hasCurrent())
       advance().xformFlush(source, target);
   }
 
-  public void composeFlush(OperationOutputStream out) {
+  public void composeFlush(TransformBuilder out) {
     while (hasCurrent())
       advance().apply(out);
   }
