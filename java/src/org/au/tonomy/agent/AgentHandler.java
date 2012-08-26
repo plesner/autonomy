@@ -14,6 +14,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.au.tonomy.agent.Json.JsonMap;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Exceptions;
 import org.au.tonomy.shared.util.Factory;
@@ -51,7 +52,7 @@ public class AgentHandler extends AbstractHandler {
     response.setStatus(endPoint.getStatusCode());
     if (str != null) {
       response.setContentType(endPoint.contentType);
-      response.getWriter().println(str);
+      response.getWriter().print(str);
     }
     baseRequest.setHandled(true);
   }
@@ -60,8 +61,10 @@ public class AgentHandler extends AbstractHandler {
    * Dispatches an api request to the agent.
    */
   private String getApiResponse(RequestInfo info) {
-    Object obj = agent.dispatch(info.getGroup(1), info);
-    return Json.stringify(obj);
+    final Object obj = agent.dispatch(info.getGroup(1), info);
+    return Json.stringify(new JsonMap() {{
+      put("value", obj);
+    }});
   }
 
   /**

@@ -1,5 +1,6 @@
 package org.au.tonomy.client;
 
+import java.util.List;
 import java.util.Map;
 
 import org.au.tonomy.client.bus.Bus;
@@ -53,12 +54,18 @@ public class EditorEntryPoint implements EntryPoint {
     final FileAgent agent = new FileAgent("http://" + agentUrl);
     Promise<String> source = agent
         .attach()
-        .lazyThen(new IFunction<Object, Promise<Map<String, FileHandle>>>() {
+        .lazyThen(new IFunction<Object, Promise<List<FileHandle>>>() {
           @Override
-          public Promise<Map<String, FileHandle>> call(Object arg) {
+          public Promise<List<FileHandle>> call(Object arg) {
             message.setText("Connected to file agent on " + agentUrl);
             message.setExpiration(1000);
-            return agent.getRoot().listEntries();
+            return agent.getSession().getRoots();
+          }
+        })
+        .lazyThen(new IFunction<List<FileHandle>, Promise<Map<String, FileHandle>>>() {
+          @Override
+          public Promise<Map<String, FileHandle>> call(List<FileHandle> roots) {
+            return roots.get(0).listEntries();
           }
         })
         .lazyThen(new IFunction<Map<String, FileHandle>, Promise<String>>() {

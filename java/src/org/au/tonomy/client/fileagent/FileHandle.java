@@ -2,6 +2,7 @@ package org.au.tonomy.client.fileagent;
 
 import java.util.Map;
 
+import org.au.tonomy.client.fileagent.FrameProxy.Method;
 import org.au.tonomy.shared.source.ISourceEntry;
 import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.IFunction;
@@ -14,55 +15,36 @@ import com.google.gwt.core.client.JsArrayMixed;
  */
 public class FileHandle implements ISourceEntry {
 
-  private final JavaScriptObject data;
+  private final FileHandleData data;
   private final FileAgent agent;
+  private final SessionHandle session;
 
-  public FileHandle(JavaScriptObject data, FileAgent agent) {
-    this.data = data;
+  public FileHandle(Object data, FileAgent agent, SessionHandle session) {
+    this.data = FileHandleData.wrap(data);
     this.agent = agent;
+    this.session = session;
   }
-
-  /**
-   * Returns this file's handle id.
-   */
-  private final native int getId() /*-{
-    var data = this.@org.au.tonomy.client.fileagent.FileHandle::data;
-    return data.id;
-  }-*/;
-
-  /**
-   * Returns a string identifying the type of this file.
-   */
-  private native int getType() /*-{
-    var data = this.@org.au.tonomy.client.fileagent.FileHandle::data;
-    return data.type;
-  }-*/;
-
-  /**
-   * Returns the full path of this file.
-   */
-  public final native String getFullPath() /*-{
-    var data = this.@org.au.tonomy.client.fileagent.FileHandle::data;
-    return data.path;
-  }-*/;
-
-  /**
-   * Returns the short name of this file.
-   */
-  public final native String getShortName() /*-{
-    var data = this.@org.au.tonomy.client.fileagent.FileHandle::data;
-    return data.name;
-  }-*/;
 
   @Override
   public boolean isFolder() {
-    return !"file".equals(getType());
+    return !"file".equals(data.getType());
+  }
+
+  @Override
+  public String getFullPath() {
+    return data.getFullPath();
+  }
+
+  @Override
+  public String getShortName() {
+    return data.getShortName();
   }
 
   @Override
   public Promise<Map<String, FileHandle>> listEntries() {
-    return agent.newMessage("get_file_list")
-      .setOption("id", getId())
+    return agent.newMessage(Method.GET, "ls")
+      .setOption("file", data.getId())
+      .setOption("session", session.getId())
       .send()
       .then(new IFunction<Object, Map<String, FileHandle>>() {
         @Override
@@ -70,7 +52,7 @@ public class FileHandle implements ISourceEntry {
           JsArrayMixed array = ((JavaScriptObject) value).<JsArrayMixed>cast();
           Map<String, FileHandle> list = Factory.newHashMap();
           for (int i = 0; i < array.length(); i++) {
-            FileHandle handle = new FileHandle(array.getObject(i), agent);
+            FileHandle handle = new FileHandle(array.getObject(i), agent, session);
             list.put(handle.getShortName(), handle);
           }
           return list;
@@ -83,8 +65,9 @@ public class FileHandle implements ISourceEntry {
    */
   @Override
   public Promise<String> readFile() {
-    return agent.newMessage("read_file")
-        .setOption("id", getId())
+    return agent.newMessage(Method.GET, "read")
+        .setOption("file", data.getId())
+        .setOption("session", session.getId())
         .send()
         .then(TO_STRING);
   }
@@ -95,5 +78,46 @@ public class FileHandle implements ISourceEntry {
       return (String) arg;
     }
   };
+
+  /**
+   * Wrapper for file handle data objects.
+   */
+  private static class FileHandleData extends JavaScriptObject {
+
+    protected FileHandleData() { }
+
+    public static native FileHandleData wrap(Object obj) /*-{
+      return obj;
+    }-*/;
+
+    /**
+     * Returns this file's handle id.
+     */
+    public final native int getId() /*-{
+      return this.id;
+    }-*/;
+
+    /**
+     * Returns a string identifying the type of this file.
+     */
+    public final native int getType() /*-{
+      return this.type;
+    }-*/;
+
+    /**
+     * Returns the full path of this file.
+     */
+    public final native String getFullPath() /*-{
+      return this.path;
+    }-*/;
+
+    /**
+     * Returns the short name of this file.
+     */
+    public final native String getShortName() /*-{
+      return this.name;
+    }-*/;
+
+  }
 
 }

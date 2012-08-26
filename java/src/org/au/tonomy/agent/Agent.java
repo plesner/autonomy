@@ -1,9 +1,11 @@
 package org.au.tonomy.agent;
 
+import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,6 +19,8 @@ import org.au.tonomy.shared.util.Factory;
  */
 public class Agent {
 
+  private final FileSystem fileSystem = new FileSystem(Arrays.asList(new File("/Users/plesner/Documents/autonomy/java/test/org/au/tonomy/shared/syntax/testdata")));
+  private final Map<String, SessionData> sessions = Factory.newHashMap();
   private int nextSessionId = 0;
 
   /**
@@ -31,9 +35,47 @@ public class Agent {
   public Object handleStartSession(RequestInfo request) {
     String href = request.getParameter("href", "(unknown client)");
     System.out.println("Starting session with " + href + ".");
+    final String id = genSessionId();
+    getOrCreateSession(id);
     return new JsonMap() {{
-      put("session", genSessionId());
+      put("session", id);
     }};
+  }
+
+  /**
+   * Returns the session with the given id or creates it if it doesn't
+   * exist.
+   */
+  private SessionData getOrCreateSession(String id) {
+    SessionData current = sessions.get(id);
+    if (current == null) {
+      current = new SessionData(fileSystem);
+      sessions.put(id, current);
+    }
+    return current;
+  }
+
+  @Handler("fileroots")
+  public Object handleFileRoots(RequestInfo request) {
+    String sessionId = request.getParameter("session", "");
+    SessionData session = sessions.get(sessionId);
+    return session.getRoots();
+  }
+
+  @Handler("ls")
+  public Object handleListFiles(RequestInfo request) {
+    String fileId = request.getParameter("file", "");
+    String sessionId = request.getParameter("session", "");
+    SessionData session = sessions.get(sessionId);
+    return session.listFiles(Integer.parseInt(fileId));
+  }
+
+  @Handler("read")
+  public Object handleRead(RequestInfo request) {
+    String fileId = request.getParameter("file", "");
+    String sessionId = request.getParameter("session", "");
+    SessionData session = sessions.get(sessionId);
+    return session.readFile(Integer.parseInt(fileId));
   }
 
   private synchronized String genSessionId() {

@@ -73,7 +73,8 @@ public abstract class FrameProxy {
         handleFrameConnect(event, (int) array.getNumber(2));
         break;
       case RESPOND:
-        handleRespond(array.getString(1), (int) array.getNumber(2));
+        JavaScriptObject obj = array.getObject(1);
+        handleRespond(obj.<JsArrayMixed>cast(), (int) array.getNumber(2));
         break;
       }
     }
@@ -94,10 +95,14 @@ public abstract class FrameProxy {
   /**
    * Forwards a response to the appropriate pending message.
    */
-  private void handleRespond(String response, int id) {
+  private void handleRespond(JsArrayMixed response, int id) {
+    int status = (int) response.getNumber(0);
+    String message = response.getString(1);
     MessageBuilder pending = pendingMessages.remove(id);
-    Response result = Response.create((JavaScriptObject) PromiseUtil.parseJson(response));
-    if (result.hasFailed()) {
+    Response result = Response.create((JavaScriptObject) PromiseUtil.parseJson(message));
+    if (status != 200) {
+      pending.result.fail(new RuntimeException("Request error " + result));
+    } else if (result.hasFailed()) {
       pending.result.fail(new RuntimeException(result.getError()));
     } else {
       pending.result.fulfill(result.getValue());
@@ -107,9 +112,11 @@ public abstract class FrameProxy {
   /**
    * Creates a new message builder.
    */
-  protected MessageBuilder newMessage(String method) {
-    return new MessageBuilder(method);
+  protected MessageBuilder newMessage(Method method, String endPoint) {
+    return new MessageBuilder(method, endPoint);
   }
+
+  public enum Method { GET, POST }
 
   /**
    * A utility for building and sending messages.
@@ -121,8 +128,9 @@ public abstract class FrameProxy {
     private int id = -1;
     private Promise<Object> result;
 
-    private MessageBuilder(String method) {
-      this.message.push(method);
+    private MessageBuilder(Method method, String endPoint) {
+      this.message.push(method.name());
+      this.message.push(endPoint);
       this.message.push(this.options);
     }
 
@@ -212,7 +220,7 @@ public abstract class FrameProxy {
   private Promise<Object> startAttempt(final int attempt, int timeoutMs) {
     // Try to attach a hidden frame from the agent.
     final Promise<Object> attemptPromise = Promise.newEmpty();
-    pendingMessages.put(attempt, newMessage("").setResult(attemptPromise));
+    pendingMessages.put(attempt, newMessage(Method.GET, "").setResult(attemptPromise));
     final Document document = Document.get();
     final IFrameElement frame = document.createIFrameElement();
     frame.getStyle().setDisplay(Display.NONE);
