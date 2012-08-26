@@ -5,7 +5,9 @@ import java.util.Map;
 
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Factory;
+import org.au.tonomy.shared.util.IUndo;
 import org.au.tonomy.shared.util.Pair;
+import org.au.tonomy.shared.util.UndoList;
 
 /**
  * A coordinator that can be given multiple streams of document operations
@@ -14,16 +16,33 @@ import org.au.tonomy.shared.util.Pair;
  */
 public class DocumentCoordinator {
 
+  /**
+   * Listener that gets notified about changes to the document.
+   */
+  public interface IListener {
+
+    /**
+     * The given transform has been applied to this document.
+     */
+    public void onChanged(Transform transform);
+
+  }
+
   private Document document;
   private final IFingerprint.IProvider fingerprinter;
   private final Map<IFingerprint, Integer> lastSeen = Factory.newHashMap();
   private final List<State> history = Factory.newArrayList();
+  private final UndoList<IListener> listeners = UndoList.create();
 
   public DocumentCoordinator(IFingerprint.IProvider fingerprinter, String text) {
     this.fingerprinter = fingerprinter;
     IFingerprint fprint = fingerprinter.calcFingerprint(text);
     this.document = new Document(text, fprint);
     lastSeen.put(fprint, -1);
+  }
+
+  public IUndo addListener(IListener listener) {
+    return listeners.add(listener);
   }
 
   /**
@@ -65,11 +84,15 @@ public class DocumentCoordinator {
           ? adapted.getSecond()
           : result.compose(adapted.getSecond());
     }
+    // We can now apply the transformation, update our internal state,
+    // and notify listeners.
     String newText = current.call(document.getText());
     IFingerprint fprint = fingerprinter.calcFingerprint(newText);
     this.lastSeen.put(fprint, history.size());
     this.history.add(new State(current, id));
     this.document = new Document(newText, fprint);
+    for (IListener listener : listeners)
+      listener.onChanged(current);
     return Pair.of(result, fprint);
   }
 

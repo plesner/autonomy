@@ -41,6 +41,10 @@ public class DocumentCoordinatorTest extends TestCase {
     assertEquals("foo quux blob baz", coord.getCurrent().getText());
   }
 
+  /**
+   * A transformer is a separate thread of editing that posts changes
+   * to the coordinator and checks the state it gets back.
+   */
   private class Transformer {
 
     private final String id;
@@ -70,11 +74,33 @@ public class DocumentCoordinatorTest extends TestCase {
 
   }
 
+  private class ChangeChecker implements DocumentCoordinator.IListener {
+
+    private final DocumentCoordinator coord;
+    private String text;
+    private int changeCount = 0;
+
+    public ChangeChecker(DocumentCoordinator coord) {
+      this.coord = coord;
+      this.text = coord.getCurrent().getText();
+    }
+
+    @Override
+    public void onChanged(Transform transform) {
+      this.text = transform.call(this.text);
+      assertEquals(coord.getCurrent().getText(), this.text);
+      changeCount++;
+    }
+
+  }
+
   @Test
   public void testRandomTransformations() {
     ExtraRandom random = new ExtraRandom(434253);
     DocumentCoordinator coord = new DocumentCoordinator(
         Md5Fingerprint.getProvider(), random.nextWord(100));
+    ChangeChecker checker = new ChangeChecker(coord);
+    coord.addListener(checker);
     List<Transformer> transformers = Factory.newArrayList();
     for (int i = 0; i < 4; i++)
       transformers.add(new Transformer(i, coord, random));
@@ -82,6 +108,7 @@ public class DocumentCoordinatorTest extends TestCase {
       Transformer next = random.nextElement(transformers);
       next.fireChange();
     }
+    assertEquals(1000, checker.changeCount);
   }
 
 }
