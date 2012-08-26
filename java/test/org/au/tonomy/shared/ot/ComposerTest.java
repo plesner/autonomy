@@ -1,17 +1,14 @@
 package org.au.tonomy.shared.ot;
 
 import static org.au.tonomy.testing.TestUtils.del;
+import static org.au.tonomy.testing.TestUtils.getRandomTransform;
 import static org.au.tonomy.testing.TestUtils.ins;
 import static org.au.tonomy.testing.TestUtils.skp;
 import static org.au.tonomy.testing.TestUtils.trans;
-
-import java.util.Iterator;
-import java.util.Random;
-import java.util.TreeSet;
-
 import junit.framework.TestCase;
 
 import org.au.tonomy.shared.util.Pair;
+import org.au.tonomy.testing.ExtraRandom;
 import org.junit.Test;
 
 public class ComposerTest extends TestCase {
@@ -19,7 +16,7 @@ public class ComposerTest extends TestCase {
   private void checkXform(String original, Transform a, Transform b,
       String expected, Transform aPrime, Transform bPrime) {
     // First check that we produced the right xformed transformations.
-    Pair<Transform, Transform> prime = Composer.xform(a, b);
+    Pair<Transform, Transform> prime = a.xform(b);
     assertEquals(aPrime, prime.getFirst());
     assertEquals(bPrime, prime.getSecond());
     // Then check that applying them has the expected effect.
@@ -143,7 +140,7 @@ public class ComposerTest extends TestCase {
   private void checkCompose(String original, Transform a, Transform b,
       Transform composed, String expected) {
     assertEquals(expected, b.call(a.call(original)));
-    Transform found = Composer.compose(a, b);
+    Transform found = a.compose(b);
     assertEquals(composed, found);
     assertEquals(expected, composed.call(original));
   }
@@ -194,62 +191,16 @@ public class ComposerTest extends TestCase {
         "cdef");
   }
 
-  private Random random;
-
-  private String getRandomString(int length) {
-    String chars = "abcdefg";
-    StringBuilder buf = new StringBuilder();
-    for (int i = 0; i < length; i++)
-      buf.append(chars.charAt(random.nextInt(chars.length())));
-    return buf.toString();
-  }
-
-  /**
-   * Generate a random transformation that can be applied to the given
-   * input.
-   */
-  private Transform getRandomTransform(String input) {
-    TransformBuilder out = new TransformBuilder();
-    // First build a list of split points where we'll transform the
-    // string.
-    TreeSet<Integer> splits = new TreeSet<Integer>();
-    while ((splits.size() < input.length() / 6) || (splits.size() % 2 != 0))
-      splits.add(random.nextInt(input.length()));
-    // Then scan through the points and generate random transformations
-    // to apply in those positions.
-    Iterator<Integer> splitIter = splits.iterator();
-    int cursor = 0;
-    while (splitIter.hasNext()) {
-      int start = splitIter.next();
-      int end = splitIter.next();
-      out.skip(start - cursor);
-      switch (random.nextInt(2)) {
-      case 0:
-        out.insert(getRandomString(random.nextInt(3) + 4));
-        out.skip(end - start);
-        break;
-      case 1:
-        out.delete(input.substring(start, end));
-        break;
-      }
-      cursor = end;
-    }
-    out.skip(input.length() - cursor);
-    Transform result = out.flush();
-    assertEquals(input.length(), result.getInputLength());
-    return result;
-  }
-
   @Test
   public void testXformRandomized() {
-    this.random = new Random(19124);
+    ExtraRandom random = new ExtraRandom(19124);
     for (int i = 0; i < 1000; i++) {
-      String input = getRandomString(100);
-      Transform a = getRandomTransform(input);
-      Transform b = getRandomTransform(input);
+      String input = random.nextWord(100);
+      Transform a = getRandomTransform(random, input);
+      Transform b = getRandomTransform(random, input);
       String aStr = a.call(input);
       String bStr = b.call(input);
-      Pair<Transform, Transform> prime = Composer.xform(a, b);
+      Pair<Transform, Transform> prime = a.xform(b);
       String aFound = prime.getSecond().call(aStr);
       String bFound = prime.getFirst().call(bStr);
       assertEquals(aFound, bFound);
@@ -258,14 +209,14 @@ public class ComposerTest extends TestCase {
 
   @Test
   public void testComposeRandomized() {
-    this.random = new Random(42342);
+    ExtraRandom random = new ExtraRandom(42342);
     for (int i = 0; i < 1000; i++) {
-      String first = getRandomString(100);
-      Transform a = getRandomTransform(first);
+      String first = random.nextWord(100);
+      Transform a = getRandomTransform(random, first);
       String second = a.call(first);
-      Transform b = getRandomTransform(second);
+      Transform b = getRandomTransform(random, second);
       String expected = b.call(a.call(first));
-      Transform ab = Composer.compose(a, b);
+      Transform ab = a.compose(b);
       String found = ab.call(first);
       assertEquals(expected, found);
     }

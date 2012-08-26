@@ -4,7 +4,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.au.tonomy.shared.ot.IJsonable;
 import org.au.tonomy.shared.util.Factory;
+import org.au.tonomy.shared.util.Misc;
 
 /**
  * Utilities for converting java objects to JSON.
@@ -69,10 +71,7 @@ public class Json {
       default:
         if (c < ' ') {
           buf.append("\\u00");
-          for (int j = 1; j >= 0; j--) {
-            int nibble = c & (0xF << (4 * j));
-            buf.append("0123456789ABCDEF".charAt(nibble));
-          }
+          Misc.writeHexDigits(c, 2, buf);
         } else {
           buf.append(c);
         }

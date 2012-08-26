@@ -1,12 +1,15 @@
 package org.au.tonomy.testing;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.TreeSet;
 
 import junit.framework.Assert;
 
 import org.au.tonomy.shared.ot.Operation;
 import org.au.tonomy.shared.ot.Transform;
+import org.au.tonomy.shared.ot.TransformBuilder;
 import org.au.tonomy.shared.syntax.Token;
 import org.au.tonomy.shared.syntax.Tokenizer;
 import org.au.tonomy.shared.util.Factory;
@@ -127,6 +130,42 @@ public class TestUtils extends Assert {
    */
   public static Operation skp(int count) {
     return new Operation.Skip(count);
+  }
+
+  /**
+   * Generate a random transformation that can be applied to the given
+   * input.
+   */
+  public static Transform getRandomTransform(ExtraRandom random, String input) {
+    TransformBuilder out = new TransformBuilder();
+    // First build a list of split points where we'll transform the
+    // string.
+    TreeSet<Integer> splits = new TreeSet<Integer>();
+    while ((splits.size() < input.length() / 6) || (splits.size() % 2 != 0))
+      splits.add(random.nextInt(input.length()));
+    // Then scan through the points and generate random transformations
+    // to apply in those positions.
+    Iterator<Integer> splitIter = splits.iterator();
+    int cursor = 0;
+    while (splitIter.hasNext()) {
+      int start = splitIter.next();
+      int end = splitIter.next();
+      out.skip(start - cursor);
+      switch (random.nextInt(2)) {
+      case 0:
+        out.insert(random.nextWord(random.nextInt(3) + 3));
+        out.skip(end - start);
+        break;
+      case 1:
+        out.delete(input.substring(start, end));
+        break;
+      }
+      cursor = end;
+    }
+    out.skip(input.length() - cursor);
+    Transform result = out.flush();
+    assertEquals(input.length(), result.getInputLength());
+    return result;
   }
 
 }

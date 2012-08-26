@@ -2,6 +2,7 @@ package org.au.tonomy.shared.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
@@ -37,6 +38,13 @@ public class Factory {
    */
   public static <T> LinkedList<T> newLinkedList() {
     return new LinkedList<T>();
+  }
+
+  /**
+   * Creates a new hash set.
+   */
+  public static <T> HashSet<T> newHashSet() {
+    return new HashSet<T>();
   }
 
 }

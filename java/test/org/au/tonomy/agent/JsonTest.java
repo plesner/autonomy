@@ -5,6 +5,7 @@ import java.util.TreeMap;
 
 import junit.framework.TestCase;
 
+import org.au.tonomy.shared.ot.IJsonable;
 import org.junit.Test;
 @SuppressWarnings("serial")
 public class JsonTest extends TestCase {
@@ -23,7 +24,7 @@ public class JsonTest extends TestCase {
     check("\"f\\noo\"", "f\noo");
     check("\"\\r\\n\\\"\\\\\"", "\r\n\"\\");
     check("\"\\u0000\"", "\0");
-    check("\"\\u000B\"", "\u000B");
+    check("\"\\u000b\"", "\u000b");
     check("{\"a\":4}", new JsonMap() {{ put("a", 4); }});
     check("{\"a\":4,\"b\":\"foo\"}", new JsonMap() {{
       put("a", 4);

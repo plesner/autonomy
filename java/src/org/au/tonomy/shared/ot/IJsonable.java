@@ -1,4 +1,4 @@
-package org.au.tonomy.agent;
+package org.au.tonomy.shared.ot;
 /**
  * A jsonable object will be asked to convert itself to json before
  * it is stringified.
