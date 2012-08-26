@@ -23,6 +23,14 @@ public class Transform implements IFunction<String, String>, Iterable<Operation>
   }
 
   /**
+   * Does this transform contain any operations? Note that operations
+   * can be non-empty but still have an effect (like del("z") ins("z")).
+   */
+  public boolean isEmpty() {
+    return ops.isEmpty();
+  }
+
+  /**
    * Returns true if the given operations constitute a normalized
    * transformation, that is, one where
    */

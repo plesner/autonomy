@@ -1,11 +1,13 @@
 package org.au.tonomy.shared.ot;
 
 import static org.au.tonomy.testing.TestUtils.del;
+import static org.au.tonomy.testing.TestUtils.getRandomTransform;
 import static org.au.tonomy.testing.TestUtils.ins;
 import static org.au.tonomy.testing.TestUtils.skp;
 import static org.au.tonomy.testing.TestUtils.trans;
 import junit.framework.TestCase;
 
+import org.au.tonomy.testing.ExtraRandom;
 import org.junit.Test;
 
 public class DiffTest extends TestCase {
@@ -33,6 +35,20 @@ public class DiffTest extends TestCase {
     checkDiff("jumps over the lazy dog", "jumped over a lazy dog",
         trans(skp(4), del("s"), ins("ed"), skp(6), del("the"), ins("a"),
             skp(9)));
+  }
+
+  @Test
+  public void testRandomized() {
+    ExtraRandom random = new ExtraRandom(453245324);
+    for (int i = 0; i < 1000; i++) {
+      String before = random.nextWord(100);
+      Transform transform = getRandomTransform(random, before);
+      String after = transform.call(before);
+      Transform forward = Diff.diff(before, after);
+      assertEquals(after, forward.call(before));
+      Transform backward = Diff.diff(after, before);
+      assertEquals(before, backward.call(after));
+    }
   }
 
 }

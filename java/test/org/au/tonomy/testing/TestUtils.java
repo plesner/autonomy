@@ -141,7 +141,7 @@ public class TestUtils extends Assert {
     // First build a list of split points where we'll transform the
     // string.
     TreeSet<Integer> splits = new TreeSet<Integer>();
-    while ((splits.size() < input.length() / 6) || (splits.size() % 2 != 0))
+    while ((splits.size() < input.length() / 6))
       splits.add(random.nextInt(input.length()));
     // Then scan through the points and generate random transformations
     // to apply in those positions.
@@ -149,18 +149,19 @@ public class TestUtils extends Assert {
     int cursor = 0;
     while (splitIter.hasNext()) {
       int start = splitIter.next();
-      int end = splitIter.next();
       out.skip(start - cursor);
-      switch (random.nextInt(2)) {
+      int opLimit = splitIter.hasNext() ? 2 : 1;
+      switch (random.nextInt(opLimit)) {
       case 0:
-        out.insert(random.nextWord(random.nextInt(3) + 3));
-        out.skip(end - start);
+        out.insert(random.nextWord(random.nextInt(2) + 3));
+        cursor = start;
         break;
       case 1:
+        int end = splitIter.next();
         out.delete(input.substring(start, end));
+        cursor = end;
         break;
       }
-      cursor = end;
     }
     out.skip(input.length() - cursor);
     Transform result = out.flush();
