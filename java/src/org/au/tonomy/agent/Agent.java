@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
-import org.au.tonomy.agent.Json.JsonMap;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Exceptions;
 import org.au.tonomy.shared.util.Factory;
@@ -20,7 +19,7 @@ import org.au.tonomy.shared.util.Factory;
 public class Agent {
 
   private final FileSystem fileSystem = new FileSystem(Arrays.asList(new File("/Users/plesner/Documents/autonomy/java/test/org/au/tonomy/shared/syntax/testdata")));
-  private final Map<String, SessionData> sessions = Factory.newHashMap();
+  private final Map<String, Session> sessions = Factory.newHashMap();
   private int nextSessionId = 0;
 
   /**
@@ -37,19 +36,20 @@ public class Agent {
     System.out.println("Starting session with " + href + ".");
     final String id = genSessionId();
     getOrCreateSession(id);
-    return new JsonMap() {{
-      put("session", id);
-    }};
+    return ServerJson
+        .getFactory()
+        .newMap()
+        .set("session", id);
   }
 
   /**
    * Returns the session with the given id or creates it if it doesn't
    * exist.
    */
-  private SessionData getOrCreateSession(String id) {
-    SessionData current = sessions.get(id);
+  private Session getOrCreateSession(String id) {
+    Session current = sessions.get(id);
     if (current == null) {
-      current = new SessionData(fileSystem);
+      current = new Session(fileSystem);
       sessions.put(id, current);
     }
     return current;
@@ -58,7 +58,7 @@ public class Agent {
   @Handler("fileroots")
   public Object handleFileRoots(RequestInfo request) {
     String sessionId = request.getParameter("session", "");
-    SessionData session = sessions.get(sessionId);
+    Session session = sessions.get(sessionId);
     return session.getRoots();
   }
 
@@ -66,7 +66,7 @@ public class Agent {
   public Object handleListFiles(RequestInfo request) {
     String fileId = request.getParameter("file", "");
     String sessionId = request.getParameter("session", "");
-    SessionData session = sessions.get(sessionId);
+    Session session = sessions.get(sessionId);
     return session.listFiles(Integer.parseInt(fileId));
   }
 
@@ -74,7 +74,7 @@ public class Agent {
   public Object handleRead(RequestInfo request) {
     String fileId = request.getParameter("file", "");
     String sessionId = request.getParameter("session", "");
-    SessionData session = sessions.get(sessionId);
+    Session session = sessions.get(sessionId);
     return session.readFile(Integer.parseInt(fileId));
   }
 

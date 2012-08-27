@@ -1,5 +1,7 @@
 package org.au.tonomy.shared.ot;
 
+import org.au.tonomy.shared.util.IJsonable;
+
 
 /**
  * A unique identifier for a piece of text.

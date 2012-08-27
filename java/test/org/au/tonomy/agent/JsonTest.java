@@ -5,13 +5,14 @@ import java.util.TreeMap;
 
 import junit.framework.TestCase;
 
-import org.au.tonomy.shared.ot.IJsonable;
+import org.au.tonomy.shared.util.IJsonFactory;
+import org.au.tonomy.shared.util.IJsonable;
 import org.junit.Test;
 @SuppressWarnings("serial")
 public class JsonTest extends TestCase {
 
   private static void check(String expected, Object value) {
-    assertEquals(expected, Json.stringify(value));
+    assertEquals(expected, ServerJson.stringify(value));
   }
 
   @Test
@@ -32,7 +33,7 @@ public class JsonTest extends TestCase {
     }});
     check("8", new IJsonable() {
       @Override
-      public Object toJson() {
+      public Object toJson(IJsonFactory factory) {
         return 8;
       }
     });

@@ -3,54 +3,16 @@ package org.au.tonomy.agent;
 import java.util.List;
 import java.util.Map;
 
-import org.au.tonomy.agent.FileSystem.SharedFile;
-import org.au.tonomy.agent.Json.JsonMap;
-import org.au.tonomy.shared.ot.IJsonable;
 import org.au.tonomy.shared.util.Factory;
 
-public class SessionData {
-
-  /**
-   * The file information specific to a single session.
-   */
-  private class SessionFile implements IJsonable {
-
-    private final int id;
-    private final SharedFile shared;
-
-    public SessionFile(int id, SharedFile shared) {
-      this.id = id;
-      this.shared = shared;
-    }
-
-    @Override
-    public Object toJson() {
-      return new JsonMap() {{
-        put("id", id);
-        put("path", shared.getFullPath());
-        put("name", shared.getShortName());
-      }};
-    }
-
-    public List<SessionFile> listFiles() {
-      List<SessionFile> result = Factory.newArrayList();
-      for (SharedFile child : shared.getChildren())
-        result.add(getOrCreateFile(child));
-      return result;
-    }
-
-    public SharedFile getShared() {
-      return shared;
-    }
-
-  }
+public class Session {
 
   private final FileSystem fileSystem;
   private final Map<SharedFile, Integer> fileIds = Factory.newHashMap();
   private final Map<Integer, SessionFile> fileData = Factory.newHashMap();
   private int nextFileHandle = 0;
 
-  public SessionData(FileSystem fileSystem) {
+  public Session(FileSystem fileSystem) {
     this.fileSystem = fileSystem;
   }
 
@@ -68,11 +30,11 @@ public class SessionData {
    * Returns a file data object for the given path. If none exists
    * one is created.
    */
-  private SessionFile getOrCreateFile(SharedFile shared) {
+  SessionFile getOrCreateFile(SharedFile shared) {
     Integer id = fileIds.get(shared);
     if (id == null) {
       id = nextFileHandle++;
-      SessionFile data = new SessionFile(id, shared);
+      SessionFile data = new SessionFile(this, id, shared);
       fileIds.put(shared, id);
       fileData.put(id, data);
       return data;

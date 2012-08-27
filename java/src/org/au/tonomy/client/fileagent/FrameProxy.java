@@ -3,7 +3,7 @@ package org.au.tonomy.client.fileagent;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.au.tonomy.client.util.PromiseUtil;
+import org.au.tonomy.client.util.ClientJson;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.ICallback;
@@ -99,7 +99,7 @@ public abstract class FrameProxy {
     int status = (int) response.getNumber(0);
     String message = response.getString(1);
     MessageBuilder pending = pendingMessages.remove(id);
-    Response result = Response.create((JavaScriptObject) PromiseUtil.parseJson(message));
+    Response result = Response.create((JavaScriptObject) ClientJson.parse(message));
     if (status != 200) {
       pending.result.fail(new RuntimeException("Request error " + result));
     } else if (result.hasFailed()) {

@@ -26,11 +26,4 @@ public class PromiseUtil {
     };
   }
 
-  /**
-   * Wrapper around JSON.parse.
-   */
-  public static native Object parseJson(String str) /*-{
-    return JSON.parse(str);
-  }-*/;
-
 }

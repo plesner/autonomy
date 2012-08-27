@@ -6,11 +6,14 @@ import java.util.List;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.IFunction;
+import org.au.tonomy.shared.util.IJsonFactory;
+import org.au.tonomy.shared.util.IJsonFactory.IJsonArray;
+import org.au.tonomy.shared.util.IJsonable;
 import org.au.tonomy.shared.util.Pair;
 /**
  * A sequence of operations that transform a document.
  */
-public class Transform implements IFunction<String, String>, Iterable<Operation> {
+public class Transform implements IFunction<String, String>, Iterable<Operation>, IJsonable {
 
   private final List<Operation> ops;
   private int inputLengthCache = -1;
@@ -173,6 +176,14 @@ public class Transform implements IFunction<String, String>, Iterable<Operation>
     // And if a is the one with more those are the ones we flush.
     aIn.xformFlush(aOut, bOut);
     return Pair.of(aOut.flush(), bOut.flush());
+  }
+
+  @Override
+  public Object toJson(IJsonFactory factory) {
+    IJsonArray result = factory.newArray();
+    for (Operation op : ops)
+      result.push(op.toJson(factory));
+    return result;
   }
 
 }

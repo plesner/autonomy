@@ -1,11 +1,13 @@
 package org.au.tonomy.shared.ot;
 
 import org.au.tonomy.shared.util.Assert;
+import org.au.tonomy.shared.util.IJsonFactory;
+import org.au.tonomy.shared.util.IJsonable;
 
 /**
  * A text operation.
  */
-public abstract class Operation {
+public abstract class Operation implements IJsonable {
 
   /**
    * Identifies the different types of operations.
@@ -280,6 +282,11 @@ public abstract class Operation {
     }
 
     @Override
+    public Object toJson(IJsonFactory factory) {
+      return factory.newArray().push("+").push(text);
+    }
+
+    @Override
     public int hashCode() {
       return text.hashCode();
     }
@@ -430,6 +437,11 @@ public abstract class Operation {
         OperationStream bIn, TransformBuilder out) {
       out.delete(text);
       aIn.advance();
+    }
+
+    @Override
+    public Object toJson(IJsonFactory factory) {
+      return factory.newArray().push("-").push(text);
     }
 
     @Override
@@ -602,6 +614,11 @@ public abstract class Operation {
         aIn.setCurrent(new Skip(count - skip.count));
         bIn.advance();
       }
+    }
+
+    @Override
+    public Object toJson(IJsonFactory factory) {
+      return factory.newArray().push(">").push(count);
     }
 
     @Override

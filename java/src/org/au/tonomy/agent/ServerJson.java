@@ -1,37 +1,62 @@
 package org.au.tonomy.agent;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.au.tonomy.shared.ot.IJsonable;
-import org.au.tonomy.shared.util.Factory;
+import org.au.tonomy.shared.util.IJsonFactory;
+import org.au.tonomy.shared.util.IJsonFactory.IJsonArray;
+import org.au.tonomy.shared.util.IJsonFactory.IJsonMap;
+import org.au.tonomy.shared.util.IJsonable;
 import org.au.tonomy.shared.util.Misc;
 
 /**
  * Utilities for converting java objects to JSON.
  */
-public class Json {
+public class ServerJson {
 
   /**
    * A utility for consing up a json map.
    */
-  public static class JsonMap implements IJsonable {
-
-    private final HashMap<Object, Object> elms = Factory.newHashMap();
-
-    /**
-     * Add a mappint to this json map.
-     */
-    protected void put(Object key, Object value) {
-      elms.put(key, value);
-    }
+  @SuppressWarnings("serial")
+  private static class JsonMap extends HashMap<String, Object> implements IJsonMap {
 
     @Override
-    public Object toJson() {
-      return elms;
+    public JsonMap set(String key, Object value) {
+      put(key, value);
+      return this;
     }
 
+  }
+
+  /**
+   * A utility for consing up a json array.
+   */
+  @SuppressWarnings("serial")
+  private static class JsonArray extends ArrayList<Object> implements IJsonArray {
+
+    @Override
+    public IJsonArray push(Object value) {
+      this.add(value);
+      return this;
+    }
+
+  }
+
+  private static final IJsonFactory FACTORY = new IJsonFactory() {
+    @Override
+    public IJsonMap newMap() {
+      return new JsonMap();
+    }
+    @Override
+    public IJsonArray newArray() {
+      return new JsonArray();
+    }
+  };
+
+  public static IJsonFactory getFactory() {
+    return FACTORY;
   }
 
   /**
@@ -82,7 +107,7 @@ public class Json {
 
   private static void writeJson(Object value, StringBuilder buf) {
     if (value instanceof IJsonable) {
-      writeJson(((IJsonable) value).toJson(), buf);
+      writeJson(((IJsonable) value).toJson(FACTORY), buf);
     } else if (value instanceof String) {
       buf.append('"');
       writeEscapedString((String) value, buf);

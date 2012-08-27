@@ -14,7 +14,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.au.tonomy.agent.Json.JsonMap;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Exceptions;
 import org.au.tonomy.shared.util.Factory;
@@ -62,9 +61,10 @@ public class AgentHandler extends AbstractHandler {
    */
   private String getApiResponse(RequestInfo info) {
     final Object obj = agent.dispatch(info.getGroup(1), info);
-    return Json.stringify(new JsonMap() {{
-      put("value", obj);
-    }});
+    return ServerJson.stringify(ServerJson
+        .getFactory()
+        .newMap()
+        .set("value", obj));
   }
 
   /**
@@ -86,7 +86,7 @@ public class AgentHandler extends AbstractHandler {
       Map<String, Boolean> map = Factory.newTreeMap();
       for (String method : Agent.getHandlerNames())
         map.put(method, true);
-      methodHandlerMapCache = Json.stringify(map);
+      methodHandlerMapCache = ServerJson.stringify(map);
     }
     return methodHandlerMapCache;
   }

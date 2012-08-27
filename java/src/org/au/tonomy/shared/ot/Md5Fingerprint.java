@@ -6,6 +6,7 @@ import java.security.NoSuchAlgorithmException;
 
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Exceptions;
+import org.au.tonomy.shared.util.IJsonFactory;
 import org.au.tonomy.shared.util.Misc;
 
 /**
@@ -21,7 +22,7 @@ public class Md5Fingerprint implements IFingerprint {
   }
 
   @Override
-  public Object toJson() {
+  public Object toJson(IJsonFactory factory) {
     return hash;
   }
 
