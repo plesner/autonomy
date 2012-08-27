@@ -14,11 +14,11 @@ import com.google.gwt.core.client.JsArrayMixed;
  */
 public class SessionHandle {
 
-  private final SessionData data;
+  private final SessionJson data;
   private final FileAgent agent;
 
   public SessionHandle(Object data, FileAgent agent) {
-    this.data = SessionData.wrap(data);
+    this.data = SessionJson.wrap(data);
     this.agent = agent;
   }
 
@@ -48,9 +48,9 @@ public class SessionHandle {
   /**
    * Wrapper for session data objects.
    */
-  private static class SessionData extends JavaScriptObject {
+  private static class SessionJson extends JavaScriptObject {
 
-    protected SessionData() { }
+    protected SessionJson() { }
 
     /**
      * Returns the session id.
@@ -59,7 +59,7 @@ public class SessionHandle {
       return this.session;
     }-*/;
 
-    public static native SessionData wrap(Object obj) /*-{
+    public static native SessionJson wrap(Object obj) /*-{
       return obj;
     }-*/;
 

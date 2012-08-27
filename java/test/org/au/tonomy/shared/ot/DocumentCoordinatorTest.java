@@ -17,9 +17,12 @@ import org.junit.Test;
 
 public class DocumentCoordinatorTest extends TestCase {
 
+  private static final IDocument.IProvider PROVIDER =
+      PojoDocument.newProvider(Md5Fingerprint.getProvider());
+
   @Test
   public void testSimpleCoordination() {
-    DocumentCoordinator coord = new DocumentCoordinator(Md5Fingerprint.getProvider(),
+    DocumentCoordinator coord = new DocumentCoordinator(PROVIDER,
         "foo bar baz");
     // Initial change.
     IFingerprint f0 = coord.getCurrent().getFingerprint();
@@ -50,7 +53,7 @@ public class DocumentCoordinatorTest extends TestCase {
     private final String id;
     private final DocumentCoordinator coord;
     private final ExtraRandom random;
-    private Document current;
+    private IDocument current;
 
     public Transformer(int id, DocumentCoordinator coord, ExtraRandom random) {
       this.id = Integer.toString(id);
@@ -67,9 +70,8 @@ public class DocumentCoordinatorTest extends TestCase {
       String newSource = transform.call(current.getText());
       if (catchup != null)
         newSource = catchup.call(newSource);
-      IFingerprint newPrint = Md5Fingerprint.calc(newSource);
-      assertEquals(changes.getSecond(), newPrint);
-      this.current = new Document(newSource, newPrint);
+      this.current = PROVIDER.newDocument(newSource);
+      assertEquals(changes.getSecond(), current.getFingerprint());
     }
 
   }
@@ -97,8 +99,8 @@ public class DocumentCoordinatorTest extends TestCase {
   @Test
   public void testRandomTransformations() {
     ExtraRandom random = new ExtraRandom(434253);
-    DocumentCoordinator coord = new DocumentCoordinator(
-        Md5Fingerprint.getProvider(), random.nextWord(100));
+    DocumentCoordinator coord = new DocumentCoordinator(PROVIDER,
+        random.nextWord(100));
     ChangeChecker checker = new ChangeChecker(coord);
     coord.addListener(checker);
     List<Transformer> transformers = Factory.newArrayList();

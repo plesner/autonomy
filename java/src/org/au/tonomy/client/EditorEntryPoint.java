@@ -13,6 +13,7 @@ import org.au.tonomy.client.util.Callback;
 import org.au.tonomy.client.widget.EditorWidget;
 import org.au.tonomy.client.widget.MessageListWidget;
 import org.au.tonomy.client.widget.workspace.WorkspaceWidget;
+import org.au.tonomy.shared.ot.IDocument;
 import org.au.tonomy.shared.util.IFunction;
 import org.au.tonomy.shared.util.Promise;
 
@@ -52,7 +53,7 @@ public class EditorEntryPoint implements EntryPoint {
     bus.addMessage(message);
     // Fetch the files.
     final FileAgent agent = new FileAgent("http://" + agentUrl);
-    Promise<String> source = agent
+    Promise<IDocument> source = agent
         .attach()
         .lazyThen(new IFunction<Object, Promise<List<FileHandle>>>() {
           @Override
@@ -68,16 +69,16 @@ public class EditorEntryPoint implements EntryPoint {
             return roots.get(0).listEntries();
           }
         })
-        .lazyThen(new IFunction<Map<String, FileHandle>, Promise<String>>() {
+        .lazyThen(new IFunction<Map<String, FileHandle>, Promise<? extends IDocument>>() {
           @Override
-          public Promise<String> call(Map<String, FileHandle> files) {
+          public Promise<? extends IDocument> call(Map<String, FileHandle> files) {
             return files.get("lambdas.aut").readFile();
           }
         });
-    source.onResolved(new Callback<String>() {
+    source.onResolved(new Callback<IDocument>() {
       @Override
-      public void onSuccess(String value) {
-        editor.setContents(value);
+      public void onSuccess(IDocument value) {
+        editor.setContents(value.getText());
       }
     });
   }

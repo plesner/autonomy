@@ -15,12 +15,12 @@ import com.google.gwt.core.client.JsArrayMixed;
  */
 public class FileHandle implements ISourceEntry {
 
-  private final FileHandleData data;
+  private final FileHandleJson data;
   private final FileAgent agent;
   private final SessionHandle session;
 
   public FileHandle(Object data, FileAgent agent, SessionHandle session) {
-    this.data = FileHandleData.wrap(data);
+    this.data = FileHandleJson.wrap(data);
     this.agent = agent;
     this.session = session;
   }
@@ -64,29 +64,31 @@ public class FileHandle implements ISourceEntry {
    * Returns the contents of this file.
    */
   @Override
-  public Promise<String> readFile() {
+  public Promise<JsonDocument> readFile() {
     return agent.newMessage(Method.GET, "read")
         .setOption("file", data.getId())
         .setOption("session", session.getId())
         .send()
-        .then(TO_STRING);
+        .then(TO_DOC);
   }
 
-  private static final IFunction<Object, String> TO_STRING = new IFunction<Object, String>() {
+  private static final IFunction<Object, JsonDocument> TO_DOC =
+      new IFunction<Object, JsonDocument>() {
     @Override
-    public String call(Object arg) {
-      return (String) arg;
-    }
+    public final native JsonDocument call(Object arg) /*-{
+      console.log(arg);
+      return arg;
+    }-*/;
   };
 
   /**
    * Wrapper for file handle data objects.
    */
-  private static class FileHandleData extends JavaScriptObject {
+  private static class FileHandleJson extends JavaScriptObject {
 
-    protected FileHandleData() { }
+    protected FileHandleJson() { }
 
-    public static native FileHandleData wrap(Object obj) /*-{
+    public static native FileHandleJson wrap(Object obj) /*-{
       return obj;
     }-*/;
 
@@ -109,6 +111,10 @@ public class FileHandle implements ISourceEntry {
      */
     public final native String getFullPath() /*-{
       return this.path;
+    }-*/;
+
+    public final native String getFingerprint() /*-{
+      return this.fingerprint;
     }-*/;
 
     /**

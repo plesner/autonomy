@@ -4,17 +4,19 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+import org.au.tonomy.shared.ot.IDocument;
 import org.au.tonomy.shared.util.Factory;
 
 public class FileSystem {
 
+  private final IDocument.IProvider documentProvider;
   private final Map<String, SharedFile> files = Factory.newHashMap();
   private final List<SharedFile> roots = Factory.newArrayList();
 
-  public FileSystem(List<File> rootFiles) {
-    for (File file : rootFiles) {
+  public FileSystem(IDocument.IProvider documentProvider, List<File> rootFiles) {
+    this.documentProvider = documentProvider;
+    for (File file : rootFiles)
       roots.add(getOrCreateFile(file.getAbsolutePath()));
-    }
   }
 
   SharedFile getOrCreateFile(String fullPath) {
@@ -24,6 +26,10 @@ public class FileSystem {
       files.put(fullPath, current);
     }
     return current;
+  }
+
+  public IDocument.IProvider getDocumentProvider() {
+    return this.documentProvider;
   }
 
   /**

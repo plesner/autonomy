@@ -28,17 +28,16 @@ public class DocumentCoordinator {
 
   }
 
-  private Document document;
-  private final IFingerprint.IProvider fingerprinter;
+  private IDocument document;
+  private final IDocument.IProvider documentProvider;
   private final Map<IFingerprint, Integer> lastSeen = Factory.newHashMap();
   private final List<State> history = Factory.newArrayList();
   private final UndoList<IListener> listeners = UndoList.create();
 
-  public DocumentCoordinator(IFingerprint.IProvider fingerprinter, String text) {
-    this.fingerprinter = fingerprinter;
-    IFingerprint fprint = fingerprinter.calcFingerprint(text);
-    this.document = new Document(text, fprint);
-    lastSeen.put(fprint, -1);
+  public DocumentCoordinator(IDocument.IProvider docProvider, String text) {
+    this.documentProvider = docProvider;
+    this.document = docProvider.newDocument(text);
+    lastSeen.put(document.getFingerprint(), -1);
   }
 
   public IUndo addListener(IListener listener) {
@@ -48,7 +47,7 @@ public class DocumentCoordinator {
   /**
    * Returns the current document state.
    */
-  public Document getCurrent() {
+  public IDocument getCurrent() {
     return this.document;
   }
 
@@ -67,7 +66,8 @@ public class DocumentCoordinator {
    *   to the document the transform is relative to produce the current
    *   document, and the fingerprint of the current document.
    */
-  public Pair<Transform, IFingerprint> apply(String id, IFingerprint parentPrint, Transform transform) {
+  public Pair<Transform, IFingerprint> apply(String id, IFingerprint parentPrint,
+      Transform transform) {
     // Find the place in the history where this change is based.
     Integer lastSeenIndex = lastSeen.get(parentPrint);
     Assert.notNull(lastSeenIndex);
@@ -87,13 +87,13 @@ public class DocumentCoordinator {
     // We can now apply the transformation, update our internal state,
     // and notify listeners.
     String newText = current.call(document.getText());
-    IFingerprint fprint = fingerprinter.calcFingerprint(newText);
-    this.lastSeen.put(fprint, history.size());
+    IDocument newDocument = documentProvider.newDocument(newText);
+    this.lastSeen.put(newDocument.getFingerprint(), history.size());
     this.history.add(new State(current, id));
-    this.document = new Document(newText, fprint);
+    this.document = newDocument;
     for (IListener listener : listeners)
       listener.onChanged(current);
-    return Pair.of(result, fprint);
+    return Pair.of(result, newDocument.getFingerprint());
   }
 
   /**

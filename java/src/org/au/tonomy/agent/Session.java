@@ -3,16 +3,21 @@ package org.au.tonomy.agent;
 import java.util.List;
 import java.util.Map;
 
+import org.au.tonomy.shared.ot.IDocument;
 import org.au.tonomy.shared.util.Factory;
+import org.au.tonomy.shared.util.IJsonFactory;
+import org.au.tonomy.shared.util.IJsonable;
 
-public class Session {
+public class Session implements IJsonable {
 
+  private final String id;
   private final FileSystem fileSystem;
   private final Map<SharedFile, Integer> fileIds = Factory.newHashMap();
   private final Map<Integer, SessionFile> fileData = Factory.newHashMap();
   private int nextFileHandle = 0;
 
-  public Session(FileSystem fileSystem) {
+  public Session(String id, FileSystem fileSystem) {
+    this.id = id;
     this.fileSystem = fileSystem;
   }
 
@@ -51,9 +56,14 @@ public class Session {
     return file.listFiles();
   }
 
-  public String readFile(int fileId) {
+  public IDocument readFile(int fileId) {
     SessionFile file = fileData.get(fileId);
     return file.getShared().getContents();
+  }
+
+  @Override
+  public Object toJson(IJsonFactory factory) {
+    return factory.newMap().set("session", this.id);
   }
 
 }

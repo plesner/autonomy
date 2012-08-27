@@ -7,12 +7,13 @@ import java.security.NoSuchAlgorithmException;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Exceptions;
 import org.au.tonomy.shared.util.IJsonFactory;
+import org.au.tonomy.shared.util.IJsonable;
 import org.au.tonomy.shared.util.Misc;
 
 /**
  * A fingerprint based on the MD5 hash of the string.
  */
-public class Md5Fingerprint implements IFingerprint {
+public class Md5Fingerprint implements IFingerprint, IJsonable {
 
   private final String hash;
 
@@ -23,7 +24,9 @@ public class Md5Fingerprint implements IFingerprint {
 
   @Override
   public Object toJson(IJsonFactory factory) {
-    return hash;
+    return factory.newMap()
+        .set("type", "MD5")
+        .set("hash", hash);
   }
 
   /**

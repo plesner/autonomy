@@ -2,6 +2,7 @@ package org.au.tonomy.shared.source;
 
 import java.util.Map;
 
+import org.au.tonomy.shared.ot.IDocument;
 import org.au.tonomy.shared.util.Promise;
 
 /**
@@ -27,7 +28,7 @@ public interface ISourceEntry {
   /**
    * Returns the contents of this entry, assuming it is a file.
    */
-  public Promise<String> readFile();
+  public Promise<? extends IDocument> readFile();
 
   /**
    * Returns a map from entry names to entries, assuming this is a folder.

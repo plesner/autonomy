@@ -6,9 +6,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.au.tonomy.shared.ot.IDocument;
+import org.au.tonomy.shared.ot.Md5Fingerprint;
+import org.au.tonomy.shared.ot.PojoDocument;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Exceptions;
 import org.au.tonomy.shared.util.Factory;
@@ -18,7 +22,9 @@ import org.au.tonomy.shared.util.Factory;
  */
 public class Agent {
 
-  private final FileSystem fileSystem = new FileSystem(Arrays.asList(new File("/Users/plesner/Documents/autonomy/java/test/org/au/tonomy/shared/syntax/testdata")));
+  private final FileSystem fileSystem = new FileSystem(
+      PojoDocument.newProvider(Md5Fingerprint.getProvider()),
+      Arrays.asList(new File("/Users/plesner/Documents/autonomy/java/test/org/au/tonomy/shared/syntax/testdata")));
   private final Map<String, Session> sessions = Factory.newHashMap();
   private int nextSessionId = 0;
 
@@ -31,15 +37,11 @@ public class Agent {
   }
 
   @Handler("startsession")
-  public Object handleStartSession(RequestInfo request) {
+  public Session handleStartSession(RequestInfo request) {
     String href = request.getParameter("href", "(unknown client)");
     System.out.println("Starting session with " + href + ".");
     final String id = genSessionId();
-    getOrCreateSession(id);
-    return ServerJson
-        .getFactory()
-        .newMap()
-        .set("session", id);
+    return getOrCreateSession(id);
   }
 
   /**
@@ -49,21 +51,21 @@ public class Agent {
   private Session getOrCreateSession(String id) {
     Session current = sessions.get(id);
     if (current == null) {
-      current = new Session(fileSystem);
+      current = new Session(id, fileSystem);
       sessions.put(id, current);
     }
     return current;
   }
 
   @Handler("fileroots")
-  public Object handleFileRoots(RequestInfo request) {
+  public List<SessionFile> handleFileRoots(RequestInfo request) {
     String sessionId = request.getParameter("session", "");
     Session session = sessions.get(sessionId);
     return session.getRoots();
   }
 
   @Handler("ls")
-  public Object handleListFiles(RequestInfo request) {
+  public List<SessionFile> handleListFiles(RequestInfo request) {
     String fileId = request.getParameter("file", "");
     String sessionId = request.getParameter("session", "");
     Session session = sessions.get(sessionId);
@@ -71,7 +73,7 @@ public class Agent {
   }
 
   @Handler("read")
-  public Object handleRead(RequestInfo request) {
+  public IDocument handleRead(RequestInfo request) {
     String fileId = request.getParameter("file", "");
     String sessionId = request.getParameter("session", "");
     Session session = sessions.get(sessionId);

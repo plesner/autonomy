@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.List;
 
+import org.au.tonomy.shared.ot.IDocument;
 import org.au.tonomy.shared.util.Exceptions;
 import org.au.tonomy.shared.util.Factory;
 
@@ -56,7 +57,12 @@ public class SharedFile {
     return result;
   }
 
-  public String getContents() {
+  public IDocument getContents() {
+    String text = readFileRaw();
+    return fileSystem.getDocumentProvider().newDocument(text);
+  }
+
+  private String readFileRaw() {
     Reader reader;
     try {
       reader = new FileReader(file);
