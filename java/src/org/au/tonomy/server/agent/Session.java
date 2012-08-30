@@ -64,8 +64,14 @@ public class Session implements IPlanktonable {
 
   public void changeFile(int fileId, Transform transform) {
     SessionFile file = fileData.get(fileId);
-    file.getShared().apply(transform);
+    file.change(transform);
   }
+
+  public void savePendingChanges(int fileId) {
+    SessionFile file = fileData.get(fileId);
+    file.savePendingChanges();
+  }
+
 
   @Override
   public Object toPlankton(IPlanktonFactory factory) {

@@ -91,6 +91,15 @@ public class Agent {
     return null;
   }
 
+  @Handler("savependingchanges")
+  public Object handleSaveFileChanges(Map<?, ?> request) {
+    int fileId = (Integer) request.get("file");
+    String sessionId = (String) request.get("session");
+    Session session = sessions.get(sessionId);
+    session.savePendingChanges(fileId);
+    return null;
+  }
+
   private synchronized String genSessionId() {
     return Integer.toHexString(nextSessionId++);
   }

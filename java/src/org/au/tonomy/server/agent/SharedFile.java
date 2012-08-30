@@ -2,9 +2,11 @@ package org.au.tonomy.server.agent;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.au.tonomy.shared.ot.IDocument;
@@ -95,6 +97,17 @@ public class SharedFile {
     String newText = transform.call(oldText);
     contents = fileSystem.getDocumentProvider().newDocument(newText);
     System.out.println(newText);
+  }
+
+  private static final Charset UTF8 = Charset.forName("UTF-8");
+
+  public void save() {
+    try {
+      FileOutputStream out = new FileOutputStream(file);
+      out.write(getContents().getText().getBytes(UTF8));
+    } catch (IOException ioe) {
+      throw Exceptions.propagate(ioe);
+    }
   }
 
 }

@@ -2,6 +2,7 @@ package org.au.tonomy.server.agent;
 
 import java.util.List;
 
+import org.au.tonomy.shared.ot.Transform;
 import org.au.tonomy.shared.plankton.IPlanktonable;
 import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.IPlanktonFactory;
@@ -14,6 +15,7 @@ public class SessionFile implements IPlanktonable {
   private final Session sessionData;
   private final int id;
   private final SharedFile shared;
+  private Transform pendingChanges;
 
   public SessionFile(Session sessionData, int id, SharedFile shared) {
     this.sessionData = sessionData;
@@ -39,6 +41,20 @@ public class SessionFile implements IPlanktonable {
 
   public SharedFile getShared() {
     return shared;
+  }
+
+  public void change(Transform transform) {
+    pendingChanges = (pendingChanges == null)
+        ? transform
+        : pendingChanges.compose(transform);
+  }
+
+  public void savePendingChanges() {
+    if (pendingChanges == null)
+      return;
+    shared.apply(pendingChanges);
+    shared.save();
+    pendingChanges = null;
   }
 
 }
