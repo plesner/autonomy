@@ -1,6 +1,6 @@
 package org.au.tonomy.client.webgl.util;
 
-import org.au.tonomy.client.webgl.RenderingContext;
+import org.au.tonomy.client.browser.RenderingContext;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.dom.client.Element;

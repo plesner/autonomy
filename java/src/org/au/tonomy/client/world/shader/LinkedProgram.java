@@ -1,13 +1,13 @@
 package org.au.tonomy.client.world.shader;
 
-import static org.au.tonomy.client.webgl.RenderingContext.FRAGMENT_SHADER;
-import static org.au.tonomy.client.webgl.RenderingContext.VERTEX_SHADER;
+import static org.au.tonomy.client.browser.RenderingContext.FRAGMENT_SHADER;
+import static org.au.tonomy.client.browser.RenderingContext.VERTEX_SHADER;
 
-import org.au.tonomy.client.webgl.Program;
-import org.au.tonomy.client.webgl.RenderingContext;
-import org.au.tonomy.client.webgl.Shader;
-import org.au.tonomy.client.webgl.UniformLocation;
-import org.au.tonomy.client.webgl.WebGLError.ShaderSyntaxError;
+import org.au.tonomy.client.browser.Program;
+import org.au.tonomy.client.browser.RenderingContext;
+import org.au.tonomy.client.browser.Shader;
+import org.au.tonomy.client.browser.UniformLocation;
+import org.au.tonomy.client.browser.WebGLError.ShaderSyntaxError;
 import org.au.tonomy.client.webgl.util.AttributeLocation;
 import org.au.tonomy.shared.util.Assert;
 

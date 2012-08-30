@@ -1,13 +1,13 @@
 package org.au.tonomy.shared.ot;
 
+import org.au.tonomy.shared.plankton.IPlanktonable;
 import org.au.tonomy.shared.util.Assert;
-import org.au.tonomy.shared.util.IJsonFactory;
-import org.au.tonomy.shared.util.IJsonable;
+import org.au.tonomy.shared.util.IPlanktonFactory;
 
 /**
  * A text operation.
  */
-public abstract class Operation implements IJsonable {
+public abstract class Operation implements IPlanktonable {
 
   /**
    * Identifies the different types of operations.
@@ -282,7 +282,7 @@ public abstract class Operation implements IJsonable {
     }
 
     @Override
-    public Object toJson(IJsonFactory factory) {
+    public Object toPlankton(IPlanktonFactory factory) {
       return factory.newArray().push("+").push(text);
     }
 
@@ -440,7 +440,7 @@ public abstract class Operation implements IJsonable {
     }
 
     @Override
-    public Object toJson(IJsonFactory factory) {
+    public Object toPlankton(IPlanktonFactory factory) {
       return factory.newArray().push("-").push(text);
     }
 
@@ -617,7 +617,7 @@ public abstract class Operation implements IJsonable {
     }
 
     @Override
-    public Object toJson(IJsonFactory factory) {
+    public Object toPlankton(IPlanktonFactory factory) {
       return factory.newArray().push(">").push(count);
     }
 

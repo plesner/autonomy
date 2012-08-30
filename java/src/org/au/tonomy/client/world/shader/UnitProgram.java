@@ -1,6 +1,6 @@
 package org.au.tonomy.client.world.shader;
 
-import org.au.tonomy.client.webgl.UniformLocation;
+import org.au.tonomy.client.browser.UniformLocation;
 import org.au.tonomy.client.webgl.util.Vec3;
 
 /**

@@ -1,12 +1,12 @@
 package org.au.tonomy.shared.ot;
 
-import org.au.tonomy.shared.util.IJsonFactory;
-import org.au.tonomy.shared.util.IJsonable;
+import org.au.tonomy.shared.plankton.IPlanktonable;
+import org.au.tonomy.shared.util.IPlanktonFactory;
 
 /**
  * A plain old java document object.
  */
-public class PojoDocument implements IDocument, IJsonable {
+public class PojoDocument implements IDocument, IPlanktonable {
 
   private final String text;
   private final IFingerprint fingerprint;
@@ -40,7 +40,7 @@ public class PojoDocument implements IDocument, IJsonable {
   }
 
   @Override
-  public Object toJson(IJsonFactory factory) {
+  public Object toPlankton(IPlanktonFactory factory) {
     return factory.newMap()
         .set("fingerprint", getFingerprint())
         .set("text", getText());

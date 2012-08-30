@@ -9,10 +9,17 @@ public class MessageEvent extends JavaScriptObject {
   protected MessageEvent() { }
 
   /**
-   * Returns the parsed data payload of this message.
+   * Returns the raw data payload of this message.
    */
-  public final native Object getData() /*-{
-    return JSON.parse(this.data);
+  public final native String getPayload() /*-{
+    return this.data;
+  }-*/;
+
+  /**
+   * Returns the attempt number for the first incoming event.
+   */
+  public final native int getAttemptIndex() /*-{
+    return this.data;
   }-*/;
 
   /**

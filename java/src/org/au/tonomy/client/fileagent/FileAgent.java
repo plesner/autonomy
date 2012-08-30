@@ -1,15 +1,15 @@
 package org.au.tonomy.client.fileagent;
 
+import java.util.Map;
+
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.IFunction;
 import org.au.tonomy.shared.util.Promise;
 
-import com.google.gwt.core.client.JavaScriptObject;
-
 /**
  * A frame proxy for communicating with a local file proxy.
  */
-public class FileAgent extends FrameProxy {
+public class FileAgent extends CrossDomainSocket {
 
   private SessionHandle session;
 
@@ -37,13 +37,13 @@ public class FileAgent extends FrameProxy {
    * Starts a session with the file agent.
    */
   private Promise<SessionHandle> startSession() {
-    return newMessage(Method.POST, "startsession")
-        .setOption("href", getOrigin())
+    return newMessage("startsession")
+        .setArgument("href", getOrigin())
         .send()
         .then(new IFunction<Object, SessionHandle>() {
           @Override
           public SessionHandle call(Object data) {
-            session = new SessionHandle((JavaScriptObject) data, FileAgent.this);
+            session = new SessionHandle((Map<?, ?>) data, FileAgent.this);
             return session;
           }
         });

@@ -3,17 +3,16 @@ package org.au.tonomy.shared.ot;
 import java.util.Iterator;
 import java.util.List;
 
+import org.au.tonomy.shared.plankton.IPlanktonable;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.IFunction;
-import org.au.tonomy.shared.util.IJsonFactory;
-import org.au.tonomy.shared.util.IJsonFactory.IJsonArray;
-import org.au.tonomy.shared.util.IJsonable;
+import org.au.tonomy.shared.util.IPlanktonFactory;
 import org.au.tonomy.shared.util.Pair;
 /**
  * A sequence of operations that transform a document.
  */
-public class Transform implements IFunction<String, String>, Iterable<Operation>, IJsonable {
+public class Transform implements IFunction<String, String>, Iterable<Operation>, IPlanktonable {
 
   private final List<Operation> ops;
   private int inputLengthCache = -1;
@@ -179,11 +178,8 @@ public class Transform implements IFunction<String, String>, Iterable<Operation>
   }
 
   @Override
-  public Object toJson(IJsonFactory factory) {
-    IJsonArray result = factory.newArray();
-    for (Operation op : ops)
-      result.push(op.toJson(factory));
-    return result;
+  public Object toPlankton(IPlanktonFactory factory) {
+    return ops;
   }
 
 }

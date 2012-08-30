@@ -1,14 +1,14 @@
 package org.au.tonomy.client.widget;
 
-import static org.au.tonomy.client.webgl.RenderingContext.COLOR_BUFFER_BIT;
+import static org.au.tonomy.client.browser.RenderingContext.COLOR_BUFFER_BIT;
 
 import java.util.List;
 
+import org.au.tonomy.client.browser.RenderingContext;
+import org.au.tonomy.client.browser.TriangleBuffer;
+import org.au.tonomy.client.browser.RenderingContext.DrawMode;
 import org.au.tonomy.client.presentation.ICamera;
 import org.au.tonomy.client.presentation.Viewport;
-import org.au.tonomy.client.webgl.RenderingContext;
-import org.au.tonomy.client.webgl.RenderingContext.DrawMode;
-import org.au.tonomy.client.webgl.TriangleBuffer;
 import org.au.tonomy.client.webgl.util.Color;
 import org.au.tonomy.client.webgl.util.IWebGL;
 import org.au.tonomy.client.webgl.util.Mat4;

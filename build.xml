@@ -7,6 +7,7 @@
   <property name="out.path" value="." />
   <property name="war" value="${out.path}/war" />
   <property name="bin" value="${out.path}/bin" />
+  <property name="gen" value="${out.path}/gen" />
 
   <!-- Load the local build configuration -->
   <property file="config.properties" />
@@ -26,10 +27,18 @@
     <!-- Add any additional server libs that need to be copied -->
   </target>
 
-  <target name="javac" depends="libs" description="Compile java source to bytecode">
+  <target name="planktonc" description="Compile thrift definitions">
+    <mkdir dir="${gen}"/>    
+    <apply executable="tools/planktonc.py" parallel="true">
+      <arg value="--out"/>
+      <arg value="${gen}"/>
+      <fileset dir="java/src/org/au/tonomy/shared/plankton" includes="**/*.pidl"/>
+    </apply>
+  </target>
+
+  <target name="javac" depends="libs,planktonc" description="Compile java source to bytecode">
     <mkdir dir="${war}/WEB-INF/classes"/>
     <javac 
-        srcdir="java/src"
         includes="**"
         encoding="utf-8"
         destdir="${war}/WEB-INF/classes"
@@ -38,6 +47,8 @@
         debug="true"
         debuglevel="lines,vars,source"
         includeantruntime="false">
+      <src path="java/src"/>
+      <src path="${gen}"/>
       <compilerarg value="-Xlint"/>
       <classpath refid="project.class.path"/>
     </javac>
@@ -50,10 +61,10 @@
     <mkdir dir="${bin}"/>
     <jar
       destfile="${bin}/agent.jar"
-      manifest="java/src/org/au/tonomy/agent/MANIFEST.MF"
+      manifest="java/src/org/au/tonomy/server/agent/MANIFEST.MF"
       basedir="${war}/WEB-INF/classes">
       <fileset dir="${war}/WEB-INF/classes">
-        <include name="org/au/tonomy/agent/** org/au/tonomy/shared/**"/>
+        <include name="org/au/tonomy/server/** org/au/tonomy/shared/**"/>
       </fileset>
       <zipfileset src="${jetty.jar.path}"/>
       <zipfileset src="${servlet-api.jar.path}"/>

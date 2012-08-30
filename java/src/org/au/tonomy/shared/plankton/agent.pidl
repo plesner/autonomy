@@ -1,0 +1,33 @@
+- settings:
+    package: org.au.tonomy.shared.plankton
+
+- service: Agent
+
+- command: ls
+  target: Agent
+  payload:
+    session: string
+    file: i32
+
+- command: fileroots
+  target: Agent
+  payload:
+    session: string
+
+- command: read
+  target: Agent
+  payload:
+    session: string
+    file: i32
+
+- type: Operation
+  enum:
+    name: Type
+    entries:
+      INSERT: 0
+      DELETE: 2
+      SKIP: 1
+  fields:
+    type: Type
+    test: string
+    count: i32

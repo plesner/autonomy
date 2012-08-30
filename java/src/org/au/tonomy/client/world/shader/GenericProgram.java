@@ -1,10 +1,10 @@
 package org.au.tonomy.client.world.shader;
 
-import static org.au.tonomy.client.webgl.RenderingContext.ARRAY_BUFFER;
-import static org.au.tonomy.client.webgl.RenderingContext.FLOAT;
+import static org.au.tonomy.client.browser.RenderingContext.ARRAY_BUFFER;
+import static org.au.tonomy.client.browser.RenderingContext.FLOAT;
 
-import org.au.tonomy.client.webgl.TriangleBuffer;
-import org.au.tonomy.client.webgl.UniformLocation;
+import org.au.tonomy.client.browser.TriangleBuffer;
+import org.au.tonomy.client.browser.UniformLocation;
 import org.au.tonomy.client.webgl.util.AttributeLocation;
 import org.au.tonomy.client.webgl.util.Color;
 import org.au.tonomy.client.webgl.util.Mat4;

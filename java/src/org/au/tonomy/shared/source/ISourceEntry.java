@@ -21,11 +21,6 @@ public interface ISourceEntry {
   public String getFullPath();
 
   /**
-   * True iff this is a folder.
-   */
-  public boolean isFolder();
-
-  /**
    * Returns the contents of this entry, assuming it is a file.
    */
   public Promise<? extends IDocument> readFile();
