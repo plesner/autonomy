@@ -182,4 +182,14 @@ public class Transform implements IFunction<String, String>, Iterable<Operation>
     return ops;
   }
 
+  /**
+   * Creates a transform from a plankton serialized object.
+   */
+  public static Transform unpack(List<?> list) {
+    List<Operation> ops = Factory.newArrayList();
+    for (Object op : list)
+      ops.add(Operation.unpack((List<?>) op));
+    return new Transform(ops);
+  }
+
 }

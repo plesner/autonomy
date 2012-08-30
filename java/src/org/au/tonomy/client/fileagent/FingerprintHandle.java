@@ -6,9 +6,9 @@ import org.au.tonomy.shared.ot.IFingerprint;
 /**
  * A fingerprint backed by json.
  */
-public class ClientFingerprint implements IFingerprint {
+public class FingerprintHandle implements IFingerprint {
 
-  protected ClientFingerprint(Map<?, ?> data) {
+  protected FingerprintHandle(Map<?, ?> data) {
 
   }
 

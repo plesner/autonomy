@@ -1,5 +1,6 @@
 package org.au.tonomy.client.presentation;
 
+import org.au.tonomy.shared.ot.IMutableDocument;
 import org.au.tonomy.shared.util.IUndo;
 
 /**
@@ -71,6 +72,6 @@ public interface IEditorWidget {
   /**
    * Sets the complete contents of this widget.
    */
-  public void setContents(String text);
+  public void setContents(IMutableDocument text);
 
 }

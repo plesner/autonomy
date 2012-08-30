@@ -8,6 +8,7 @@ import java.io.Reader;
 import java.util.List;
 
 import org.au.tonomy.shared.ot.IDocument;
+import org.au.tonomy.shared.ot.Transform;
 import org.au.tonomy.shared.util.Exceptions;
 import org.au.tonomy.shared.util.Factory;
 
@@ -19,6 +20,7 @@ public class SharedFile {
   private final FileSystem fileSystem;
   private final String fullPath;
   private final File file;
+  private IDocument contents;
 
   public SharedFile(FileSystem fileSystem, String fullPath) {
     this.fileSystem = fileSystem;
@@ -58,8 +60,11 @@ public class SharedFile {
   }
 
   public IDocument getContents() {
-    String text = readFileRaw();
-    return fileSystem.getDocumentProvider().newDocument(text);
+    if (contents == null) {
+      String text = readFileRaw();
+      contents = fileSystem.getDocumentProvider().newDocument(text);
+    }
+    return contents;
   }
 
   private String readFileRaw() {
@@ -83,6 +88,13 @@ public class SharedFile {
       buf.append(chunk, 0, count);
     }
     return buf.toString();
+  }
+
+  public void apply(Transform transform) {
+    String oldText = getContents().getText();
+    String newText = transform.call(oldText);
+    contents = fileSystem.getDocumentProvider().newDocument(newText);
+    System.out.println(newText);
   }
 
 }

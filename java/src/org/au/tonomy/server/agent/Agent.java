@@ -13,6 +13,7 @@ import java.util.Set;
 import org.au.tonomy.shared.ot.IDocument;
 import org.au.tonomy.shared.ot.Md5Fingerprint;
 import org.au.tonomy.shared.ot.PojoDocument;
+import org.au.tonomy.shared.ot.Transform;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Exceptions;
 import org.au.tonomy.shared.util.Factory;
@@ -78,6 +79,16 @@ public class Agent {
     String sessionId = (String) request.get("session");
     Session session = sessions.get(sessionId);
     return session.readFile(fileId);
+  }
+
+  @Handler("changefile")
+  public Object handleChangeFile(Map<?, ?> request) {
+    int fileId = (Integer) request.get("file");
+    String sessionId = (String) request.get("session");
+    Transform transform = Transform.unpack((List<?>) request.get("transform"));
+    Session session = sessions.get(sessionId);
+    session.changeFile(fileId, transform);
+    return null;
   }
 
   private synchronized String genSessionId() {

@@ -6,6 +6,7 @@ import java.util.Map;
 import org.au.tonomy.client.bus.Bus;
 import org.au.tonomy.client.bus.DefaultBus;
 import org.au.tonomy.client.bus.Message;
+import org.au.tonomy.client.fileagent.DocumentHandle;
 import org.au.tonomy.client.fileagent.FileAgent;
 import org.au.tonomy.client.fileagent.FileHandle;
 import org.au.tonomy.client.presentation.EditorPresenter;
@@ -13,7 +14,6 @@ import org.au.tonomy.client.util.Callback;
 import org.au.tonomy.client.widget.EditorWidget;
 import org.au.tonomy.client.widget.MessageListWidget;
 import org.au.tonomy.client.widget.workspace.WorkspaceWidget;
-import org.au.tonomy.shared.ot.IDocument;
 import org.au.tonomy.shared.util.IFunction;
 import org.au.tonomy.shared.util.Promise;
 
@@ -53,7 +53,7 @@ public class EditorEntryPoint implements EntryPoint {
     bus.addMessage(message);
     // Fetch the files.
     final FileAgent agent = new FileAgent("http://" + agentUrl);
-    Promise<IDocument> source = agent
+    Promise<DocumentHandle> source = agent
         .attach()
         .lazyThen(new IFunction<Object, Promise<List<FileHandle>>>() {
           @Override
@@ -69,16 +69,16 @@ public class EditorEntryPoint implements EntryPoint {
             return roots.get(0).listEntries();
           }
         })
-        .lazyThen(new IFunction<Map<String, FileHandle>, Promise<? extends IDocument>>() {
+        .lazyThen(new IFunction<Map<String, FileHandle>, Promise<? extends DocumentHandle>>() {
           @Override
-          public Promise<? extends IDocument> call(Map<String, FileHandle> files) {
-            return files.get("lambdas.aut").readFile();
+          public Promise<? extends DocumentHandle> call(Map<String, FileHandle> files) {
+            return files.get("annotations.aut").readFile();
           }
         });
-    source.onResolved(new Callback<IDocument>() {
+    source.onResolved(new Callback<DocumentHandle>() {
       @Override
-      public void onSuccess(IDocument value) {
-        editor.setContents(value.getText());
+      public void onSuccess(DocumentHandle value) {
+        editor.setContents(value);
       }
     });
   }

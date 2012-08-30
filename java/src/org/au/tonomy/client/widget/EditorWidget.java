@@ -4,6 +4,7 @@ import org.au.tonomy.client.codemirror.AutonomyMode;
 import org.au.tonomy.client.codemirror.ChangeEvent;
 import org.au.tonomy.client.codemirror.CodeMirror;
 import org.au.tonomy.client.presentation.IEditorWidget;
+import org.au.tonomy.shared.ot.IMutableDocument;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.IThunk;
 import org.au.tonomy.shared.util.IUndo;
@@ -29,6 +30,7 @@ public class EditorWidget extends Composite implements IEditorWidget {
   private CodeMirror.Builder builder;
   private CodeMirror mirror;
   private final UndoList<IListener> listeners = UndoList.create();
+  private boolean muteEvents = false;
 
   public EditorWidget() {
     this.builder = CodeMirror
@@ -55,8 +57,13 @@ public class EditorWidget extends Composite implements IEditorWidget {
   }
 
   @Override
-  public void setContents(String value) {
-    Assert.notNull(this.mirror).setValue(value);
+  public void setContents(IMutableDocument value) {
+    try {
+      muteEvents = true;
+      Assert.notNull(this.mirror).setValue(value.getText());
+    } finally {
+      muteEvents = false;
+    }
   }
 
   /**
@@ -73,7 +80,8 @@ public class EditorWidget extends Composite implements IEditorWidget {
   private final IThunk<ChangeEvent> changeListener = new IThunk<ChangeEvent>() {
     @Override
     public void call(ChangeEvent event) {
-      onChanged(event);
+      if (!muteEvents)
+        onChanged(event);
     }
   };
 

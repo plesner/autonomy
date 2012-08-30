@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.au.tonomy.shared.ot.IDocument;
+import org.au.tonomy.shared.ot.Transform;
 import org.au.tonomy.shared.plankton.IPlanktonable;
 import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.IPlanktonFactory;
@@ -59,6 +60,11 @@ public class Session implements IPlanktonable {
   public IDocument readFile(int fileId) {
     SessionFile file = fileData.get(fileId);
     return file.getShared().getContents();
+  }
+
+  public void changeFile(int fileId, Transform transform) {
+    SessionFile file = fileData.get(fileId);
+    file.getShared().apply(transform);
   }
 
   @Override

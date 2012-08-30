@@ -59,7 +59,7 @@ public class EditorPresenterTest extends TestCase {
     EventChecker checker = new EventChecker();
     editor.addListener(checker);
 
-    editor.setContents("foo\nbar\nbaz");
+    editor.setContents(new FakeDocument("foo\nbar\nbaz"));
 
     checker.getRecorder().onChange(trans(del("f"), skp(10)));
     fakeWidget.fireChangeEvent(change(0, 0, 0, 1, ""));

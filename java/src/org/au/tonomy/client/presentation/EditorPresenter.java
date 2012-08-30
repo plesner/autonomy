@@ -2,6 +2,7 @@ package org.au.tonomy.client.presentation;
 
 import org.au.tonomy.client.presentation.IEditorWidget.IChangeEvent;
 import org.au.tonomy.client.presentation.IEditorWidget.IPosition;
+import org.au.tonomy.shared.ot.IMutableDocument;
 import org.au.tonomy.shared.ot.Transform;
 import org.au.tonomy.shared.ot.TransformBuilder;
 import org.au.tonomy.shared.source.SourceCoordinateMapper;
@@ -26,6 +27,7 @@ public class EditorPresenter {
   private final SourceCoordinateMapper mapper = new SourceCoordinateMapper();
   private final IEditorWidget widget;
   private final UndoList<IListener> listeners = UndoList.create();
+  private IMutableDocument doc;
 
   public EditorPresenter(IEditorWidget widget) {
     this.widget = widget;
@@ -35,9 +37,10 @@ public class EditorPresenter {
   /**
    * Sets the text of this editor.
    */
-  public void setContents(String text) {
-    this.widget.setContents(text);
-    this.mapper.resetSource(text);
+  public void setContents(IMutableDocument doc) {
+    this.doc = doc;
+    this.widget.setContents(doc);
+    this.mapper.resetSource(doc.getText());
   }
 
   public String getContents() {
@@ -72,6 +75,7 @@ public class EditorPresenter {
     Assert.equals(mapper.getLength(), transform.getInputLength());
     for (IListener listener : listeners)
       listener.onChange(transform);
+    doc.apply(transform);
     mapper.apply(transform);
   }
 

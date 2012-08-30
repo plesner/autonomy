@@ -3,6 +3,7 @@ package org.au.tonomy.client.fileagent;
 import java.util.List;
 import java.util.Map;
 
+import org.au.tonomy.shared.ot.Transform;
 import org.au.tonomy.shared.source.ISourceEntry;
 import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.IFunction;
@@ -60,20 +61,25 @@ public class FileHandle implements ISourceEntry {
    * Returns the contents of this file.
    */
   @Override
-  public Promise<ClientDocument> readFile() {
+  public Promise<DocumentHandle> readFile() {
     return agent.newMessage("read")
         .setArgument("file", id)
         .setArgument("session", session.getId())
         .send()
-        .then(TO_DOC);
+        .then(new IFunction<Object, DocumentHandle>() {
+          @Override
+          public DocumentHandle call(Object arg) {
+            return new DocumentHandle((Map<?, ?>) arg, FileHandle.this);
+          }
+        });
   }
 
-  private static final IFunction<Object, ClientDocument> TO_DOC =
-      new IFunction<Object, ClientDocument>() {
-    @Override
-    public ClientDocument call(Object arg) {
-      return new ClientDocument((Map<?, ?>) arg);
-    }
-  };
+  public void apply(Transform transform) {
+    agent.newMessage("changefile")
+        .setArgument("file", id)
+        .setArgument("session", session.getId())
+        .setArgument("transform", transform)
+        .sendAsync();
+  }
 
 }

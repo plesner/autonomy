@@ -1,5 +1,7 @@
 package org.au.tonomy.shared.ot;
 
+import java.util.List;
+
 import org.au.tonomy.shared.plankton.IPlanktonable;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.IPlanktonFactory;
@@ -685,6 +687,20 @@ public abstract class Operation implements IPlanktonable {
     // The deletion should only be applied after the insertion so skip
     // the text.
     deleteOut.skip(insert.text.length());
+  }
+
+  /**
+   * Unpacks an op from a plankton serialized value.
+   */
+  public static Operation unpack(List<?> elms) {
+    String tag = (String) elms.get(0);
+    if (">".equals(tag)) {
+      return new Skip((Integer) elms.get(1));
+    } else if ("+".equals(tag)) {
+      return new Insert((String) elms.get(1));
+    } else {
+      return new Delete((String) elms.get(1));
+    }
   }
 
 }
