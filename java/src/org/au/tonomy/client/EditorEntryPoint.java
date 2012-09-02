@@ -11,8 +11,8 @@ import org.au.tonomy.client.fileagent.FileAgent;
 import org.au.tonomy.client.fileagent.FileHandle;
 import org.au.tonomy.client.presentation.EditorPresenter;
 import org.au.tonomy.client.util.Callback;
-import org.au.tonomy.client.widget.EditorWidget;
 import org.au.tonomy.client.widget.MessageListWidget;
+import org.au.tonomy.client.widget.PageWidget;
 import org.au.tonomy.client.widget.workspace.WorkspaceWidget;
 import org.au.tonomy.shared.util.IFunction;
 import org.au.tonomy.shared.util.Promise;
@@ -24,13 +24,17 @@ import com.google.gwt.user.client.ui.RootPanel;
 
 public class EditorEntryPoint implements EntryPoint {
 
+  private PageWidget page;
   private EditorPresenter editor;
 
   private WorkspaceWidget buildWorkspace() {
     WorkspaceWidget workspace = new WorkspaceWidget();
+    PageWidget editorWidget = new PageWidget();
+    /*
     EditorWidget editorWidget = new EditorWidget();
-    workspace.setBackground(editorWidget);
     this.editor = new EditorPresenter(editorWidget);
+    */
+    workspace.setBackground(editorWidget);
     MessageListWidget messages = new MessageListWidget();
     workspace.addPanel(messages);
     return workspace;
@@ -48,6 +52,8 @@ public class EditorEntryPoint implements EntryPoint {
         RootPanel.get().add(workspace);
       }
     });
+    if (true)
+      return;
     final String agentUrl = "localhost:8040";
     final Message message = new Message("Connecting to " + agentUrl);
     bus.addMessage(message);

@@ -1,5 +1,7 @@
 package org.au.tonomy.client.presentation;
 
+import org.au.tonomy.client.Console;
+import org.au.tonomy.client.codemirror.IAction;
 import org.au.tonomy.client.presentation.IEditorWidget.IChangeEvent;
 import org.au.tonomy.client.presentation.IEditorWidget.IPosition;
 import org.au.tonomy.shared.ot.IMutableDocument;
@@ -83,6 +85,9 @@ public class EditorPresenter {
     @Override
     public void onChanged(IChangeEvent event) {
       onContentsChanged(event);
+    }
+    public void onAction(IAction.Type action) {
+      Console.log(action.name());
     }
   };
 

@@ -1,8 +1,11 @@
 package org.au.tonomy.client.widget;
 
+import org.au.tonomy.client.codemirror.AutonomyKeyMap;
 import org.au.tonomy.client.codemirror.AutonomyMode;
 import org.au.tonomy.client.codemirror.ChangeEvent;
 import org.au.tonomy.client.codemirror.CodeMirror;
+import org.au.tonomy.client.codemirror.IAction;
+import org.au.tonomy.client.codemirror.IAction.Type;
 import org.au.tonomy.client.presentation.IEditorWidget;
 import org.au.tonomy.shared.ot.IMutableDocument;
 import org.au.tonomy.shared.util.Assert;
@@ -24,6 +27,7 @@ public class EditorWidget extends Composite implements IEditorWidget {
 
   static {
     CodeMirror.defineMode(new AutonomyMode());
+    CodeMirror.defineKeyMap(AutonomyKeyMap.get());
   }
 
   @UiField HTMLPanel container;
@@ -37,8 +41,10 @@ public class EditorWidget extends Composite implements IEditorWidget {
         .builder()
         .setLineNumbers(true)
         .setMode("autonomy")
+        .setKeyMap("autonomy")
         .setUndoDepth(0)
-        .setChangeListener(changeListener);
+        .setChangeListener(changeListener)
+        .setActionListener(actionListener);
     initWidget(BINDER.createAndBindUi(this));
   }
 
@@ -74,6 +80,11 @@ public class EditorWidget extends Composite implements IEditorWidget {
       listener.onChanged(event);
   }
 
+  private void onAction(Type action) {
+    for (IListener listener : listeners)
+      listener.onAction(action);
+  }
+
   /**
    * The singleton change event listener.
    */
@@ -82,6 +93,12 @@ public class EditorWidget extends Composite implements IEditorWidget {
     public void call(ChangeEvent event) {
       if (!muteEvents)
         onChanged(event);
+    }
+  };
+
+  private final IThunk<IAction.Type> actionListener = new IThunk<IAction.Type>() {
+    public void call(IAction.Type action) {
+      onAction(action);
     }
   };
 

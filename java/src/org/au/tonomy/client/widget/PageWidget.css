@@ -1,0 +1,17 @@
+.container {
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: 500px;
+  border: 1px solid silver;
+  background: white;
+}
+
+.message {
+  text-align: center;
+  top: 50%;
+  position: absolute;
+  width: 100%;
+  color: silver;
+  font-size: 10pt;
+}

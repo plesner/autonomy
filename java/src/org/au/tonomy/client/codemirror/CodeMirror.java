@@ -1,5 +1,6 @@
 package org.au.tonomy.client.codemirror;
 
+import org.au.tonomy.client.util.JavaScriptObjects;
 import org.au.tonomy.shared.util.IThunk;
 
 import com.google.gwt.core.client.JavaScriptObject;
@@ -19,35 +20,61 @@ public class CodeMirror extends JavaScriptObject {
   }-*/;
 
   /**
+   * Returns the listener that should be notified of editor actions.
+   */
+  public final IThunk<IAction.Type> getActionListener() {
+    return JavaScriptObjects.getProperty(this, "actionListener");
+  }
+
+  /**
    * A utility for configuring a codemirror instance.
    */
   public static class Builder {
 
     private final JavaScriptObject config = JavaScriptObject.createObject();
+    private IThunk<IAction.Type> actionListener = null;
 
     /**
      * Creates the instance using the given parent element.
      */
     public native CodeMirror build(Element parent) /*-{
-      return $wnd.CodeMirror(parent, this.@org.au.tonomy.client.codemirror.CodeMirror.Builder::config);
+      var result = $wnd.CodeMirror(parent, this.@org.au.tonomy.client.codemirror.CodeMirror.Builder::config);
+      result.actionListener = this.@org.au.tonomy.client.codemirror.CodeMirror.Builder::actionListener;
+      return result;
     }-*/;
 
     /**
      * Sets the mode to use.
      */
-    public native Builder setMode(String mode) /*-{
-      this.@org.au.tonomy.client.codemirror.CodeMirror.Builder::config.mode = mode;
+    public Builder setMode(String mode) {
+      JavaScriptObjects.setProperty(config, "mode", mode);
       return this;
-    }-*/;
+    }
 
     /**
      * Sets the maximum number of undo levels that the editor stores.
      * Defaults to 40.
      */
-    public native Builder setUndoDepth(int depth) /*-{
-      this.@org.au.tonomy.client.codemirror.CodeMirror.Builder::config.undoDepth = depth;
+    public Builder setUndoDepth(int depth) {
+      JavaScriptObjects.setProperty(config, "undoDepth", depth);
       return this;
-    }-*/;
+    }
+
+    /**
+     * Sets the name of the key map to use.
+     */
+    public Builder setKeyMap(String name) {
+      JavaScriptObjects.setProperty(config, "keyMap", name);
+      return this;
+    }
+
+    /**
+     * Sets the listener that will be notified on editor actions.
+     */
+    public Builder setActionListener(IThunk<IAction.Type> listener) {
+      this.actionListener = listener;
+      return this;
+    }
 
     /**
      * Sets the change listener that will be notified of editor changes.
@@ -62,10 +89,10 @@ public class CodeMirror extends JavaScriptObject {
     /**
      * Sets whether to show line numbers.
      */
-    public native Builder setLineNumbers(boolean value) /*-{
-      this.@org.au.tonomy.client.codemirror.CodeMirror.Builder::config.lineNumbers = value;
+    public Builder setLineNumbers(boolean value) {
+      JavaScriptObjects.setProperty(config, "lineNumbers", value);
       return this;
-    }-*/;
+    }
 
   }
 
@@ -81,6 +108,15 @@ public class CodeMirror extends JavaScriptObject {
             token: mode.@org.au.tonomy.client.codemirror.IMode::getNextToken(Lorg/au/tonomy/client/codemirror/Stream;Ljava/lang/Object;).bind(mode)
           };
         });
+  }-*/;
+
+  /**
+   * Registers a key map.
+   */
+  public static native void defineKeyMap(KeyMap keyMap) /*-{
+    var name = keyMap.@org.au.tonomy.client.codemirror.KeyMap::getName()();
+    var mapping = keyMap.@org.au.tonomy.client.codemirror.KeyMap::getMappings()();
+    $wnd.CodeMirror.keyMap[name] = mapping;
   }-*/;
 
   /**

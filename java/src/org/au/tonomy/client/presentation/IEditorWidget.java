@@ -1,5 +1,6 @@
 package org.au.tonomy.client.presentation;
 
+import org.au.tonomy.client.codemirror.IAction;
 import org.au.tonomy.shared.ot.IMutableDocument;
 import org.au.tonomy.shared.util.IUndo;
 
@@ -61,6 +62,11 @@ public interface IEditorWidget {
      * The contents of this widget has changed.
      */
     public void onChanged(IChangeEvent event);
+
+    /**
+     *
+     */
+    public void onAction(IAction.Type action);
 
   }
 
