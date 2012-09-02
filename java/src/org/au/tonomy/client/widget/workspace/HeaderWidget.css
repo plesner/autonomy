@@ -12,12 +12,3 @@
   color: ccLightText;
   float: left;
 }
-
-.status {
-  float: right;
-  margin-top: 6pt;
-  margin-right: 6pt;
-  font-family: ccSansSerif;
-  font-size: 10pt;
-  color: gray;
-}

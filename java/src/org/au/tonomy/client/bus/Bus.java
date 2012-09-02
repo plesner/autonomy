@@ -14,21 +14,6 @@ public abstract class Bus {
   private static Bus instance;
 
   /**
-   * Returns the current status.
-   */
-  public abstract String getStatus();
-
-  /**
-   * Sets the current status;
-   */
-  public abstract void setStatus(String value);
-
-  /**
-   * Adds a callback to invoke when the status changes.
-   */
-  public abstract IUndo addStatusListener(IThunk<String> listener);
-
-  /**
    * Returns the current set of active messages.
    */
   public abstract Collection<Message> getMessages();

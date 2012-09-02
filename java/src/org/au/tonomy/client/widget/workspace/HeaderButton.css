@@ -1,0 +1,18 @@
+.button {
+  float: right;
+  height: 15pt;
+  margin-top: 3pt;
+  margin-right: 3pt;
+  background: #9F9FDD;
+  padding-right: 5px;
+  padding-left: 5px;
+  padding-top: 1pt;
+  font-size: 10pt;
+  border-radius: 4px;
+  color: white;
+}
+
+.button:hover {
+  background: #B0B0DB;
+  cursor: pointer;
+}

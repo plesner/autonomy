@@ -1,9 +1,10 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-  xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  xmlns:g="urn:import:com.google.gwt.user.client.ui"
+  xmlns:w="urn:import:org.au.tonomy.client.widget.workspace">
   <ui:style src="../constants.css HeaderWidget.css"></ui:style>
   <g:FlowPanel stylePrimaryName="{style.main}">
     <g:Label stylePrimaryName="{style.title}">Autonomy</g:Label>
-    <g:Label ui:field="status" stylePrimaryName="{style.status}"></g:Label>
+    <w:LogInOutButton></w:LogInOutButton>
   </g:FlowPanel>
 </ui:UiBinder> 

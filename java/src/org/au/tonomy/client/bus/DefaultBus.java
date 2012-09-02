@@ -11,31 +11,12 @@ import org.au.tonomy.shared.util.UndoList;
  */
 public class DefaultBus extends Bus {
 
-  private String status;
-  private final UndoList<IThunk<String>> statusListeners = UndoList.create();
   private final UndoList<Message> messages = UndoList.create();
   private final UndoList<IThunk<Message>> messageAddedListeners = UndoList.create();
 
   @Override
-  public String getStatus() {
-    return this.status;
-  }
-
-  @Override
-  public void setStatus(String value) {
-    this.status = value;
-    for (IThunk<String> listener : statusListeners)
-      listener.call(value);
-  }
-
-  @Override
   public Collection<Message> getMessages() {
     return messages.get();
-  }
-
-  @Override
-  public IUndo addStatusListener(final IThunk<String> listener) {
-    return statusListeners.add(listener);
   }
 
   @Override
