@@ -1,8 +1,9 @@
 .container {
   top: 3px;
   bottom: 3px;
-  left: 3px;
-  width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 500pt;
   border: ccDimBorder;
   background: ccLightBackground;
 }
@@ -14,4 +15,5 @@
   width: 100%;
   color: ccDimText;
   font-size: 10pt;
+  margin-top: -.7em;
 }
