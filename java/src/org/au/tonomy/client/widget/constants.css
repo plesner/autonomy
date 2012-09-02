@@ -1,0 +1,19 @@
+/* 
+ * Color scheme constants. All prefixed with "cc" (as in css constant)
+ * to distinguish them from built-in constants.
+ */
+@def ccPrimaryColor #52529C;
+@def ccDarkPrimaryColor #333381;
+@def ccLightPrimaryColor #7272B5;
+
+@def ccDimBackground #F7F7F7;
+@def ccDimBorder 1px solid #E0E0E0;
+@def ccLightBackground white;
+
+/*
+ * Various font related constants.
+ */
+@def ccSansSerif "Open Sans", sans-serif;
+@def ccDarkText grey;
+@def ccDimText silver;
+@def ccLightText white;

@@ -1,7 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
-  <ui:style src="PageWidget.css"/>
+  <ui:style src="constants.css PageWidget.css"/>
   <g:FlowPanel stylePrimaryName="{style.container}">
     <g:Label stylePrimaryName="{style.message}">Press Ctrl-O to open a file</g:Label>
   </g:FlowPanel>

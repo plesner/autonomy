@@ -4,7 +4,7 @@
   right: 0px;
   top: 0px;
   bottom: 0px;
-  font-family: "Open Sans", sans-serif;
+  font-family: ccSansSerif;
 }
 
 .workspace {
@@ -14,7 +14,7 @@
   right: 0px;
   top: 22pt;
   bottom: 0px;
-  background: #F7F7F7;
+  background: ccDimBackground;
 }
 
 .background {

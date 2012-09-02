@@ -1,15 +1,15 @@
 .main {
   height: 22pt;
-  background: #C8C8FF;
+  background-color: ccPrimaryColor;
+  background-image: literal("-webkit-linear-gradient(top, ") ccLightPrimaryColor literal(", ") ccPrimaryColor literal(")");
+  background-image: literal("-moz-linear-gradient(to bottom, ") ccLightPrimaryColor literal(", ") ccPrimaryColor literal(")");
 }
 
 .title {
-  font-size: 16pt;
-  font-family: sans-serif;
-  font-weight: bold;
-  padding-top: 2pt;
+  font-size: 15pt;
+  font-family: ccSansSerif;
   padding-left: 4pt;
-  color: #98AEF5;
+  color: ccLightText;
   float: left;
 }
 
@@ -17,7 +17,7 @@
   float: right;
   margin-top: 6pt;
   margin-right: 6pt;
-  font-family: sans-serif;
+  font-family: ccSansSerif;
   font-size: 10pt;
   color: gray;
 }

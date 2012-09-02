@@ -47,7 +47,7 @@ public class WorkspaceWidget extends Composite {
 
   public interface Resources extends ClientBundle {
 
-    @Source("WorkspaceWidget.css")
+    @Source({"../constants.css", "WorkspaceWidget.css"})
     public Css css();
 
   }
