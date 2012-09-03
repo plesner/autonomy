@@ -1,8 +1,10 @@
 package org.au.tonomy.client.codemirror;
 
+import org.au.tonomy.client.util.JavaScriptObjects;
 import org.au.tonomy.shared.util.IThunk;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArrayMixed;
 /**
  * A codemirror key map.
  */
@@ -44,6 +46,7 @@ public class KeyMap {
 
     private final String name;
     private final JavaScriptObject mappings = JavaScriptObject.createObject();
+    private JsArrayMixed fallthroughs;
 
     private Builder(String name) {
       this.name = name;
@@ -59,6 +62,18 @@ public class KeyMap {
       };
       return this;
     }-*/;
+
+    /**
+     * Adds a fallback key mapping.
+     */
+    public Builder addFallthrough(String name) {
+      if (fallthroughs == null) {
+        fallthroughs = JavaScriptObject.createArray().cast();
+        JavaScriptObjects.setProperty(mappings, "fallthrough", fallthroughs);
+      }
+      fallthroughs.push(name);
+      return this;
+    }
 
     /**
      * Returns the finished key map.

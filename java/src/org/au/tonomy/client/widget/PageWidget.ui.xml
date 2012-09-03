@@ -3,6 +3,6 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui">
   <ui:style src="constants.css PageWidget.css"/>
   <g:FlowPanel stylePrimaryName="{style.container}">
-    <g:Label stylePrimaryName="{style.message}">Press Ctrl-O to open a file</g:Label>
+    <g:FlowPanel ui:field="contents" />
   </g:FlowPanel>
 </ui:UiBinder> 

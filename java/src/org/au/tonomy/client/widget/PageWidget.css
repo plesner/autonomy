@@ -1,19 +1,9 @@
 .container {
   top: 3px;
   bottom: 3px;
-  margin-left: auto;
-  margin-right: auto;
-  width: 500pt;
+  left: 3px;
+  width: 520pt;
   border: ccDimBorder;
   background: ccLightBackground;
-}
-
-.message {
-  text-align: center;
-  top: 50%;
-  position: absolute;
-  width: 100%;
-  color: ccDimText;
-  font-size: 10pt;
-  margin-top: -.7em;
+  overflow-y: auto;
 }

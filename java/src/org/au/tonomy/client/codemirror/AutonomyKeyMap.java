@@ -15,6 +15,7 @@ public class AutonomyKeyMap {
         .newBuilder("autonomy")
         .addBinding("Cmd-S", getForwarder(IAction.Type.SAVE))
         .addBinding("Cmd-Z", getForwarder(IAction.Type.UNDO))
+        .addFallthrough("basic")
         .build();
   }
 
