@@ -1,4 +1,4 @@
-package org.au.tonomy.shared.util;
+package org.au.tonomy.shared.plankton;
 /**
  * A factory for creating json objects. The server and client side use
  * different types objects to represent arrays and mapes and this

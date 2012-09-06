@@ -7,12 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.au.tonomy.shared.plankton.IPlanktonFactory.IPlanktonArray;
+import org.au.tonomy.shared.plankton.IPlanktonFactory.IPlanktonMap;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Exceptions;
 import org.au.tonomy.shared.util.Factory;
-import org.au.tonomy.shared.util.IPlanktonFactory;
-import org.au.tonomy.shared.util.IPlanktonFactory.IPlanktonArray;
-import org.au.tonomy.shared.util.IPlanktonFactory.IPlanktonMap;
 
 
 /**
@@ -53,8 +52,10 @@ public class Plankton {
         encode(elm, out);
     } else if (value == null) {
       out.addByte(tNull);
-    } else if (value instanceof IPlanktonable) {
-      encode(((IPlanktonable) value).toPlankton(FACTORY), out);
+    } else if (value instanceof IPlanktonDatable) {
+      encode(((IPlanktonDatable) value).toPlanktonData(FACTORY), out);
+    } else if (value instanceof IPlanktonable<?>) {
+      encode(((IPlanktonable<?>) value).toPlankton(), out);
     } else {
       Assert.that(false);
     }

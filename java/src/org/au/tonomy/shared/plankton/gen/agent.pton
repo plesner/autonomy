@@ -1,0 +1,30 @@
+- settings:
+    package: org.au.tonomy.shared.plankton.gen
+
+- type: Document
+  fields:
+    text: string
+    fingerprint: Fingerprint
+
+- type: Fingerprint
+  implements:
+    - org.au.tonomy.shared.ot.IFingerprint
+  fields:
+    variant: string
+    payload: string
+
+- type: File
+  fields:
+    id: i32
+    name: string
+    path: string
+
+- type: Session
+  fields:
+    id: string
+
+- type: Operation
+  fields:
+    type: i32
+    count: i32
+    text: string

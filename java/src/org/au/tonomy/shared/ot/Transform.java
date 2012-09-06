@@ -3,16 +3,17 @@ package org.au.tonomy.shared.ot;
 import java.util.Iterator;
 import java.util.List;
 
-import org.au.tonomy.shared.plankton.IPlanktonable;
+import org.au.tonomy.shared.plankton.IPlanktonDatable;
+import org.au.tonomy.shared.plankton.IPlanktonFactory;
+import org.au.tonomy.shared.plankton.gen.POperation;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.IFunction;
-import org.au.tonomy.shared.util.IPlanktonFactory;
 import org.au.tonomy.shared.util.Pair;
 /**
  * A sequence of operations that transform a document.
  */
-public class Transform implements IFunction<String, String>, Iterable<Operation>, IPlanktonable {
+public class Transform implements IFunction<String, String>, Iterable<Operation>, IPlanktonDatable {
 
   private final List<Operation> ops;
   private int inputLengthCache = -1;
@@ -178,7 +179,7 @@ public class Transform implements IFunction<String, String>, Iterable<Operation>
   }
 
   @Override
-  public Object toPlankton(IPlanktonFactory factory) {
+  public Object toPlanktonData(IPlanktonFactory factory) {
     return ops;
   }
 
@@ -188,7 +189,7 @@ public class Transform implements IFunction<String, String>, Iterable<Operation>
   public static Transform unpack(List<?> list) {
     List<Operation> ops = Factory.newArrayList();
     for (Object op : list)
-      ops.add(Operation.unpack((List<?>) op));
+      ops.add(Operation.unpack(POperation.parse(op)));
     return new Transform(ops);
   }
 

@@ -6,10 +6,10 @@ import java.util.Map;
 import org.au.tonomy.shared.ot.IDocument;
 import org.au.tonomy.shared.ot.Transform;
 import org.au.tonomy.shared.plankton.IPlanktonable;
+import org.au.tonomy.shared.plankton.gen.PSession;
 import org.au.tonomy.shared.util.Factory;
-import org.au.tonomy.shared.util.IPlanktonFactory;
 
-public class Session implements IPlanktonable {
+public class Session implements IPlanktonable<PSession> {
 
   private final String id;
   private final FileSystem fileSystem;
@@ -72,10 +72,12 @@ public class Session implements IPlanktonable {
     file.savePendingChanges();
   }
 
-
   @Override
-  public Object toPlankton(IPlanktonFactory factory) {
-    return factory.newMap().set("session", this.id);
+  public PSession toPlankton() {
+    return PSession
+        .newBuilder()
+        .setId(id)
+        .build();
   }
 
 }

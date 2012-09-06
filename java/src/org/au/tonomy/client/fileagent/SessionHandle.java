@@ -1,8 +1,9 @@
 package org.au.tonomy.client.fileagent;
 
 import java.util.List;
-import java.util.Map;
 
+import org.au.tonomy.shared.plankton.gen.PFile;
+import org.au.tonomy.shared.plankton.gen.PSession;
 import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.IFunction;
 import org.au.tonomy.shared.util.Promise;
@@ -11,24 +12,24 @@ import org.au.tonomy.shared.util.Promise;
  */
 public class SessionHandle {
 
-  private final String id;
   private final FileAgent agent;
+  private final PSession data;
 
-  public SessionHandle(Map<?, ?> data, FileAgent agent) {
+  public SessionHandle(FileAgent agent, PSession data) {
     this.agent = agent;
-    this.id = (String) data.get("session");
+    this.data = data;
   }
 
   /**
    * Returns the unique identifier for this session.
    */
   public String getId() {
-    return id;
+    return data.getId();
   }
 
   public Promise<List<FileHandle>> getRoots() {
     return agent.newMessage("fileroots")
-        .setArgument("session", id)
+        .setArgument("session", data.getId())
         .send()
         .then(new IFunction<Object, List<FileHandle>>() {
           @Override
@@ -36,7 +37,7 @@ public class SessionHandle {
             List<?> files = (List<?>) arg;
             List<FileHandle> result = Factory.newArrayList();
             for (Object file : files)
-              result.add(new FileHandle((Map<?, ?>) file, agent, SessionHandle.this));
+              result.add(new FileHandle(agent, SessionHandle.this, PFile.parse(file)));
             return result;
           }
         });

@@ -1,37 +1,38 @@
 package org.au.tonomy.client.fileagent;
 
-import java.util.Map;
-
 import org.au.tonomy.shared.ot.IFingerprint;
 import org.au.tonomy.shared.ot.IMutableDocument;
 import org.au.tonomy.shared.ot.Transform;
-/**
- * A document backed by json.
- */
+import org.au.tonomy.shared.plankton.gen.PDocument;
+
 public class DocumentHandle implements IMutableDocument {
 
-  private final String text;
-  private final IFingerprint fingerprint;
+  private final PDocument data;
   private final FileHandle file;
 
-  protected DocumentHandle(Map<?, ?> map, FileHandle file) {
-    this.text = (String) map.get("text");
-    this.fingerprint = new FingerprintHandle((Map<?, ?>) map.get("fingerprint"));
+  public DocumentHandle(PDocument data, FileHandle file) {
+    this.data = data;
     this.file = file;
   }
 
   @Override
   public IFingerprint getFingerprint() {
-    return this.fingerprint;
+    return data.getFingerprint();
   }
 
   @Override
   public String getText() {
-    return this.text;
+    return data.getText();
   }
 
+  @Override
   public void apply(Transform transform) {
     file.apply(transform);
+  }
+
+  @Override
+  public PDocument toPlankton() {
+    return data;
   }
 
 }

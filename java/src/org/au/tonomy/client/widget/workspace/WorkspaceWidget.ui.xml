@@ -4,7 +4,6 @@
   <ui:with field="res" type="org.au.tonomy.client.widget.workspace.WorkspaceWidget.Resources"/>
   <g:FlowPanel stylePrimaryName="{res.css.wholePage}">
     <w:HeaderWidget ui:field="header"></w:HeaderWidget>
-    <g:FlowPanel ui:field="workspace" stylePrimaryName="{res.css.workspace}">
-    </g:FlowPanel>
+    <g:FlowPanel ui:field="workspace" stylePrimaryName="{res.css.workspace}" />
   </g:FlowPanel>
 </ui:UiBinder>

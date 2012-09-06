@@ -1,10 +1,13 @@
 package org.au.tonomy.shared.ot;
 
+import org.au.tonomy.shared.plankton.IPlanktonable;
+import org.au.tonomy.shared.plankton.gen.PDocument;
+
 
 /**
  * A document is a piece of text along with a unique id.
  */
-public interface IDocument {
+public interface IDocument extends IPlanktonable<PDocument> {
 
   /**
    * A document provider that can produce documents from source code.

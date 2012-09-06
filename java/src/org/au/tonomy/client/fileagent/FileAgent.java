@@ -1,7 +1,6 @@
 package org.au.tonomy.client.fileagent;
 
-import java.util.Map;
-
+import org.au.tonomy.shared.plankton.gen.PSession;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.IFunction;
 import org.au.tonomy.shared.util.Promise;
@@ -43,7 +42,7 @@ public class FileAgent extends CrossDomainSocket {
         .then(new IFunction<Object, SessionHandle>() {
           @Override
           public SessionHandle call(Object data) {
-            session = new SessionHandle((Map<?, ?>) data, FileAgent.this);
+            session = new SessionHandle(FileAgent.this, PSession.parse(data));
             return session;
           }
         });

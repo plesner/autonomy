@@ -4,13 +4,13 @@ import java.util.List;
 
 import org.au.tonomy.shared.ot.Transform;
 import org.au.tonomy.shared.plankton.IPlanktonable;
+import org.au.tonomy.shared.plankton.gen.PFile;
 import org.au.tonomy.shared.util.Factory;
-import org.au.tonomy.shared.util.IPlanktonFactory;
 
 /**
  * The file information specific to a single session.
  */
-public class SessionFile implements IPlanktonable {
+public class SessionFile implements IPlanktonable<PFile> {
 
   private final Session sessionData;
   private final int id;
@@ -24,12 +24,13 @@ public class SessionFile implements IPlanktonable {
   }
 
   @Override
-  public Object toPlankton(IPlanktonFactory factory) {
-    return factory
-        .newMap()
-        .set("id", id)
-        .set("path", shared.getFullPath())
-        .set("name", shared.getShortName());
+  public PFile toPlankton() {
+    return PFile
+        .newBuilder()
+        .setId(id)
+        .setPath(shared.getFullPath())
+        .setName(shared.getShortName())
+        .build();
   }
 
   public List<SessionFile> listFiles() {

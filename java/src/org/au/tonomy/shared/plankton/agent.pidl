@@ -20,14 +20,14 @@
     session: string
     file: i32
 
-- type: Operation
-  enum:
-    name: Type
-    entries:
-      INSERT: 0
-      DELETE: 2
-      SKIP: 1
+- type: Document
   fields:
-    type: Type
-    test: string
-    count: i32
+    text: string
+    fingerprint: Fingerprint
+
+- type: Fingerprint
+  implements:
+    - org.au.tonomy.shared.ot.IFingerprint
+  fields:
+    variant: string
+    payload: string

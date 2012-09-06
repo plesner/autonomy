@@ -27,12 +27,12 @@
     <!-- Add any additional server libs that need to be copied -->
   </target>
 
-  <target name="planktonc" description="Compile thrift definitions">
+  <target name="planktonc" description="Compile plankton definitions">
     <mkdir dir="${gen}"/>    
     <apply executable="tools/planktonc.py" parallel="true">
       <arg value="--out"/>
       <arg value="${gen}"/>
-      <fileset dir="java/src/org/au/tonomy/shared/plankton" includes="**/*.pidl"/>
+      <fileset dir="java/src/org/au/tonomy/shared/plankton/gen" includes="**/*.pton"/>
     </apply>
   </target>
 

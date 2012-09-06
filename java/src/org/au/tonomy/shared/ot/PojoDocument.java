@@ -1,12 +1,13 @@
 package org.au.tonomy.shared.ot;
 
-import org.au.tonomy.shared.plankton.IPlanktonable;
-import org.au.tonomy.shared.util.IPlanktonFactory;
+import org.au.tonomy.shared.plankton.gen.PDocument;
+
+
 
 /**
  * A plain old java document object.
  */
-public class PojoDocument implements IDocument, IPlanktonable {
+public class PojoDocument implements IDocument {
 
   private final String text;
   private final IFingerprint fingerprint;
@@ -40,10 +41,13 @@ public class PojoDocument implements IDocument, IPlanktonable {
   }
 
   @Override
-  public Object toPlankton(IPlanktonFactory factory) {
-    return factory.newMap()
-        .set("fingerprint", getFingerprint())
-        .set("text", getText());
+  public PDocument toPlankton() {
+    return PDocument
+        .newBuilder()
+        .setFingerprint(fingerprint.toPlankton())
+        .setText(text)
+        .build();
+
   }
 
 }

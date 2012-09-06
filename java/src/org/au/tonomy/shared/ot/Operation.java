@@ -1,15 +1,13 @@
 package org.au.tonomy.shared.ot;
 
-import java.util.List;
-
 import org.au.tonomy.shared.plankton.IPlanktonable;
+import org.au.tonomy.shared.plankton.gen.POperation;
 import org.au.tonomy.shared.util.Assert;
-import org.au.tonomy.shared.util.IPlanktonFactory;
 
 /**
  * A text operation.
  */
-public abstract class Operation implements IPlanktonable {
+public abstract class Operation implements IPlanktonable<POperation> {
 
   /**
    * Identifies the different types of operations.
@@ -284,8 +282,12 @@ public abstract class Operation implements IPlanktonable {
     }
 
     @Override
-    public Object toPlankton(IPlanktonFactory factory) {
-      return factory.newArray().push("+").push(text);
+    public POperation toPlankton() {
+      return POperation
+          .newBuilder()
+          .setType('+')
+          .setText(text)
+          .build();
     }
 
     @Override
@@ -442,8 +444,12 @@ public abstract class Operation implements IPlanktonable {
     }
 
     @Override
-    public Object toPlankton(IPlanktonFactory factory) {
-      return factory.newArray().push("-").push(text);
+    public POperation toPlankton() {
+      return POperation
+          .newBuilder()
+          .setType('-')
+          .setText(text)
+          .build();
     }
 
     @Override
@@ -619,8 +625,12 @@ public abstract class Operation implements IPlanktonable {
     }
 
     @Override
-    public Object toPlankton(IPlanktonFactory factory) {
-      return factory.newArray().push(">").push(count);
+    public POperation toPlankton() {
+      return POperation
+          .newBuilder()
+          .setType('>')
+          .setCount(count)
+          .build();
     }
 
     @Override
@@ -692,14 +702,16 @@ public abstract class Operation implements IPlanktonable {
   /**
    * Unpacks an op from a plankton serialized value.
    */
-  public static Operation unpack(List<?> elms) {
-    String tag = (String) elms.get(0);
-    if (">".equals(tag)) {
-      return new Skip((Integer) elms.get(1));
-    } else if ("+".equals(tag)) {
-      return new Insert((String) elms.get(1));
-    } else {
-      return new Delete((String) elms.get(1));
+  public static Operation unpack(POperation data) {
+    switch (data.getType()) {
+    case '+':
+      return new Insert(data.getText());
+    case '-':
+      return new Delete(data.getText());
+    case '>':
+      return new Skip(data.getCount());
+    default:
+      return null;
     }
   }
 

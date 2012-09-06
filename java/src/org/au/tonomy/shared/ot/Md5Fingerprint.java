@@ -4,16 +4,15 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import org.au.tonomy.shared.plankton.IPlanktonable;
+import org.au.tonomy.shared.plankton.gen.PFingerprint;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Exceptions;
-import org.au.tonomy.shared.util.IPlanktonFactory;
 import org.au.tonomy.shared.util.Misc;
 
 /**
  * A fingerprint based on the MD5 hash of the string.
  */
-public class Md5Fingerprint implements IFingerprint, IPlanktonable {
+public class Md5Fingerprint implements IFingerprint {
 
   private final String hash;
 
@@ -23,10 +22,13 @@ public class Md5Fingerprint implements IFingerprint, IPlanktonable {
   }
 
   @Override
-  public Object toPlankton(IPlanktonFactory factory) {
-    return factory.newMap()
-        .set("type", "MD5")
-        .set("hash", hash);
+  public String getPayload() {
+    return hash;
+  }
+
+  @Override
+  public String getVariant() {
+    return "MD5";
   }
 
   /**
@@ -95,6 +97,15 @@ public class Md5Fingerprint implements IFingerprint, IPlanktonable {
   @Override
   public String toString() {
     return "MD5[" + hash + "]";
+  }
+
+  @Override
+  public PFingerprint toPlankton() {
+    return PFingerprint
+        .newBuilder()
+        .setPayload(getPayload())
+        .setVariant(getVariant())
+        .build();
   }
 
 }

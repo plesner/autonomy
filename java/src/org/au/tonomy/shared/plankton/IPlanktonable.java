@@ -1,16 +1,10 @@
 package org.au.tonomy.shared.plankton;
-
-import org.au.tonomy.shared.util.IPlanktonFactory;
-
 /**
- * Types that implement this interface are asked to convert themselves
- * to plankton when being serialized.
+ * Interface for types that can convert themselves to structured
+ * plankton wrapper objects.
  */
-public interface IPlanktonable {
+public interface IPlanktonable<P extends IPlanktonObject> {
 
-  /**
-   * Return a plankton representation of this object.
-   */
-  public Object toPlankton(IPlanktonFactory factory);
+  public P toPlankton();
 
 }
