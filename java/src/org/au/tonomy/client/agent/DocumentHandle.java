@@ -1,9 +1,9 @@
-package org.au.tonomy.client.fileagent;
+package org.au.tonomy.client.agent;
 
+import org.au.tonomy.shared.agent.pton.PDocument;
 import org.au.tonomy.shared.ot.IFingerprint;
 import org.au.tonomy.shared.ot.IMutableDocument;
 import org.au.tonomy.shared.ot.Transform;
-import org.au.tonomy.shared.plankton.gen.PDocument;
 
 public class DocumentHandle implements IMutableDocument {
 

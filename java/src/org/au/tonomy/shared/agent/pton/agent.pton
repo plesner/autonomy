@@ -1,5 +1,5 @@
 - settings:
-    package: org.au.tonomy.shared.plankton.gen
+    package: org.au.tonomy.shared.agent.pton
 
 - type: Document
   fields:

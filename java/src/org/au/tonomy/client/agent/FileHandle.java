@@ -1,11 +1,11 @@
-package org.au.tonomy.client.fileagent;
+package org.au.tonomy.client.agent;
 
 import java.util.List;
 import java.util.Map;
 
+import org.au.tonomy.shared.agent.pton.PDocument;
+import org.au.tonomy.shared.agent.pton.PFile;
 import org.au.tonomy.shared.ot.Transform;
-import org.au.tonomy.shared.plankton.gen.PDocument;
-import org.au.tonomy.shared.plankton.gen.PFile;
 import org.au.tonomy.shared.source.ISourceEntry;
 import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.IFunction;

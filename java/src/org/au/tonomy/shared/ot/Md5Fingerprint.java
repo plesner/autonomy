@@ -4,7 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import org.au.tonomy.shared.plankton.gen.PFingerprint;
+import org.au.tonomy.shared.agent.pton.PFingerprint;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Exceptions;
 import org.au.tonomy.shared.util.Misc;

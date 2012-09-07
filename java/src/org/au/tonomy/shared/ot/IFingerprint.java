@@ -1,7 +1,7 @@
 package org.au.tonomy.shared.ot;
 
+import org.au.tonomy.shared.agent.pton.PFingerprint;
 import org.au.tonomy.shared.plankton.IPlanktonable;
-import org.au.tonomy.shared.plankton.gen.PFingerprint;
 
 
 

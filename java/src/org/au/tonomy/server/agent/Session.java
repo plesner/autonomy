@@ -3,10 +3,10 @@ package org.au.tonomy.server.agent;
 import java.util.List;
 import java.util.Map;
 
+import org.au.tonomy.shared.agent.pton.PSession;
 import org.au.tonomy.shared.ot.IDocument;
 import org.au.tonomy.shared.ot.Transform;
 import org.au.tonomy.shared.plankton.IPlanktonable;
-import org.au.tonomy.shared.plankton.gen.PSession;
 import org.au.tonomy.shared.util.Factory;
 
 public class Session implements IPlanktonable<PSession> {

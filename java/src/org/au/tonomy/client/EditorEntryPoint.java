@@ -3,12 +3,12 @@ package org.au.tonomy.client;
 import java.util.List;
 import java.util.Map;
 
+import org.au.tonomy.client.agent.DocumentHandle;
+import org.au.tonomy.client.agent.FileAgent;
+import org.au.tonomy.client.agent.FileHandle;
 import org.au.tonomy.client.bus.Bus;
 import org.au.tonomy.client.bus.DefaultBus;
 import org.au.tonomy.client.bus.Message;
-import org.au.tonomy.client.fileagent.DocumentHandle;
-import org.au.tonomy.client.fileagent.FileAgent;
-import org.au.tonomy.client.fileagent.FileHandle;
 import org.au.tonomy.client.presentation.EditorPresenter;
 import org.au.tonomy.client.util.Callback;
 import org.au.tonomy.client.widget.EditorWidget;

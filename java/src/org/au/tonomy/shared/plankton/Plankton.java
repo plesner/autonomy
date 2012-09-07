@@ -12,6 +12,7 @@ import org.au.tonomy.shared.plankton.IPlanktonFactory.IPlanktonMap;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Exceptions;
 import org.au.tonomy.shared.util.Factory;
+import org.au.tonomy.shared.util.Internal;
 
 
 /**
@@ -120,6 +121,11 @@ public class Plankton {
     } catch (UnsupportedEncodingException uee) {
       throw Exceptions.propagate(uee);
     }
+  }
+
+  @Internal
+  public static IPlanktonFactory getDefaultFactory() {
+    return FACTORY;
   }
 
   private static final IPlanktonFactory FACTORY = new IPlanktonFactory() {

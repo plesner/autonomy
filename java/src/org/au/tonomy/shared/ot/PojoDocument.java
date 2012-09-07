@@ -1,6 +1,6 @@
 package org.au.tonomy.shared.ot;
 
-import org.au.tonomy.shared.plankton.gen.PDocument;
+import org.au.tonomy.shared.agent.pton.PDocument;
 
 
 

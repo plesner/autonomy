@@ -1,9 +1,9 @@
-package org.au.tonomy.client.fileagent;
+package org.au.tonomy.client.agent;
 
 import java.util.List;
 
-import org.au.tonomy.shared.plankton.gen.PFile;
-import org.au.tonomy.shared.plankton.gen.PSession;
+import org.au.tonomy.shared.agent.pton.PFile;
+import org.au.tonomy.shared.agent.pton.PSession;
 import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.IFunction;
 import org.au.tonomy.shared.util.Promise;

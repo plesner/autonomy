@@ -1,6 +1,6 @@
-package org.au.tonomy.client.fileagent;
+package org.au.tonomy.client.agent;
 
-import org.au.tonomy.shared.plankton.gen.PSession;
+import org.au.tonomy.shared.agent.pton.PSession;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.IFunction;
 import org.au.tonomy.shared.util.Promise;

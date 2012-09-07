@@ -1,0 +1,12 @@
+- settings:
+    package: test.org.au.tonomy.shared.plankton
+
+- type: Point
+  fields:
+    x: i32
+    y: i32
+
+- type: Rect
+  fields:
+    top_left: Point
+    bottom_right: Point

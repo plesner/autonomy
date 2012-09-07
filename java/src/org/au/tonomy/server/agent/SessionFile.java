@@ -2,9 +2,9 @@ package org.au.tonomy.server.agent;
 
 import java.util.List;
 
+import org.au.tonomy.shared.agent.pton.PFile;
 import org.au.tonomy.shared.ot.Transform;
 import org.au.tonomy.shared.plankton.IPlanktonable;
-import org.au.tonomy.shared.plankton.gen.PFile;
 import org.au.tonomy.shared.util.Factory;
 
 /**

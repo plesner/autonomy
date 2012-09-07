@@ -1,4 +1,4 @@
-package org.au.tonomy.client.fileagent;
+package org.au.tonomy.client.agent;
 
 import com.google.gwt.event.shared.EventHandler;
 /**

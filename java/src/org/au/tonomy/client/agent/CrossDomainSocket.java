@@ -1,4 +1,4 @@
-package org.au.tonomy.client.fileagent;
+package org.au.tonomy.client.agent;
 
 import java.util.HashMap;
 import java.util.List;
@@ -174,8 +174,8 @@ public abstract class CrossDomainSocket {
    * Sends an object as a message to the frame connected to this proxy.
    */
   private native void postMessage(String message) /*-{
-    var source = this.@org.au.tonomy.client.fileagent.CrossDomainSocket::source;
-    var targetOrigin = this.@org.au.tonomy.client.fileagent.CrossDomainSocket::root;
+    var source = this.@org.au.tonomy.client.agent.CrossDomainSocket::source;
+    var targetOrigin = this.@org.au.tonomy.client.agent.CrossDomainSocket::root;
     source.source.postMessage(message, targetOrigin);
   }-*/;
 

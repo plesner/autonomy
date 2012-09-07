@@ -1,4 +1,4 @@
-package org.au.tonomy.client.fileagent;
+package org.au.tonomy.client.agent;
 
 import com.google.gwt.core.client.JavaScriptObject;
 /**
@@ -28,7 +28,7 @@ public class MessageEvent extends JavaScriptObject {
    */
   public static native void addMessageHandler(MessageHandler handler) /*-{
     $wnd.addEventListener("message", function (event) {
-      handler.@org.au.tonomy.client.fileagent.MessageHandler::onMessage(Lorg/au/tonomy/client/fileagent/MessageEvent;)(event);
+      handler.@org.au.tonomy.client.agent.MessageHandler::onMessage(Lorg/au/tonomy/client/agent/MessageEvent;)(event);
     }, false);
   }-*/;
 
