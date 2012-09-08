@@ -4,7 +4,7 @@ package org.au.tonomy.shared.plankton;
 /**
  * Signals that an error occurred while decoding plankton.
  */
-public class DecodingError extends Exception {
+public class DecodingError extends RuntimeException {
 
   public DecodingError(String message) {
     super(message);

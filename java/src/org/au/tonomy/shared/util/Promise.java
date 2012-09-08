@@ -95,6 +95,20 @@ public class Promise<T> {
     return new Promise<T>();
   }
 
+  public T getValue() {
+    Assert.equals(state, State.SUCCEEDED);
+    return this.value;
+  }
+
+  /**
+   * Creates a new promise with a fixed value.
+   */
+  public static <T> Promise<T> of(T value) {
+    Promise<T> result = Promise.newEmpty();
+    result.fulfill(value);
+    return result;
+  }
+
   /**
    * Resolve the given promise when this one is resolved.
    */

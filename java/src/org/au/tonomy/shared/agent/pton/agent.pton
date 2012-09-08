@@ -1,6 +1,18 @@
 - settings:
     package: org.au.tonomy.shared.agent.pton
 
+# The agent service
+
+- service: AgentService
+
+- command: start_session
+  target: AgentService
+  out: SessionData
+  in:
+    href: string
+
+# Data types used in communication with the agent.
+
 - type: DocumentData
   fields:
     text: string

@@ -10,3 +10,25 @@
   fields:
     top_left: Point
     bottom_right: Point
+
+- service: MathService
+
+- command: mult
+  target: MathService
+  in:
+    a: i32
+    b: i32
+  out: i32
+
+- command: add
+  target: MathService
+  in:
+    a: i32
+    b: i32
+  out: i32
+
+- command: neg
+  target: MathService
+  in:
+    value: i32
+  out: i32
