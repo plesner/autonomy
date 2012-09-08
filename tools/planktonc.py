@@ -164,7 +164,7 @@ _BASIC_TYPES = {
 
 # Given a plankton type, returns the corresponding java type.
 def pton_to_java_type(name):
-  return _BASIC_TYPES.get(name, "P" + name)
+  return _BASIC_TYPES.get(name, name)
 
 _REFERENCE_TYPES = {
   "i32": "java.lang.Integer",
@@ -193,9 +193,18 @@ _DEFAULT_VALUES = {
 def pton_to_default_value(type):
   return _DEFAULT_VALUES.get(type, "null")
 
+def to_lower_camel(name):
+  upper = to_upper_camel(name)
+  return upper[0].lower() + upper[1:]
+
 # Returns the given name in upper camel case
 def to_upper_camel(name):
-  return name[0].upper() + name[1:].lower()
+  def title(str):
+    if len(str) == 0:
+      return str
+    else:
+      return str[0].upper() + str[1:].lower()
+  return "".join(map(title, name.split("_")))
 
 def to_lines(data):
   if type(data) == dict:
@@ -333,7 +342,7 @@ if (map.containsKey(\"%(name)s\")) {
       fragments = {
         "name": name,
         "type": type,
-        "lowerCamelName": name,
+        "lowerCamelName": to_lower_camel(name),
         "UpperCamelName": to_upper_camel(name),
         "JavaType": pton_to_java_type(type),
         "ReferenceType": pton_to_reference_type(type),

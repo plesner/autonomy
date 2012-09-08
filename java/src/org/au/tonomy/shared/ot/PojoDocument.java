@@ -1,6 +1,6 @@
 package org.au.tonomy.shared.ot;
 
-import org.au.tonomy.shared.agent.pton.PDocument;
+import org.au.tonomy.shared.agent.pton.DocumentData;
 
 
 
@@ -41,8 +41,8 @@ public class PojoDocument implements IDocument {
   }
 
   @Override
-  public PDocument toPlankton() {
-    return PDocument
+  public DocumentData toPlankton() {
+    return DocumentData
         .newBuilder()
         .setFingerprint(fingerprint.toPlankton())
         .setText(text)

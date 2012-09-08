@@ -3,8 +3,8 @@ package org.au.tonomy.client.agent;
 import java.util.List;
 import java.util.Map;
 
-import org.au.tonomy.shared.agent.pton.PDocument;
-import org.au.tonomy.shared.agent.pton.PFile;
+import org.au.tonomy.shared.agent.pton.DocumentData;
+import org.au.tonomy.shared.agent.pton.FileData;
 import org.au.tonomy.shared.ot.Transform;
 import org.au.tonomy.shared.source.ISourceEntry;
 import org.au.tonomy.shared.util.Factory;
@@ -17,9 +17,9 @@ public class FileHandle implements ISourceEntry {
 
   private final FileAgent agent;
   private final SessionHandle session;
-  private final PFile data;
+  private final FileData data;
 
-  public FileHandle(FileAgent agent, SessionHandle session, PFile data) {
+  public FileHandle(FileAgent agent, SessionHandle session, FileData data) {
     this.agent = agent;
     this.session = session;
     this.data = data;
@@ -47,7 +47,7 @@ public class FileHandle implements ISourceEntry {
           List<?> files = (List<?>) value;
           Map<String, FileHandle> list = Factory.newHashMap();
           for (Object file : files) {
-            FileHandle handle = new FileHandle(agent, session, PFile.parse(file));
+            FileHandle handle = new FileHandle(agent, session, FileData.parse(file));
             list.put(handle.getShortName(), handle);
           }
           return list;
@@ -67,7 +67,7 @@ public class FileHandle implements ISourceEntry {
         .then(new IFunction<Object, DocumentHandle>() {
           @Override
           public DocumentHandle call(Object arg) {
-            return new DocumentHandle(PDocument.parse(arg), FileHandle.this);
+            return new DocumentHandle(DocumentData.parse(arg), FileHandle.this);
           }
         });
   }

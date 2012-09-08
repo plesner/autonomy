@@ -1,13 +1,13 @@
 package org.au.tonomy.shared.ot;
 
-import org.au.tonomy.shared.agent.pton.POperation;
+import org.au.tonomy.shared.agent.pton.OperationData;
 import org.au.tonomy.shared.plankton.IPlanktonable;
 import org.au.tonomy.shared.util.Assert;
 
 /**
  * A text operation.
  */
-public abstract class Operation implements IPlanktonable<POperation> {
+public abstract class Operation implements IPlanktonable<OperationData> {
 
   /**
    * Identifies the different types of operations.
@@ -282,8 +282,8 @@ public abstract class Operation implements IPlanktonable<POperation> {
     }
 
     @Override
-    public POperation toPlankton() {
-      return POperation
+    public OperationData toPlankton() {
+      return OperationData
           .newBuilder()
           .setType('+')
           .setText(text)
@@ -444,8 +444,8 @@ public abstract class Operation implements IPlanktonable<POperation> {
     }
 
     @Override
-    public POperation toPlankton() {
-      return POperation
+    public OperationData toPlankton() {
+      return OperationData
           .newBuilder()
           .setType('-')
           .setText(text)
@@ -625,8 +625,8 @@ public abstract class Operation implements IPlanktonable<POperation> {
     }
 
     @Override
-    public POperation toPlankton() {
-      return POperation
+    public OperationData toPlankton() {
+      return OperationData
           .newBuilder()
           .setType('>')
           .setCount(count)
@@ -702,7 +702,7 @@ public abstract class Operation implements IPlanktonable<POperation> {
   /**
    * Unpacks an op from a plankton serialized value.
    */
-  public static Operation unpack(POperation data) {
+  public static Operation unpack(OperationData data) {
     switch (data.getType()) {
     case '+':
       return new Insert(data.getText());

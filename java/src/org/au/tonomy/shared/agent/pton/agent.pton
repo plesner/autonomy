@@ -1,29 +1,29 @@
 - settings:
     package: org.au.tonomy.shared.agent.pton
 
-- type: Document
+- type: DocumentData
   fields:
     text: string
-    fingerprint: Fingerprint
+    fingerprint: FingerprintData
 
-- type: Fingerprint
+- type: FingerprintData
   implements:
     - org.au.tonomy.shared.ot.IFingerprint
   fields:
     variant: string
     payload: string
 
-- type: File
+- type: FileData
   fields:
     id: i32
     name: string
     path: string
 
-- type: Session
+- type: SessionData
   fields:
     id: string
 
-- type: Operation
+- type: OperationData
   fields:
     type: i32
     count: i32

@@ -1,16 +1,16 @@
 package org.au.tonomy.client.agent;
 
-import org.au.tonomy.shared.agent.pton.PDocument;
+import org.au.tonomy.shared.agent.pton.DocumentData;
 import org.au.tonomy.shared.ot.IFingerprint;
 import org.au.tonomy.shared.ot.IMutableDocument;
 import org.au.tonomy.shared.ot.Transform;
 
 public class DocumentHandle implements IMutableDocument {
 
-  private final PDocument data;
+  private final DocumentData data;
   private final FileHandle file;
 
-  public DocumentHandle(PDocument data, FileHandle file) {
+  public DocumentHandle(DocumentData data, FileHandle file) {
     this.data = data;
     this.file = file;
   }
@@ -31,7 +31,7 @@ public class DocumentHandle implements IMutableDocument {
   }
 
   @Override
-  public PDocument toPlankton() {
+  public DocumentData toPlankton() {
     return data;
   }
 

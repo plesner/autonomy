@@ -4,7 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import org.au.tonomy.shared.agent.pton.PFingerprint;
+import org.au.tonomy.shared.agent.pton.FingerprintData;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Exceptions;
 import org.au.tonomy.shared.util.Misc;
@@ -100,8 +100,8 @@ public class Md5Fingerprint implements IFingerprint {
   }
 
   @Override
-  public PFingerprint toPlankton() {
-    return PFingerprint
+  public FingerprintData toPlankton() {
+    return FingerprintData
         .newBuilder()
         .setPayload(getPayload())
         .setVariant(getVariant())

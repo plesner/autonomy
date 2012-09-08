@@ -2,8 +2,8 @@ package org.au.tonomy.client.agent;
 
 import java.util.List;
 
-import org.au.tonomy.shared.agent.pton.PFile;
-import org.au.tonomy.shared.agent.pton.PSession;
+import org.au.tonomy.shared.agent.pton.FileData;
+import org.au.tonomy.shared.agent.pton.SessionData;
 import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.IFunction;
 import org.au.tonomy.shared.util.Promise;
@@ -13,9 +13,9 @@ import org.au.tonomy.shared.util.Promise;
 public class SessionHandle {
 
   private final FileAgent agent;
-  private final PSession data;
+  private final SessionData data;
 
-  public SessionHandle(FileAgent agent, PSession data) {
+  public SessionHandle(FileAgent agent, SessionData data) {
     this.agent = agent;
     this.data = data;
   }
@@ -37,7 +37,7 @@ public class SessionHandle {
             List<?> files = (List<?>) arg;
             List<FileHandle> result = Factory.newArrayList();
             for (Object file : files)
-              result.add(new FileHandle(agent, SessionHandle.this, PFile.parse(file)));
+              result.add(new FileHandle(agent, SessionHandle.this, FileData.parse(file)));
             return result;
           }
         });

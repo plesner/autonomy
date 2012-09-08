@@ -3,10 +3,9 @@ package org.au.tonomy.shared.ot;
 import java.util.Iterator;
 import java.util.List;
 
-import org.au.tonomy.shared.agent.pton.POperation;
+import org.au.tonomy.shared.agent.pton.OperationData;
 import org.au.tonomy.shared.plankton.IPlanktonDatable;
 import org.au.tonomy.shared.plankton.IPlanktonFactory;
-import org.au.tonomy.shared.plankton.ParseError;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.IFunction;
@@ -187,10 +186,10 @@ public class Transform implements IFunction<String, String>, Iterable<Operation>
   /**
    * Creates a transform from a plankton serialized object.
    */
-  public static Transform unpack(List<?> list) throws ParseError {
+  public static Transform unpack(List<?> list) {
     List<Operation> ops = Factory.newArrayList();
     for (Object op : list)
-      ops.add(Operation.unpack(POperation.parse(op)));
+      ops.add(Operation.unpack(OperationData.parse(op)));
     return new Transform(ops);
   }
 

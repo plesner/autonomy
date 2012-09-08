@@ -2,7 +2,7 @@ package org.au.tonomy.server.agent;
 
 import java.util.List;
 
-import org.au.tonomy.shared.agent.pton.PFile;
+import org.au.tonomy.shared.agent.pton.FileData;
 import org.au.tonomy.shared.ot.Transform;
 import org.au.tonomy.shared.plankton.IPlanktonable;
 import org.au.tonomy.shared.util.Factory;
@@ -10,7 +10,7 @@ import org.au.tonomy.shared.util.Factory;
 /**
  * The file information specific to a single session.
  */
-public class SessionFile implements IPlanktonable<PFile> {
+public class SessionFile implements IPlanktonable<FileData> {
 
   private final Session sessionData;
   private final int id;
@@ -24,8 +24,8 @@ public class SessionFile implements IPlanktonable<PFile> {
   }
 
   @Override
-  public PFile toPlankton() {
-    return PFile
+  public FileData toPlankton() {
+    return FileData
         .newBuilder()
         .setId(id)
         .setPath(shared.getFullPath())
