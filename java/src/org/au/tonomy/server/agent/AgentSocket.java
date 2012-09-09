@@ -1,18 +1,15 @@
 package org.au.tonomy.server.agent;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.au.tonomy.shared.plankton.DecodingError;
-import org.au.tonomy.shared.plankton.Plankton;
-import org.au.tonomy.shared.plankton.StringBinaryInputStream;
-import org.au.tonomy.shared.plankton.StringBinaryOutputStream;
+import org.au.tonomy.shared.agent.AgentService;
+import org.au.tonomy.shared.plankton.PackageProcessor;
+import org.au.tonomy.shared.plankton.RemoteMessage;
 import org.au.tonomy.shared.util.Exceptions;
+import org.au.tonomy.shared.util.IThunk;
+import org.au.tonomy.shared.util.Promise;
 import org.eclipse.jetty.websocket.WebSocket;
 import org.eclipse.jetty.websocket.WebSocket.OnTextMessage;
 import org.eclipse.jetty.websocket.WebSocketServlet;
@@ -21,11 +18,24 @@ import org.eclipse.jetty.websocket.WebSocketServlet;
  */
 public class AgentSocket implements OnTextMessage {
 
-  private final Agent agent;
+  private final PackageProcessor processor;
+  private final AgentServiceImpl agent;
   private Connection connection;
 
-  private AgentSocket(Agent agent) {
+  private AgentSocket(AgentServiceImpl agent) {
     this.agent = agent;
+    this.processor = new PackageProcessor(new IThunk<String>() {
+      @Override
+      public void call(String value) {
+        postOutgoing(value);
+      }
+    });
+    this.processor.setHandler(new PackageProcessor.IHandler() {
+      @Override
+      public Promise<?> onMessage(RemoteMessage message) {
+        return dispatchIncoming(message);
+      }
+    });
   }
 
   @Override
@@ -39,37 +49,24 @@ public class AgentSocket implements OnTextMessage {
   }
 
   @Override
-  public void onMessage(String messageStr) {
-    StringBinaryInputStream in = new StringBinaryInputStream(messageStr);
-    List<?> message;
-    try {
-      message = (List<?>) Plankton.decode(in);
-    } catch (DecodingError de) {
-      throw Exceptions.propagate(de);
-    }
-    String method = (String) message.get(0);
-    int id = (Integer) message.get(1);
-    Map<?, ?> args = (Map<?, ?>) message.get(2);
-    Object response = agent.dispatch(method, args);
-    if (id != -1)
-      sendResponse(id, response);
+  public void onMessage(String rawMessage) {
+    processor.dispatchPackage(rawMessage);
   }
 
-  private void sendResponse(int id, Object response) {
-    List<Object> message = Arrays.asList("respond", id, response);
-    StringBinaryOutputStream out = new StringBinaryOutputStream();
-    Plankton.encode(message, out);
+  private void postOutgoing(String message) {
     try {
-      connection.sendMessage(out.flush());
-    } catch (UnsupportedEncodingException uee) {
-      throw Exceptions.propagate(uee);
+      this.connection.sendMessage(message);
     } catch (IOException ioe) {
       throw Exceptions.propagate(ioe);
     }
   }
 
+  private Promise<?> dispatchIncoming(RemoteMessage message) {
+    return AgentService.dispatch(message, agent);
+  }
+
   @SuppressWarnings("serial")
-  public static WebSocketServlet newServlet(final Agent agent) {
+  public static WebSocketServlet newServlet(final AgentServiceImpl agent) {
     return new WebSocketServlet() {
       @Override
       public WebSocket doWebSocketConnect(HttpServletRequest request, String protocol) {

@@ -11,6 +11,11 @@
     top_left: Point
     bottom_right: Point
 
+- type: Strip
+  fields:
+    points:
+      list: Point
+
 - service: MathService
 
 - command: mult
@@ -32,3 +37,10 @@
   in:
     value: i32
   out: i32
+
+- command: new_point
+  target: MathService
+  in:
+    x: i32
+    y: i32
+  out: Point

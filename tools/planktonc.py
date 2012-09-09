@@ -8,6 +8,36 @@ import sys
 import yaml
 
 
+_BASIC_TYPES = {
+  "i32": "int",
+  "string": "java.lang.String",
+  "any": "java.lang.Object",
+  "bool": "boolean"
+}
+
+
+_REFERENCE_TYPES = {
+  "i32": "java.lang.Integer",
+  "bool": "java.lang.Boolean"
+}
+
+
+_COMPOUND_TYPES = {
+  "list": "java.util.List<%s>"
+}
+
+
+_DEFAULT_COMPOUND_VALUES = {
+  "list": "java.util.Collections.emptyList()"
+}
+
+
+_DEFAULT_VALUES = {
+  "i32": "0",
+  "bool": "false"
+}
+
+
 class Configuration(object):
 
   def __init__(self):
@@ -139,13 +169,13 @@ public class %(Name)s {
 
   #(messages)
 
-  public static IClient newEncoder(final org.au.tonomy.shared.util.IFunction<org.au.tonomy.shared.plankton.IPlanktonDatable, ? extends org.au.tonomy.shared.util.Promise<?>> sender) {
+  public static IClient newEncoder(final org.au.tonomy.shared.util.IFunction<org.au.tonomy.shared.plankton.RemoteMessage, ? extends org.au.tonomy.shared.util.Promise<?>> sender) {
     return new IClient() {
       #(encoder_body)
     };
   }
 
-  public static org.au.tonomy.shared.util.Promise<?> dispatch(org.au.tonomy.shared.plankton.Message message, IServer server) {
+  public static org.au.tonomy.shared.util.Promise<?> dispatch(org.au.tonomy.shared.plankton.RemoteMessage message, IServer server) {
     java.lang.String method = message.getMethod();
     #(dispatch_body)
     return null;
@@ -164,8 +194,20 @@ public org.au.tonomy.shared.util.Promise<%(ReferenceType)s> %(lowerCamelName)s(%
 
   ENCODER_TEMPLATE = """\
 public org.au.tonomy.shared.util.Promise<%(ReferenceType)s> %(lowerCamelName)s(%(UpperCamelName)sParameters params) {
-  org.au.tonomy.shared.util.Promise<?> result = sender.call(new org.au.tonomy.shared.plankton.Message(\"%(name)s\", params));
-  return (org.au.tonomy.shared.util.Promise<%(ReferenceType)s>) result;
+  org.au.tonomy.shared.plankton.RemoteMessage message = org.au.tonomy.shared.plankton.RemoteMessage
+      .newBuilder()
+      .setMethod(\"%(name)s\")
+      .setParameters(params)
+      .build();
+  org.au.tonomy.shared.util.Promise<?> result = sender.call(message);
+  return result.then(new org.au.tonomy.shared.util.IFunction<Object, %(ReferenceType)s>() {
+    @Override
+    public %(ReferenceType)s call(Object arg) {
+      %(ReferenceType)s result;
+      #(convert)
+      return result;
+    }
+  });
 }
 """
 
@@ -199,19 +241,29 @@ if (\"%(name)s\".equals(method)) {
     }
     out.add_line(Service.CLASS_TEMPLATE, fragments)
     for command in self.commands:
+      out_type = command.data["out"]
       name = command.name()
       upper_camel_name = to_upper_camel(name)
       fragments = {
         "name": name,
         "lowerCamelName": to_lower_camel(name),
         "UpperCamelName": upper_camel_name,
-        "ReferenceType": pton_to_reference_type(command.data["out"])
+        "ReferenceType": pton_to_reference_type(out_type)
       }
       server_body_out = out.substream("server_body")
       server_body_out.comment("//", to_lines(command.data))
       server_body_out.add(Service.SERVER_COMMAND_TEMPLATE, fragments)
       out.substream("client_body").add(Service.CLIENT_COMMAND_TEMPLATE, fragments)
-      out.substream("encoder_body").add(Service.ENCODER_TEMPLATE, fragments)
+      encoder_body = out.substream("encoder_body").new_substream()
+      encoder_body.add(Service.ENCODER_TEMPLATE, fragments)
+      convert = encoder_body.substream("convert")
+      convert.add(Type.CONVERT_TEMPLATES[get_conversion_type(out_type)], {
+        "in": "arg",
+        "out": "result",
+        "Target": pton_to_reference_type(out_type),
+        "ElementType": compound_element_type(out_type)
+
+      })
       out.substream("dispatch_body").add(Service.DISPATCH_TEMPLATE, fragments)
       params_data = {
         "type": "%sParameters" % upper_camel_name,
@@ -248,41 +300,67 @@ class Command(Declaration):
     out.add("}").newline()
 
 
-_BASIC_TYPES = {
-  "i32": "int",
-  "string": "java.lang.String"
-}
-
 # Given a plankton type, returns the corresponding java type.
 def pton_to_java_type(name):
-  return _BASIC_TYPES.get(name, name)
-
-_REFERENCE_TYPES = {
-  "i32": "java.lang.Integer",
-  "string": "java.lang.String"
-}
+  if type(name) is str:
+    return _BASIC_TYPES.get(name, name)
+  else:
+    return compound_pton_to_java_type(name)
 
 # Returns a java reference type corresponding to the given type. The only
 # difference between this and pton_to_java_type is that this will never
 # return primitive types.
-def pton_to_reference_type(type):
-  return _REFERENCE_TYPES.get(type, pton_to_java_type(type))
+def pton_to_reference_type(name):
+  if type(name) is str:
+    return _REFERENCE_TYPES.get(name, pton_to_java_type(name))
+  else:
+    return compound_pton_to_java_type(name)
+
+# Converts a compound type (list or may say) to a java type. There is no
+# explicity conversion to a reference type because the result will always
+# be a reference type.
+def compound_pton_to_java_type(name):
+  (container, element) = name.items()[0]
+  return _COMPOUND_TYPES[container] % pton_to_reference_type(element)
+
+# Returns the element type of the given type if it is a compound, otherwise
+# the empty string.
+def compound_element_type(t):
+  if is_compound_type(t):
+    (container, element) = t.items()[0]
+    return pton_to_reference_type(element)
+  else:
+    return ""
+
+def is_compound_type(t):
+  return not type(t) is str
+
+
+def compound_container_type(t):
+  if is_compound_type(t):
+    (container, element) = t.items()[0]
+    return container
+  else:
+    return ""
 
 # Returns the kind of conversion necessary to convert from the given
 # type to java.
-def get_conversion_type(type):
-  if type in _REFERENCE_TYPES:
+def get_conversion_type(name):
+  if not type(name) is str:
+    (container, _) = name.items()[0]
+    return container
+  elif (name in _REFERENCE_TYPES) or (name in _BASIC_TYPES):
     return "cast"
   else:
     return "parse"
 
-_DEFAULT_VALUES = {
-  "i32": "0"
-}
-
 # Returns the default value for the given type.
-def pton_to_default_value(type):
-  return _DEFAULT_VALUES.get(type, "null")
+def pton_to_default_value(name):
+  if is_compound_type(name):
+    (container, element) = name.items()[0]
+    return _DEFAULT_COMPOUND_VALUES[container]
+  else:
+    return _DEFAULT_VALUES.get(name, "null")
 
 def to_lower_camel(name):
   upper = to_upper_camel(name)
@@ -327,6 +405,7 @@ class Type(Declaration):
     #(constructor_body)
   }
 
+  @SuppressWarnings("cast")
   public static %(Name)s parse(Object data) throws org.au.tonomy.shared.plankton.ParseError {
     if (!(data instanceof java.util.Map<?, ?>)) {
       throw new org.au.tonomy.shared.plankton.ParseError();
@@ -389,6 +468,23 @@ if (this.has%(UpperCamelName)s)
   map.set(\"%(name)s\", this.%(lowerCamelName)s);
 """
 
+  CONVERT_TEMPLATES = {
+    "cast": """\
+if (!(%(in)s instanceof %(Target)s)) {
+  throw new org.au.tonomy.shared.plankton.ParseError();
+}
+%(out)s = (%(Target)s) %(in)s;
+""",
+    "parse": """\
+%(out)s = %(Target)s.parse(%(in)s);
+""",
+    "list": """\
+%(out)s = org.au.tonomy.shared.util.Factory.newArrayList();
+for (Object elm : (java.util.List<?>) %(in)s)
+  %(out)s.add(%(ElementType)s.parse(elm));
+"""
+  }
+
   PARSE_TEMPLATES = {
     "cast": """\
 %(JavaType)s %(lowerCamelName)s;
@@ -415,6 +511,39 @@ if (has%(UpperCamelName)s) {
   }
 } else {
   %(lowerCamelName)s = %(default_value)s;
+}
+""",
+    "list": """\
+%(JavaType)s %(lowerCamelName)s;
+boolean has%(UpperCamelName)s = map.containsKey(\"%(name)s\");
+if (has%(UpperCamelName)s) {
+  Object obj = map.get(\"%(name)s\");
+  if (!(obj instanceof java.util.List<?>)) {
+    throw new org.au.tonomy.shared.plankton.ParseError().addPathSegment("%(name)s");
+  }
+  %(lowerCamelName)s = org.au.tonomy.shared.util.Factory.newArrayList();
+  try {
+    for (Object elm : (java.util.List<?>) obj)
+      %(lowerCamelName)s.add(%(ElementType)s.parse(elm));
+  } catch (org.au.tonomy.shared.plankton.ParseError pe) {
+    pe.addPathSegment(\"%(name)s\");
+    throw pe;
+  }
+} else {
+  %(lowerCamelName)s = %(default_value)s;
+}
+"""
+  }
+
+  COMPOUND_BUILDER_FIELD_TEMPLATE = {
+    "list": """
+public Builder addTo%(UpperCamelName)s(%(ElementType)s elm) {
+  if (!has%(UpperCamelName)s) {
+    %(lowerCamelName)s = org.au.tonomy.shared.util.Factory.newArrayList();
+    has%(UpperCamelName)s = true;
+  }
+  %(lowerCamelName)s.add(elm);
+  return this;
 }
 """
   }
@@ -447,12 +576,16 @@ if (has%(UpperCamelName)s) {
         "UpperCamelName": to_upper_camel(name),
         "JavaType": pton_to_java_type(type),
         "ReferenceType": pton_to_reference_type(type),
-        "default_value": pton_to_default_value(type)
+        "default_value": pton_to_default_value(type),
+        "ElementType": compound_element_type(type)
       }
       class_fields_out = out.substream("class_fields")
       class_fields_out.comment("//", "%(name)s: %(type)s", fragments)
       class_fields_out.add(Type.CLASS_FIELD_TEMPLATE, fragments)
       out.substream("builder_fields").add(Type.BUILDER_FIELD_TEMPLATE, fragments)
+      if is_compound_type(type):
+        container = compound_container_type(type)
+        out.substream("builder_fields").add(Type.COMPOUND_BUILDER_FIELD_TEMPLATE[container], fragments)        
       out.substream("constructor_body").add(Type.CONSTRUCTOR_LINE_TEMPLATE, fragments)
       constructor_params_out = out.substream("constructor_params")
       field_list_out = out.substream("field_list")

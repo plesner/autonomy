@@ -16,13 +16,6 @@ public class MessageEvent extends JavaScriptObject {
   }-*/;
 
   /**
-   * Returns the attempt number for the first incoming event.
-   */
-  public final native int getAttemptIndex() /*-{
-    return this.data;
-  }-*/;
-
-  /**
    * Installs the given message handler as a message listener on this
    * window.
    */

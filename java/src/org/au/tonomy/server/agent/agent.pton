@@ -1,5 +1,5 @@
 - settings:
-    package: org.au.tonomy.shared.agent.pton
+    package: org.au.tonomy.shared.agent
 
 # The agent service
 
@@ -10,6 +10,28 @@
   out: SessionData
   in:
     href: string
+
+- command: get_file_roots
+  target: AgentService
+  out:
+    list: FileData
+  in:
+    session_id: string
+
+- command: list_files
+  target: AgentService
+  out:
+    list: FileData
+  in:
+    session_id: string
+    file_id: i32
+
+- command: read_file
+  target: AgentService
+  out: DocumentData
+  in:
+    sessin_id: string
+    file_id: i32
 
 # Data types used in communication with the agent.
 
@@ -40,3 +62,8 @@
     type: i32
     count: i32
     text: string
+
+- type: TransformData
+  fields:
+    operations:
+      list: OperationData

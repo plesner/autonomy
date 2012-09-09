@@ -3,9 +3,10 @@ package org.au.tonomy.client.agent;
 import java.util.List;
 import java.util.Map;
 
-import org.au.tonomy.shared.agent.pton.DocumentData;
-import org.au.tonomy.shared.agent.pton.FileData;
-import org.au.tonomy.shared.ot.Transform;
+import org.au.tonomy.shared.agent.AgentService.ListFilesParameters;
+import org.au.tonomy.shared.agent.AgentService.ReadFileParameters;
+import org.au.tonomy.shared.agent.DocumentData;
+import org.au.tonomy.shared.agent.FileData;
 import org.au.tonomy.shared.source.ISourceEntry;
 import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.IFunction;
@@ -37,22 +38,23 @@ public class FileHandle implements ISourceEntry {
 
   @Override
   public Promise<Map<String, FileHandle>> listEntries() {
-    return agent.newMessage("ls")
-      .setArgument("file", data.getId())
-      .setArgument("session", session.getId())
-      .send()
-      .then(new IFunction<Object, Map<String, FileHandle>>() {
-        @Override
-        public Map<String, FileHandle> call(Object value) {
-          List<?> files = (List<?>) value;
-          Map<String, FileHandle> list = Factory.newHashMap();
-          for (Object file : files) {
-            FileHandle handle = new FileHandle(agent, session, FileData.parse(file));
-            list.put(handle.getShortName(), handle);
+    return agent.getClient().listFiles(
+        ListFilesParameters
+            .newBuilder()
+            .setFileId(data.getId())
+            .setSessionId(session.getId())
+            .build())
+        .then(new IFunction<List<FileData>, Map<String, FileHandle>>() {
+          @Override
+          public Map<String, FileHandle> call(List<FileData> files) {
+            Map<String, FileHandle> list = Factory.newHashMap();
+            for (FileData file : files) {
+              FileHandle handle = new FileHandle(agent, session, file);
+              list.put(handle.getShortName(), handle);
+            }
+            return list;
           }
-          return list;
-        }
-      });
+        });
   }
 
   /**
@@ -60,24 +62,18 @@ public class FileHandle implements ISourceEntry {
    */
   @Override
   public Promise<DocumentHandle> readFile() {
-    return agent.newMessage("read")
-        .setArgument("file", data.getId())
-        .setArgument("session", session.getId())
-        .send()
-        .then(new IFunction<Object, DocumentHandle>() {
+    return agent.getClient().readFile(
+        ReadFileParameters
+            .newBuilder()
+            .setFileId(data.getId())
+            .setSessinId(session.getId())
+            .build())
+        .then(new IFunction<DocumentData, DocumentHandle>() {
           @Override
-          public DocumentHandle call(Object arg) {
-            return new DocumentHandle(DocumentData.parse(arg), FileHandle.this);
+          public DocumentHandle call(DocumentData data) {
+            return new DocumentHandle(data, FileHandle.this);
           }
         });
-  }
-
-  public void apply(Transform transform) {
-    agent.newMessage("changefile")
-        .setArgument("file", data.getId())
-        .setArgument("session", session.getId())
-        .setArgument("transform", transform)
-        .sendAsync();
   }
 
 }

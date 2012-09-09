@@ -1,9 +1,10 @@
 package org.au.tonomy.client.agent;
 
-import org.au.tonomy.shared.agent.pton.DocumentData;
+import org.au.tonomy.shared.agent.DocumentData;
 import org.au.tonomy.shared.ot.IFingerprint;
 import org.au.tonomy.shared.ot.IMutableDocument;
 import org.au.tonomy.shared.ot.Transform;
+import org.au.tonomy.shared.util.Assert;
 
 public class DocumentHandle implements IMutableDocument {
 
@@ -27,7 +28,7 @@ public class DocumentHandle implements IMutableDocument {
 
   @Override
   public void apply(Transform transform) {
-    file.apply(transform);
+    Assert.notNull(file);
   }
 
   @Override

@@ -1,6 +1,6 @@
 package org.au.tonomy.client.presentation;
 
-import org.au.tonomy.shared.agent.pton.DocumentData;
+import org.au.tonomy.shared.agent.DocumentData;
 import org.au.tonomy.shared.ot.IFingerprint;
 import org.au.tonomy.shared.ot.IMutableDocument;
 import org.au.tonomy.shared.ot.Transform;

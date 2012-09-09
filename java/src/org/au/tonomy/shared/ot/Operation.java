@@ -1,6 +1,6 @@
 package org.au.tonomy.shared.ot;
 
-import org.au.tonomy.shared.agent.pton.OperationData;
+import org.au.tonomy.shared.agent.OperationData;
 import org.au.tonomy.shared.plankton.IPlanktonable;
 import org.au.tonomy.shared.util.Assert;
 

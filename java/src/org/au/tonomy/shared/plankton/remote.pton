@@ -1,0 +1,25 @@
+- settings:
+    package: org.au.tonomy.shared.plankton
+
+# The data about a single remote message call, independent of how it
+# was transported.
+- type: RemoteMessage
+  fields:
+    # Name of the method being called.
+    method: string
+    # The parameter object.
+    parameters: any
+
+# A remote message call along with transport information.
+- type: RemotePackage
+  fields:
+    # This message's serial number.
+    serial: i32
+    # If this is an incoming message this will be set to the payload.
+    message: RemoteMessage
+    # If this is a successful outgoing response this will be set to the
+    # response value.
+    success_response: any
+    # If this is a failed outgoing response this will be set to the
+    # error.
+    failure_response: any

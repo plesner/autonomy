@@ -1,17 +1,11 @@
 package org.au.tonomy.client.agent;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.au.tonomy.shared.plankton.DecodingError;
-import org.au.tonomy.shared.plankton.Plankton;
-import org.au.tonomy.shared.plankton.StringBinaryInputStream;
-import org.au.tonomy.shared.plankton.StringBinaryOutputStream;
+import org.au.tonomy.shared.plankton.PackageProcessor;
+import org.au.tonomy.shared.plankton.RemoteMessage;
 import org.au.tonomy.shared.util.Assert;
-import org.au.tonomy.shared.util.Exceptions;
-import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.ICallback;
+import org.au.tonomy.shared.util.IFunction;
+import org.au.tonomy.shared.util.IThunk;
 import org.au.tonomy.shared.util.Promise;
 
 import com.google.gwt.core.client.Scheduler;
@@ -27,20 +21,19 @@ import com.google.gwt.user.client.Window.Location;
  */
 public abstract class CrossDomainSocket {
 
-  private static final int RESPOND = 0;
-
-  @SuppressWarnings("serial")
-  private static final Map<String, Integer> DISPATCH = new HashMap<String, Integer>() {{
-    put("respond", RESPOND);
-  }};
-
   private final String root;
+  private final PackageProcessor processor;
+  private Promise<Object> connectPromise;
   private MessageEvent source;
-  private int nextMessageId = 1;
-  private Map<Integer, MessageBuilder> pendingMessages = Factory.newHashMap();
 
   public CrossDomainSocket(String root) {
     this.root = root;
+    this.processor = new PackageProcessor(new IThunk<String>() {
+      @Override
+      public void call(String value) {
+        postMessage(value);
+      }
+    });
     MessageEvent.addMessageHandler(new MessageHandler() {
       @Override
       public void onMessage(MessageEvent event) {
@@ -63,31 +56,12 @@ public abstract class CrossDomainSocket {
    * Dispatches an incoming event object to a method call on this object.
    */
   private void dispatchIncoming(MessageEvent event) {
-    if (source == null) {
+    if (source == null && connectPromise != null) {
       // The initial request comes from the frame itself and we use it
-      // to initialize the connection. It's not plankton encoded because
-      // the frame doesn't know how to do that.
-      handleFrameConnect(event, event.getAttemptIndex());
-      return;
-    }
-    String rawMessage = event.getPayload();
-    Object message;
-    try {
-      message = Plankton.decode(new StringBinaryInputStream(rawMessage));
-    } catch (DecodingError de) {
-      throw Exceptions.propagate(de);
-    }
-    List<?> parts = (List<?>) message;
-    Integer index = DISPATCH.get((String) parts.get(0));
-    if (index == null) {
-      // forward to the subclass
+      // to initialize the connection.
+      handleFrameConnect(event);
     } else {
-      switch (index) {
-      case RESPOND:
-        Object obj = parts.get(2);
-        handleRespond(obj, (Integer) parts.get(1));
-        break;
-      }
+      processor.dispatchPackage(event.getPayload());
     }
   }
 
@@ -95,79 +69,12 @@ public abstract class CrossDomainSocket {
    * Sets the source window of the iframe this file proxy is connected
    * through.
    */
-  private void handleFrameConnect(MessageEvent source, int attempt) {
+  private void handleFrameConnect(MessageEvent source) {
     Assert.isNull(this.source);
+    Assert.notNull(this.connectPromise);
     this.source = source;
-    MessageBuilder pending = pendingMessages.remove(attempt);
-    pending.result.fulfill(null);
-  }
-
-  /**
-   * Forwards a response to the appropriate pending message.
-   */
-  private void handleRespond(Object response, int id) {
-    MessageBuilder pending = pendingMessages.remove(id);
-    pending.result.fulfill(response);
-  }
-
-  /**
-   * Creates a new message builder.
-   */
-  protected MessageBuilder newMessage(String endPoint) {
-    return new MessageBuilder(endPoint);
-  }
-
-  /**
-   * A utility for building and sending messages.
-   */
-  protected class MessageBuilder {
-
-    private final String endPoint;
-    private final Map<Object, Object> args = Factory.newHashMap();
-    private int id = -1;
-    private Promise<Object> result;
-
-    private MessageBuilder(String endPoint) {
-      this.endPoint = endPoint;
-    }
-
-    private MessageBuilder setResult(Promise<Object> result) {
-      Assert.isNull(this.result);
-      this.result = result;
-      return this;
-    }
-
-    /**
-     * Sets a string option on this message.
-     */
-    public MessageBuilder setArgument(Object key, Object value) {
-      args.put(key, value);
-      return this;
-    }
-
-    /**
-     * Sends this message, returning a promise for the result.
-     */
-    public Promise<Object> send() {
-      Assert.isNull(result);
-      this.id = nextMessageId++;
-      Promise<Object> result = Promise.newEmpty();
-      this.result = result;
-      pendingMessages.put(id, this);
-      sendAsync();
-      return result;
-    }
-
-    public void sendAsync() {
-      List<Object> message = Factory.newArrayList();
-      message.add(endPoint);
-      message.add(id);
-      message.add(args);
-      StringBinaryOutputStream out = new StringBinaryOutputStream();
-      Plankton.encode(message, out);
-      postMessage(out.flush());
-    }
-
+    this.connectPromise.fulfill(null);
+    this.connectPromise = null;
   }
 
   /**
@@ -194,7 +101,7 @@ public abstract class CrossDomainSocket {
    * we try again.
    */
   private void keepAttaching(final Promise<Object> result, final int timeoutMs) {
-    startAttempt(nextMessageId++, timeoutMs).onResolved(new ICallback<Object>() {
+    startAttempt(timeoutMs).onResolved(new ICallback<Object>() {
       @Override
       public void onSuccess(Object value) {
         result.fulfill(value);
@@ -209,15 +116,13 @@ public abstract class CrossDomainSocket {
   /**
    * Makes an attempt to connect with the frame.
    */
-  private Promise<Object> startAttempt(final int attempt, int timeoutMs) {
+  private Promise<Object> startAttempt(int timeoutMs) {
     // Try to attach a hidden frame from the agent.
     final Promise<Object> attemptPromise = Promise.newEmpty();
-    pendingMessages.put(attempt, newMessage("").setResult(attemptPromise));
     final Document document = Document.get();
     final IFrameElement frame = document.createIFrameElement();
     frame.getStyle().setDisplay(Display.NONE);
-    String query = "?attempt=" + attempt +
-        "&origin=" + URL.encodeQueryString(getOrigin());
+    String query = "?origin=" + URL.encodeQueryString(getOrigin());
     frame.setSrc(root + query);
     document.getBody().appendChild(frame);
     // After the given timeout we check on the state of this attempt
@@ -227,13 +132,12 @@ public abstract class CrossDomainSocket {
       public boolean execute() {
         if (attemptPromise.isResolved())
           return false;
-        pendingMessages.remove(attempt);
         document.getBody().removeChild(frame);
-        attemptPromise.fail(new RuntimeException("Attempt timed out."));
         return false;
       }
     }, timeoutMs);
     // Set up the connection hook.
+    this.connectPromise = attemptPromise;
     return whenConnected(attemptPromise);
   }
 
@@ -248,6 +152,10 @@ public abstract class CrossDomainSocket {
       ? "*"
       : protocol + "//" + Location.getHost() + Location.getPath();
     return origin;
+  }
+
+  public IFunction<RemoteMessage, Promise<?>> newSender() {
+    return processor.newSender();
   }
 
 }

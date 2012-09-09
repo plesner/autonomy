@@ -8,24 +8,26 @@
   <property name="war" value="${out.path}/war" />
   <property name="bin" value="${out.path}/bin" />
   <property name="gen" value="${out.path}/gen" />
+  <property name="class.out" value="${war}/WEB-INF/classes" />
+  <property name="lib.out" value="${war}/WEB-INF/lib" />
 
   <!-- Load the local build configuration -->
   <property file="config.properties" />
 
   <path id="project.class.path">
-    <pathelement location="${war}/WEB-INF/classes"/>
+    <pathelement location="${class.out}"/>
     <pathelement location="${gwt.sdk.path}/gwt-user.jar"/>
     <fileset dir="${gwt.sdk.path}" includes="gwt-dev*.jar"/>
     <!-- Add any additional non-server libs (such as JUnit) -->
-    <fileset dir="${war}/WEB-INF/lib" includes="**/*.jar"/>
+    <fileset dir="${lib.out}" includes="**/*.jar"/>
     <pathelement location="${jetty.jar.path}"/>
     <pathelement location="${servlet-api.jar.path}"/>
   </path>
 
   <target name="libs" description="Copy libs to WEB-INF/lib">
-    <mkdir dir="${war}/WEB-INF/lib" />
-    <copy todir="${war}/WEB-INF/lib" file="${gwt.sdk.path}/gwt-servlet.jar" />
-    <copy todir="${war}/WEB-INF/lib" file="${gwt.sdk.path}/gwt-servlet-deps.jar" />
+    <mkdir dir="${lib.out}" />
+    <copy todir="${lib.out}" file="${gwt.sdk.path}/gwt-servlet.jar" />
+    <copy todir="${lib.out}" file="${gwt.sdk.path}/gwt-servlet-deps.jar" />
     <!-- Add any additional server libs that need to be copied -->
   </target>
 
@@ -39,11 +41,11 @@
   </target>
 
   <target name="javac" depends="libs,planktonc" description="Compile java source to bytecode">
-    <mkdir dir="${war}/WEB-INF/classes"/>
+    <mkdir dir="${class.out}"/>
     <javac 
         includes="**"
         encoding="utf-8"
-        destdir="${war}/WEB-INF/classes"
+        destdir="${class.out}"
         source="1.5"
         target="1.5"
         debug="true"
@@ -54,7 +56,7 @@
       <compilerarg value="-Xlint"/>
       <classpath refid="project.class.path"/>
     </javac>
-    <copy todir="${war}/WEB-INF/classes">
+    <copy todir="${class.out}">
       <fileset dir="java/src" excludes="**/*.java"/>
     </copy>
   </target>
@@ -64,8 +66,8 @@
     <jar
       destfile="${bin}/agent.jar"
       manifest="java/src/org/au/tonomy/server/agent/MANIFEST.MF"
-      basedir="${war}/WEB-INF/classes">
-      <fileset dir="${war}/WEB-INF/classes">
+      basedir="${class.out}">
+      <fileset dir="${class.out}">
         <include name="org/au/tonomy/server/** org/au/tonomy/shared/**"/>
       </fileset>
       <zipfileset src="${jetty.jar.path}"/>
@@ -118,7 +120,7 @@
   <target name="javac.tests" depends="javac" description="Compiles test code">
     <javac srcdir="java/test" includes="**" encoding="utf-8"
       source="1.5" target="1.5" nowarn="true"
-      destdir="${war}/WEB-INF/classes"
+      destdir="${class.out}"
       debug="true" debuglevel="lines,vars,source">
       <classpath location="${junit.jar.path}"/>
       <classpath refid="project.class.path"/>
@@ -178,9 +180,19 @@
     <antcall target="test.prod" />
   </target>
 
-  <target name="presubmit" description="Target that should be run before submitting">
+  <target name="presubmit" depends="clean" description="Target that should be run before submitting">
     <antcall target="build" />
     <antcall target="test" />
+  </target>
+
+  <target name="clean" description="Delete generated files">
+    <delete includeemptydirs="true" failonerror="false">
+      <fileset dir="${gen}" />
+      <fileset dir="${bin}" />
+      <fileset dir="${class.out}" />
+      <fileset dir="${lib.out}" />
+      <fileset dir="${out.path}/reports" />
+    </delete>
   </target>
 
   <target name="build" depends="gwtc" description="Build this project" />

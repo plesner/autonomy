@@ -2,9 +2,6 @@
   // The URL of the page that is allowed to communicate with this proxy.
   var kTargetOrigin = "%1$s";
 
-  // Id of the connection attempt that caused this file to be served.
-  var kConnectAttempt = %2$s;
-  
   // The web socket connected to the server.
   var serverConnection;
   
@@ -30,7 +27,7 @@
   // Establishes a connection with the host page.
   function connectToHost() {
     window.addEventListener("message", forwardHostMessage);
-    forwardServerMessage(kConnectAttempt);
+    forwardServerMessage("");
   }
 
   // Forwards a browser request to the server.

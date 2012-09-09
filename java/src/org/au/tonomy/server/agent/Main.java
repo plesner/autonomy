@@ -18,7 +18,7 @@ public class Main {
   private final Server server;
 
   private Main() {
-    Agent agent = new Agent();
+    AgentServiceImpl agent = new AgentServiceImpl();
     ServletHandler handler = new ServletHandler();
     handler.addServletWithMapping(new ServletHolder(new TrampolineServlet()), "/");
     handler.addServletWithMapping(new ServletHolder(AgentSocket.newServlet(agent)), "/api");

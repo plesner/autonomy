@@ -3,9 +3,9 @@ package org.au.tonomy.shared.ot;
 import java.util.Iterator;
 import java.util.List;
 
-import org.au.tonomy.shared.agent.pton.OperationData;
-import org.au.tonomy.shared.plankton.IPlanktonDatable;
-import org.au.tonomy.shared.plankton.IPlanktonFactory;
+import org.au.tonomy.shared.agent.OperationData;
+import org.au.tonomy.shared.agent.TransformData;
+import org.au.tonomy.shared.plankton.IPlanktonable;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.IFunction;
@@ -13,7 +13,7 @@ import org.au.tonomy.shared.util.Pair;
 /**
  * A sequence of operations that transform a document.
  */
-public class Transform implements IFunction<String, String>, Iterable<Operation>, IPlanktonDatable {
+public class Transform implements IFunction<String, String>, Iterable<Operation>, IPlanktonable<TransformData> {
 
   private final List<Operation> ops;
   private int inputLengthCache = -1;
@@ -179,17 +179,20 @@ public class Transform implements IFunction<String, String>, Iterable<Operation>
   }
 
   @Override
-  public Object toPlanktonData(IPlanktonFactory factory) {
-    return ops;
+  public TransformData toPlankton() {
+    TransformData.Builder result = TransformData.newBuilder();
+    for (Operation op : ops)
+      result.addToOperations(op.toPlankton());
+    return result.build();
   }
 
   /**
    * Creates a transform from a plankton serialized object.
    */
-  public static Transform unpack(List<?> list) {
+  public static Transform unpack(TransformData data) {
     List<Operation> ops = Factory.newArrayList();
-    for (Object op : list)
-      ops.add(Operation.unpack(OperationData.parse(op)));
+    for (OperationData op : data.getOperations())
+      ops.add(Operation.unpack(op));
     return new Transform(ops);
   }
 

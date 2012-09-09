@@ -3,7 +3,7 @@ package org.au.tonomy.server.agent;
 import java.util.List;
 import java.util.Map;
 
-import org.au.tonomy.shared.agent.pton.SessionData;
+import org.au.tonomy.shared.agent.SessionData;
 import org.au.tonomy.shared.ot.IDocument;
 import org.au.tonomy.shared.ot.Transform;
 import org.au.tonomy.shared.plankton.IPlanktonable;

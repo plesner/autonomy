@@ -2,8 +2,9 @@ package org.au.tonomy.client.agent;
 
 import java.util.List;
 
-import org.au.tonomy.shared.agent.pton.FileData;
-import org.au.tonomy.shared.agent.pton.SessionData;
+import org.au.tonomy.shared.agent.AgentService.GetFileRootsParameters;
+import org.au.tonomy.shared.agent.FileData;
+import org.au.tonomy.shared.agent.SessionData;
 import org.au.tonomy.shared.util.Factory;
 import org.au.tonomy.shared.util.IFunction;
 import org.au.tonomy.shared.util.Promise;
@@ -28,16 +29,17 @@ public class SessionHandle {
   }
 
   public Promise<List<FileHandle>> getRoots() {
-    return agent.newMessage("fileroots")
-        .setArgument("session", data.getId())
-        .send()
-        .then(new IFunction<Object, List<FileHandle>>() {
+    return agent.getClient().getFileRoots(
+        GetFileRootsParameters
+            .newBuilder()
+            .setSessionId(data.getId())
+            .build())
+        .then(new IFunction<List<FileData>, List<FileHandle>>() {
           @Override
-          public List<FileHandle> call(Object arg) {
-            List<?> files = (List<?>) arg;
+          public List<FileHandle> call(List<FileData> files) {
             List<FileHandle> result = Factory.newArrayList();
-            for (Object file : files)
-              result.add(new FileHandle(agent, SessionHandle.this, FileData.parse(file)));
+            for (FileData file : files)
+              result.add(new FileHandle(agent, SessionHandle.this, file));
             return result;
           }
         });

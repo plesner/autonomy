@@ -1,6 +1,8 @@
 package org.au.tonomy.client.agent;
 
-import org.au.tonomy.shared.agent.pton.SessionData;
+import org.au.tonomy.shared.agent.AgentService;
+import org.au.tonomy.shared.agent.AgentService.StartSessionParameters;
+import org.au.tonomy.shared.agent.SessionData;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.IFunction;
 import org.au.tonomy.shared.util.Promise;
@@ -11,11 +13,23 @@ import org.au.tonomy.shared.util.Promise;
 public class FileAgent extends CrossDomainSocket {
 
   private SessionHandle session;
+  private final AgentService.IClient client;
 
   public FileAgent(String root) {
     super(root);
+    this.client = AgentService.newEncoder(newSender());
   }
 
+  /**
+   * Returns the client socket used to communicate with the server.
+   */
+  public AgentService.IClient getClient() {
+    return this.client;
+  }
+
+  /**
+   * Returns the handle for the current session.
+   */
   public SessionHandle getSession() {
     return Assert.notNull(session);
   }
@@ -36,16 +50,20 @@ public class FileAgent extends CrossDomainSocket {
    * Starts a session with the file agent.
    */
   private Promise<SessionHandle> startSession() {
-    return newMessage("startsession")
-        .setArgument("href", getOrigin())
-        .send()
-        .then(new IFunction<Object, SessionHandle>() {
+    return client
+        .startSession(
+            StartSessionParameters
+                .newBuilder()
+                .setHref(getOrigin())
+                .build())
+        .then(new IFunction<SessionData, SessionHandle>() {
           @Override
-          public SessionHandle call(Object data) {
-            session = new SessionHandle(FileAgent.this, SessionData.parse(data));
+          public SessionHandle call(SessionData data) {
+            session = new SessionHandle(FileAgent.this, data);
             return session;
           }
         });
   }
+
 
 }
