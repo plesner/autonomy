@@ -50,6 +50,13 @@ public class Promise<T> {
   }
 
   /**
+   * Returns true if this promise has been successfully resolved.
+   */
+  public boolean hasSucceeded() {
+    return state == State.SUCCEEDED;
+  }
+
+  /**
    * Adds a listener to the set that should be called when this promise
    * is resolved. If it has already been resolved the callback is
    * called immediately.
@@ -110,9 +117,10 @@ public class Promise<T> {
   }
 
   /**
-   * Resolve the given promise when this one is resolved.
+   * Resolve the given promise when this one is resolved. Returns this
+   * promise.
    */
-  public void forwardTo(final Promise<? super T> target) {
+  public Promise<T> forwardTo(final Promise<? super T> target) {
     this.onResolved(new ICallback<T>() {
       @Override
       public void onSuccess(T value) {
@@ -123,6 +131,7 @@ public class Promise<T> {
         target.fail(error);
       }
     });
+    return this;
   }
 
   /**
@@ -143,6 +152,24 @@ public class Promise<T> {
       }
     });
     return result;
+  }
+
+  /**
+   * Schedules the given action to be performed if this promise fails.
+   * Returns this promise.
+   */
+  public Promise<T> onFail(final IThunk<? super Throwable> action) {
+    onResolved(new ICallback<T>() {
+      @Override
+      public void onSuccess(T value) {
+        // ignore
+      }
+      @Override
+      public void onFailure(Throwable error) {
+        action.call(error);
+      }
+    });
+    return this;
   }
 
   public <S> Promise<S> lazyThen(final IFunction<? super T, ? extends Promise<? extends S>> filter) {

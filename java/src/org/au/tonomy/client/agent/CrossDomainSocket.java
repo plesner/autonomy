@@ -1,5 +1,6 @@
 package org.au.tonomy.client.agent;
 
+import org.au.tonomy.client.util.ClientPromise;
 import org.au.tonomy.shared.plankton.PackageProcessor;
 import org.au.tonomy.shared.plankton.RemoteMessage;
 import org.au.tonomy.shared.util.Assert;
@@ -8,8 +9,6 @@ import org.au.tonomy.shared.util.IFunction;
 import org.au.tonomy.shared.util.IThunk;
 import org.au.tonomy.shared.util.Promise;
 
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.IFrameElement;
 import com.google.gwt.dom.client.Style.Display;
@@ -127,15 +126,17 @@ public abstract class CrossDomainSocket {
     document.getBody().appendChild(frame);
     // After the given timeout we check on the state of this attempt
     // and if it's failed we cancel it.
-    Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
-      @Override
-      public boolean execute() {
-        if (attemptPromise.isResolved())
-          return false;
-        document.getBody().removeChild(frame);
-        return false;
-      }
-    }, timeoutMs);
+    ClientPromise
+        .failAfterDelay(timeoutMs, null)
+        .forwardTo(attemptPromise)
+        .onFail(new IThunk<Object>() {
+          @Override
+          public void call(Object value) {
+            if (!attemptPromise.hasSucceeded()) {
+              document.getBody().removeChild(frame);
+            }
+          }
+        });
     // Set up the connection hook.
     this.connectPromise = attemptPromise;
     return whenConnected(attemptPromise);
