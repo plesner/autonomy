@@ -5,8 +5,8 @@ import static org.au.tonomy.client.browser.RenderingContext.COLOR_BUFFER_BIT;
 import java.util.List;
 
 import org.au.tonomy.client.browser.RenderingContext;
-import org.au.tonomy.client.browser.TriangleBuffer;
 import org.au.tonomy.client.browser.RenderingContext.DrawMode;
+import org.au.tonomy.client.browser.TriangleBuffer;
 import org.au.tonomy.client.presentation.ICamera;
 import org.au.tonomy.client.presentation.Viewport;
 import org.au.tonomy.client.webgl.util.Color;
@@ -51,6 +51,7 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
   private final IWebGL webGlUtils;
   private final Viewport<Vec4, Mat4> viewport;
   private final Canvas canvas;
+  private final RenderColorScheme colorScheme;
 
   private final TriangleBuffer innerHexStrip;
   private final TriangleBuffer outerHexStrip;
@@ -78,6 +79,7 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
     this.webGlUtils = webGlUtils;
     this.viewport = viewport;
     this.canvas = canvas;
+    this.colorScheme = RenderColorScheme.get();
     RenderingContext context = webGlUtils.create3DContext(canvas);
     this.boardProgram =  linkBoardProgram(context);
     this.unitProgram =  linkUnitProgram(context);
@@ -210,10 +212,10 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
   private void renderBoard(WorldTrace trace, double time) {
     boardProgram.setPerspective(perspective);
     boardProgram.setLocation(ORIGIN);
-    Color ground = Color.create(.929, .749, .525, 1.0);
-    boardProgram.setColor(ground.adjust(Color.Adjustment.DARKER));
-    boardProgram.drawTriangles(outerHexStrip);
+    Color ground = colorScheme.getLightPrimaryColor();
     boardProgram.setColor(ground);
+    boardProgram.drawTriangles(outerHexStrip);
+    boardProgram.setColor(ground.adjust(Color.Adjustment.LIGHTER));
     boardProgram.drawTriangles(innerHexStrip);
   }
 

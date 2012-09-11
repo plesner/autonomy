@@ -4,6 +4,7 @@
   <ui:style>
     .container {
       background: white;
+      border: 1px solid silver;
     }
     
     @external .CodeMirror, .CodeMirror-scroll;

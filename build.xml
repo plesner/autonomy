@@ -192,6 +192,8 @@
       <fileset dir="${class.out}" />
       <fileset dir="${lib.out}" />
       <fileset dir="${out.path}/reports" />
+      <fileset dir="${war}/WEB-INF/deploy" />
+      <fileset dir="${war}/org.au.tonomy.Autonomy" />
     </delete>
   </target>
 

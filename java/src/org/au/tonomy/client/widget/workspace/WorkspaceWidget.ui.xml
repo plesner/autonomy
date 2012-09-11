@@ -1,9 +1,14 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-  xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:w="urn:import:org.au.tonomy.client.widget.workspace">
-  <ui:with field="res" type="org.au.tonomy.client.widget.workspace.WorkspaceWidget.Resources"/>
-  <g:FlowPanel stylePrimaryName="{res.css.wholePage}">
+  xmlns:g="urn:import:com.google.gwt.user.client.ui"
+  xmlns:w="urn:import:org.au.tonomy.client.widget.workspace"
+  xmlns:t="urn:import:org.au.tonomy.client.widget">
+  <ui:style src="../constants.css WorkspaceWidget.css"></ui:style>
+  <g:FlowPanel stylePrimaryName="{style.wholePage}">
     <w:HeaderWidget ui:field="header"></w:HeaderWidget>
-    <g:FlowPanel ui:field="workspace" stylePrimaryName="{res.css.workspace}" />
+    <g:FlowPanel ui:field="workspace" stylePrimaryName="{style.workspace}">
+      <t:WorldWidget ui:field="world" addStyleNames="{style.world}"/>
+      <t:EditorWidget ui:field="editor" addStyleNames="{style.editor}"/>
+    </g:FlowPanel>
   </g:FlowPanel>
 </ui:UiBinder>

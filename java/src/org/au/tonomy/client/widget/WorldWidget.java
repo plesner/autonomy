@@ -34,14 +34,18 @@ public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
 
   @UiField CanvasPlus canvasWrapper;
 
-  private final WorldTrace trace;
-  private final IWebGL webGlUtils;
-  private final WorldRenderer renderer;
+  private WorldTrace trace;
+  private IWebGL webGlUtils;
+  private WorldRenderer renderer;
   private boolean keepRunning = false;
   private IListener listener = null;
 
-  public WorldWidget(IWebGL webGlUtils, Viewport<Vec4, Mat4> viewport, WorldTrace trace) {
+  public WorldWidget() {
     initWidget(BINDER.createAndBindUi(this));
+  }
+
+  @Override
+  public void setup(IWebGL webGlUtils, Viewport<Vec4, Mat4> viewport, WorldTrace trace) {
     this.trace = trace;
     this.webGlUtils = webGlUtils;
     this.renderer = new WorldRenderer(webGlUtils, getCanvas(), viewport, trace.getWorld());
@@ -166,5 +170,26 @@ public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
 
   public static final Resources RESOURCES = GWT.create(Resources.class);
   static { RESOURCES.css().ensureInjected(); }
+
+  /**
+   * Bundle for the constant resources.
+   */
+  public interface IColorScheme extends ClientBundle {
+
+    /**
+     * The style constants.
+     */
+    public interface IConstants extends CssResource {
+
+      public String ccPrimaryColor();
+
+      public String ccLightPrimaryColor();
+
+    }
+
+    @Source({"constants.css"})
+    public IConstants getConstants();
+
+  }
 
 }

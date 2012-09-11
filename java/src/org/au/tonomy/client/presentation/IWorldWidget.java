@@ -1,7 +1,9 @@
 package org.au.tonomy.client.presentation;
 
+import org.au.tonomy.client.webgl.util.IWebGL;
 import org.au.tonomy.shared.util.IMatrix;
 import org.au.tonomy.shared.util.IVector;
+import org.au.tonomy.shared.world.WorldTrace;
 
 public interface IWorldWidget<V4 extends IVector, M4 extends IMatrix<V4>> {
 
@@ -46,5 +48,10 @@ public interface IWorldWidget<V4 extends IVector, M4 extends IMatrix<V4>> {
   public void showDragCursor();
 
   public void hideDragCursor();
+
+  /**
+   * Sets up this widget to display the specified trace.
+   */
+  void setup(IWebGL webGlUtils, Viewport<V4, M4> viewport, WorldTrace trace);
 
 }
