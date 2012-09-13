@@ -181,9 +181,7 @@ public class WorldWidget extends Composite implements IWorldWidget<Vec4, Mat4> {
      */
     public interface IConstants extends CssResource {
 
-      public String ccPrimaryColor();
-
-      public String ccLightPrimaryColor();
+      public String ccTileColor();
 
     }
 

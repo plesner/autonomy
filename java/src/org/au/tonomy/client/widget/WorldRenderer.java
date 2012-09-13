@@ -212,7 +212,7 @@ public class WorldRenderer implements ICamera<Vec4, Mat4> {
   private void renderBoard(WorldTrace trace, double time) {
     boardProgram.setPerspective(perspective);
     boardProgram.setLocation(ORIGIN);
-    Color ground = colorScheme.getLightPrimaryColor();
+    Color ground = colorScheme.getTileColor();
     boardProgram.setColor(ground);
     boardProgram.drawTriangles(outerHexStrip);
     boardProgram.setColor(ground.adjust(Color.Adjustment.LIGHTER));

@@ -76,7 +76,7 @@ public class MainEntryPoint implements EntryPoint {
   }
 
   private void buildWorld(IWebGL webGl) {
-    Console.log(RenderColorScheme.get().getPrimaryColor().getVector());
+    Console.log(RenderColorScheme.get().getTileColor().getVector());
 
     if (Window.Location.getParameter("no3d") != null) {
       return;

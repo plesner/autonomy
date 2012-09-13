@@ -14,8 +14,7 @@ import com.google.gwt.core.client.GWT;
 public class RenderColorScheme {
 
   private static RenderColorScheme instance = null;
-  private final Color primaryColor;
-  private final Color lightPrimaryColor;
+  private final Color tileColor;
 
   public static RenderColorScheme get() {
     if (instance == null) {
@@ -26,16 +25,11 @@ public class RenderColorScheme {
   }
 
   public RenderColorScheme(IConstants constants) {
-    this.primaryColor = parseCssColor(constants.ccPrimaryColor());
-    this.lightPrimaryColor = parseCssColor(constants.ccLightPrimaryColor());
+    this.tileColor = parseCssColor(constants.ccTileColor());
   }
 
-  public Color getPrimaryColor() {
-    return primaryColor;
-  }
-
-  public Color getLightPrimaryColor() {
-    return lightPrimaryColor;
+  public Color getTileColor() {
+    return tileColor;
   }
 
   private static Color parseCssColor(String color) {

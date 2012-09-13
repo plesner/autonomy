@@ -6,6 +6,12 @@
 @def ccDarkPrimaryColor #333381;
 @def ccLightPrimaryColor #7272B5;
 
+@def ccSecondaryColor #DFC062;
+@def ccDarkSecondaryColor #B8993D;
+@def ccLightSecondaryColor #E7CE83;
+
+@def ccTileColor ccLightSecondaryColor;
+
 @def ccDimBackground #F7F7F7;
 @def ccDimBorder 1px solid #E0E0E0;
 @def ccLightBackground white;
