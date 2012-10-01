@@ -2,7 +2,6 @@ package org.au.tonomy.client.widget;
 
 import java.util.List;
 
-import org.au.tonomy.client.Console;
 import org.au.tonomy.shared.util.Assert;
 import org.au.tonomy.shared.util.Factory;
 
@@ -120,7 +119,6 @@ public class CanvasPlus extends Composite {
   private void refreshLayout() {
     int newWidth = container.getOffsetWidth();
     int newHeight = container.getOffsetHeight();
-    Console.log(newWidth + ", " + newHeight);
     if (newWidth == currentWidth && newHeight == currentHeight)
       return;
     for (IResizeListener listener : listeners)
